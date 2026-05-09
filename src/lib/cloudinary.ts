@@ -1,9 +1,14 @@
 /**
  * Cloudinary helpers for HorseBrand.
- * The cloud name is fixed; only public IDs change per asset.
+ *
+ * The cloud name is read from `PUBLIC_CLOUDINARY_CLOUD` (set in Vercel env
+ * or local `.env`). It's a public value (it's part of every image URL),
+ * so the prefix `PUBLIC_` is intentional. A hardcoded fallback keeps dev
+ * working out-of-the-box without requiring any env setup.
  */
 
-export const CLOUDINARY_CLOUD = "dukv3ov6t";
+export const CLOUDINARY_CLOUD =
+  import.meta.env.PUBLIC_CLOUDINARY_CLOUD ?? "dukv3ov6t";
 
 const BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/image/upload`;
 
