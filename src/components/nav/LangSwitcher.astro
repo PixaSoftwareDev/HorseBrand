@@ -1,0 +1,43 @@
+---
+import { type Lang } from "@/i18n/ui";
+import { alternateLang, localizedPath } from "@/i18n/utils";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const other = alternateLang(lang);
+---
+
+<div class="lang">
+  <a
+    href={localizedPath(lang, "/")}
+    class:list={["lang__btn", lang === "es" && "active"]}
+    aria-current={lang === "es" ? "true" : undefined}
+  >ES</a>
+  <span aria-hidden="true">/</span>
+  <a
+    href={localizedPath(other === "es" ? "es" : "en", "/")}
+    class:list={["lang__btn", lang === "en" && "active"]}
+    aria-current={lang === "en" ? "true" : undefined}
+  >EN</a>
+</div>
+
+<style>
+  .lang {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+  }
+  .lang__btn {
+    color: rgba(247, 243, 236, 0.55);
+    font-weight: 400;
+    transition: color 0.35s;
+    padding: 4px 2px;
+  }
+  .lang__btn.active { color: #f7f3ec; }
+  .lang span { color: rgba(247, 243, 236, 0.4); }
+  :global(.nav.scrolled) .lang__btn { color: rgba(21, 17, 13, 0.45); }
+  :global(.nav.scrolled) .lang__btn.active { color: var(--color-ink); }
+  :global(.nav.scrolled) .lang span { color: rgba(21, 17, 13, 0.3); }
+</style>

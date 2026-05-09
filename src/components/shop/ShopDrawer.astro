@@ -1,0 +1,331 @@
+---
+import { type Lang, useTranslations, type TKey } from "@/i18n/ui";
+import { SHOP_BASE_URL, SHOP_CATEGORIES, type ShopCategoryKey } from "@/lib/shop";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+const CAT_IMAGES: Record<ShopCategoryKey, string> = {
+  furniture: cldImage(CLD_IDS.IMG_3144, 480),
+  home: cldImage(CLD_IDS.IMG_3082, 480),
+  mate: cldImage(CLD_IDS.IMG_3105, 480),
+  bags: cldImage(CLD_IDS.IMG_2977, 480),
+  rugs: cldImage(CLD_IDS.IMG_3081, 480),
+};
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<aside class="drawer" id="shopDrawer" role="dialog" aria-modal="true" aria-labelledby="shopDrawerTitle" aria-hidden="true">
+  <div class="drawer__scrim" data-shop-close></div>
+
+  <div class="drawer__panel">
+    <header class="drawer__head">
+      <div class="drawer__head-text">
+        <span class="drawer__eyebrow">{t("shop.eyebrow")}</span>
+        <h2 id="shopDrawerTitle">{t("shop.title")}</h2>
+        <p>{t("shop.cat_intro")}</p>
+      </div>
+      <button class="drawer__close" data-shop-close aria-label={t("shop.close")}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+    </header>
+
+    <ul class="drawer__cats">
+      {SHOP_CATEGORIES.map((cat, i) => (
+        <li class="drawer-cat">
+          <a
+            class="drawer-cat__link"
+            href={cat.url}
+            target="_blank"
+            rel="noopener"
+          >
+            <div class="drawer-cat__media">
+              <img
+                src={CAT_IMAGES[cat.key]}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="drawer-cat__text">
+              <span class="drawer-cat__num">{String(i + 1).padStart(2, "0")}</span>
+              <span class="drawer-cat__label">{t(`shop.cat.${cat.key}` as TKey)}</span>
+            </div>
+            <svg class="drawer-cat__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <footer class="drawer__foot">
+      <a class="drawer__shop-all" href={SHOP_BASE_URL} target="_blank" rel="noopener">
+        <span>{t("shop.view_all")}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <path d="M5 12h14M13 5l7 7-7 7"/>
+        </svg>
+      </a>
+      <p class="drawer__legend">horse-brand.com · pago seguro</p>
+    </footer>
+  </div>
+</aside>
+
+<style>
+  .drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 9500;
+    pointer-events: none;
+  }
+  .drawer.open { pointer-events: auto; }
+
+  .drawer__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 11, 8, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity 0.55s var(--ease-editorial);
+  }
+  .drawer.open .drawer__scrim { opacity: 1; }
+
+  .drawer__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: min(480px, 92vw);
+    background: var(--color-ivory);
+    color: var(--color-ink);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(105%);
+    transition: transform 0.7s var(--ease-editorial);
+    box-shadow: -10px 0 50px rgba(15, 11, 8, 0.25);
+  }
+  .drawer.open .drawer__panel { transform: translateX(0); }
+
+  .drawer__head {
+    padding: 30px 32px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+  }
+  .drawer__head-text { display: flex; flex-direction: column; gap: 6px; }
+  .drawer__eyebrow {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--color-cognac);
+  }
+  .drawer__head h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: 0.005em;
+    color: var(--color-ink);
+  }
+  .drawer__head p {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgba(21, 17, 13, 0.65);
+    margin-top: 4px;
+    max-width: 320px;
+  }
+  .drawer__close {
+    background: transparent;
+    border: 1px solid var(--line);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-ink);
+    transition: background 0.4s, border-color 0.4s, transform 0.4s var(--ease-editorial);
+    flex-shrink: 0;
+    cursor: none;
+  }
+  .drawer__close:hover {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-ivory);
+    transform: rotate(90deg);
+  }
+  .drawer__close svg { width: 14px; height: 14px; }
+
+  /* ---- Categories with image ---- */
+  .drawer__cats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .drawer__cats::-webkit-scrollbar { width: 4px; }
+  .drawer__cats::-webkit-scrollbar-thumb { background: var(--line); }
+
+  .drawer-cat {
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .drawer-cat__link {
+    display: grid;
+    grid-template-columns: 92px 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 32px;
+    cursor: none;
+    color: var(--color-ink);
+    transition: background 0.4s var(--ease-editorial);
+  }
+  .drawer-cat__link:hover { background: var(--color-paper); }
+
+  .drawer-cat__media {
+    width: 92px;
+    aspect-ratio: 1 / 1.15;
+    overflow: hidden;
+    background: var(--color-bone);
+  }
+  .drawer-cat__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1s var(--ease-editorial);
+  }
+  .drawer-cat__link:hover .drawer-cat__media :global(img) { transform: scale(1.06); }
+
+  .drawer-cat__text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .drawer-cat__num {
+    font-family: var(--font-sans);
+    font-size: 9.5px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+    line-height: 1;
+  }
+  .drawer-cat__label {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: 0.005em;
+    color: var(--color-ink);
+    transition: color 0.4s;
+  }
+  .drawer-cat__link:hover .drawer-cat__label { color: var(--color-cognac); }
+
+  .drawer-cat__arrow {
+    width: 16px;
+    height: 16px;
+    color: var(--color-stone);
+    transition: transform 0.45s var(--ease-editorial), color 0.4s;
+  }
+  .drawer-cat__link:hover .drawer-cat__arrow {
+    transform: translateX(5px);
+    color: var(--color-ink);
+  }
+
+  /* ---- Footer ---- */
+  .drawer__foot {
+    border-top: 1px solid var(--line);
+    padding: 22px 32px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .drawer__shop-all {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--color-ink);
+    color: var(--color-ivory);
+    padding: 18px 22px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    transition: background 0.45s var(--ease-editorial);
+    cursor: none;
+  }
+  .drawer__shop-all:hover { background: var(--color-leather); }
+  .drawer__shop-all svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.45s var(--ease-editorial);
+  }
+  .drawer__shop-all:hover svg { transform: translateX(5px); }
+
+  .drawer__legend {
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+  }
+
+  @media (max-width: 540px) {
+    .drawer__head { padding: 24px 22px 18px; }
+    .drawer__head h2 { font-size: 24px; }
+    .drawer-cat__link {
+      padding: 16px 22px;
+      grid-template-columns: 76px 1fr auto;
+      gap: 14px;
+    }
+    .drawer-cat__media { width: 76px; }
+    .drawer-cat__label { font-size: 17px; }
+    .drawer__foot { padding: 18px 22px 24px; }
+  }
+</style>
+
+<script>
+  function wireDrawer(): void {
+    const drawer = document.getElementById("shopDrawer");
+    if (!drawer) return;
+
+    const open = (): void => {
+      drawer.classList.add("open");
+      drawer.setAttribute("aria-hidden", "false");
+      document.body.classList.add("shop-open");
+      document.body.style.overflow = "hidden";
+    };
+    const close = (): void => {
+      drawer.classList.remove("open");
+      drawer.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("shop-open");
+      document.body.style.overflow = "";
+    };
+
+    drawer.querySelectorAll<HTMLElement>("[data-shop-close]").forEach((el) => {
+      el.addEventListener("click", close);
+    });
+
+    window.addEventListener("shop:open", open);
+    window.addEventListener("shop:close", close);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && drawer.classList.contains("open")) close();
+    });
+  }
+  document.addEventListener("astro:page-load", wireDrawer);
+</script>

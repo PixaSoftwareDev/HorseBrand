@@ -1,0 +1,103 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const manifestoImg = cldImage(CLD_IDS.IMG_3081, 1600);
+---
+
+<section class="manifesto" id="manifiesto">
+  <div class="manifesto__grid">
+    <div class="manifesto__text">
+      <Reveal class="eyebrow">{t("manifesto.eyebrow")}</Reveal>
+      <Reveal as="h2">
+        <span>{t("manifesto.title_1")}</span>
+        <em>{t("manifesto.title_2")}</em>
+      </Reveal>
+      <Reveal as="div" class="manifesto__body">
+        <p>{t("manifesto.p1")}</p>
+        <p>{t("manifesto.p2")}</p>
+        <ul class="manifesto__list">
+          <li><span></span>{t("manifesto.li_1")}</li>
+          <li><span></span>{t("manifesto.li_2")}</li>
+          <li><span></span>{t("manifesto.li_3")}</li>
+        </ul>
+      </Reveal>
+    </div>
+    <Reveal class="manifesto__media">
+      <div data-scroll-reveal>
+        <img src={manifestoImg} alt="Atelier" loading="lazy" decoding="async" />
+      </div>
+    </Reveal>
+  </div>
+</section>
+
+<style>
+  .manifesto {
+    background: var(--color-paper);
+    padding: 140px 0;
+  }
+  .manifesto__grid {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 5vw;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .manifesto__text { max-width: 560px; }
+  .manifesto__text h2 { margin: 22px 0 36px; }
+  .manifesto__text h2 span { display: inline; }
+  .manifesto__text h2 em { display: block; }
+  .manifesto__body p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: rgba(21, 17, 13, 0.78);
+    margin-bottom: 18px;
+  }
+  .manifesto__list {
+    list-style: none;
+    margin-top: 40px;
+  }
+  .manifesto__list li {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+  }
+  .manifesto__list li:last-child { border-bottom: 1px solid var(--line); }
+  .manifesto__list span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-cognac);
+  }
+
+  .manifesto__media :global(img) {
+    width: 100%;
+    height: 720px;
+    object-fit: cover;
+  }
+
+  @media (max-width: 1280px) {
+    .manifesto { padding: 110px 0; }
+    .manifesto__grid { gap: 56px; }
+    .manifesto__media :global(img) { height: 580px; }
+  }
+  @media (max-width: 900px) {
+    .manifesto { padding: 90px 0; }
+    .manifesto__grid { grid-template-columns: 1fr; gap: 50px; }
+    .manifesto__media :global(img) { height: 460px; }
+  }
+</style>

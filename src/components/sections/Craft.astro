@@ -1,0 +1,600 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const photos = [
+  { src: cldImage(CLD_IDS.IMG_3082, 1400), alt: "Pieza de cuero sobre el caballo" },
+  { src: cldImage(CLD_IDS.IMG_3105, 1400), alt: "Detalle artesanal" },
+  { src: cldImage(CLD_IDS.IMG_3144, 1400), alt: "Cartera con grabado" },
+  { src: cldImage(CLD_IDS.IMG_3084, 1600), alt: "Atelier" },
+];
+
+const stats = [
+  {
+    value: t("craft.stat_1_value"),
+    label: t("craft.stat_1_label"),
+    caption: t("craft.stat_1_caption"),
+  },
+  {
+    value: t("craft.stat_2_value"),
+    label: t("craft.stat_2_label"),
+    caption: t("craft.stat_2_caption"),
+  },
+  {
+    value: t("craft.stat_3_value"),
+    label: t("craft.stat_3_label"),
+    caption: t("craft.stat_3_caption"),
+  },
+];
+
+const closingTitle = lang === "es" ? "El tiempo no es" : "Time is not";
+const closingTitleItalic = lang === "es" ? "nuestro enemigo." : "our enemy.";
+const closingTitleEnd = lang === "es" ? "Es nuestro material." : "It is our material.";
+---
+
+<section class="craft" id="artesania">
+  <!-- Desktop: horizontal scroll pinning -->
+  <div class="craft__pin" id="craftPin">
+    <div class="craft__sticky">
+      <div class="craft__track" id="craftTrack">
+
+        <!-- 0 · Title + intro -->
+        <div class="slide slide--title">
+          <span class="eyebrow">{t("craft.eyebrow")}</span>
+          <h2>
+            <span>{t("craft.title_1")}</span>
+            <em>{t("craft.title_2")}</em>
+          </h2>
+          <p class="craft__intro">{t("craft.p")}</p>
+        </div>
+
+        <!-- 1 · Pair: Photo 1 + Stat 1 -->
+        <div class="slide slide--pair">
+          <div class="pair__photo">
+            <img src={photos[0].src} alt={photos[0].alt} loading="eager" decoding="async" />
+          </div>
+          <div class="pair__stat">
+            <span class="stat__value">{stats[0].value}</span>
+            <span class="stat__label">{stats[0].label}</span>
+            <p class="stat__caption">{stats[0].caption}</p>
+          </div>
+        </div>
+
+        <!-- 2 · Pair: Photo 2 + Stat 2 -->
+        <div class="slide slide--pair">
+          <div class="pair__photo">
+            <img src={photos[1].src} alt={photos[1].alt} loading="eager" decoding="async" />
+          </div>
+          <div class="pair__stat">
+            <span class="stat__value">{stats[1].value}</span>
+            <span class="stat__label">{stats[1].label}</span>
+            <p class="stat__caption">{stats[1].caption}</p>
+          </div>
+        </div>
+
+        <!-- 3 · Pair: Photo 3 + Stat 3 -->
+        <div class="slide slide--pair">
+          <div class="pair__photo">
+            <img src={photos[2].src} alt={photos[2].alt} loading="eager" decoding="async" />
+          </div>
+          <div class="pair__stat">
+            <span class="stat__value">{stats[2].value}</span>
+            <span class="stat__label">{stats[2].label}</span>
+            <p class="stat__caption">{stats[2].caption}</p>
+          </div>
+        </div>
+
+        <!-- 4 · Photo 4 (feature) -->
+        <div class="slide slide--photo slide--feature">
+          <img src={photos[3].src} alt={photos[3].alt} loading="eager" decoding="async" />
+        </div>
+
+        <!-- 5 · Closing -->
+        <div class="slide slide--closing">
+          <h3>
+            <span class="l1">{closingTitle}</span>
+            <span class="l2"><em>{closingTitleItalic}</em></span>
+            <span class="l3">{closingTitleEnd}</span>
+          </h3>
+        </div>
+
+        <!-- 6 · Buffer -->
+        <div class="slide slide--buffer" aria-hidden="true"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile fallback: vertical stack -->
+  <div class="craft__mobile">
+    <div class="craft__head">
+      <span class="eyebrow">{t("craft.eyebrow")}</span>
+      <h2>
+        <span>{t("craft.title_1")}</span> <em>{t("craft.title_2")}</em>
+      </h2>
+      <p>{t("craft.p")}</p>
+    </div>
+    {photos.map((p, i) => (
+      <div class="m-block">
+        <img src={p.src} alt={p.alt} loading="eager" decoding="async" />
+        {i < stats.length && (
+          <div class="m-stat">
+            <span class="stat__value">{stats[i].value}</span>
+            <span class="stat__label">{stats[i].label}</span>
+            <p class="stat__caption">{stats[i].caption}</p>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  function wireCraft(): void {
+    const pin = document.getElementById("craftPin");
+    const track = document.getElementById("craftTrack");
+    if (!pin || !track) return;
+    if (window.matchMedia("(max-width: 900px)").matches) return;
+
+    const slides = Array.from(track.querySelectorAll<HTMLElement>(".slide"));
+    const photoSlides = slides.filter((s) => s.classList.contains("slide--photo"));
+    const closingSlide = track.querySelector<HTMLElement>(".slide--closing");
+
+    // STEP-BASED scroll: each "stop" centers a slide in the viewport.
+    // One scroll-step worth of vertical scroll → one slide's reveal completes.
+    // The track interpolates smoothly between stops with easeInOutCubic.
+    const stopElements: HTMLElement[] = [];
+    for (const slide of slides) {
+      if (slide.classList.contains("slide--buffer")) continue;
+      stopElements.push(slide);
+    }
+    const NUM_STOPS = stopElements.length;
+
+    function getStopOffset(idx: number): number {
+      // Stop 0 (title) → no centering, track stays in its natural position.
+      // The title has padding-left and shows next to its natural composition.
+      if (idx <= 0) return 0;
+      const s = stopElements[Math.min(NUM_STOPS - 1, idx)];
+      return s.offsetLeft + s.offsetWidth / 2 - window.innerWidth / 2;
+    }
+    function easeInOutCubic(x: number): number {
+      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+
+    let raf: number | null = null;
+    let currentT = 0;
+    let targetT = 0;
+    let initialFrames = 120;
+    let typewriterFired = false;
+    let firstPairAutoFired = false;
+    let firstPairTimer: number | null = null;
+    const SETTLED = 0.0004;
+    const TYPE_SPEED_MS = 55; // ms per character
+    const LINE_GAP_MS = 280;  // pause between lines
+    const FIRST_PAIR_AUTO_DELAY = 700; // ms after section enters → reveal first pair
+
+    function typeText(el: HTMLElement, text: string): Promise<void> {
+      return new Promise((resolve) => {
+        el.classList.add("is-typing");
+        let i = 0;
+        function tick(): void {
+          el.textContent = text.substring(0, ++i);
+          if (i < text.length) {
+            window.setTimeout(tick, TYPE_SPEED_MS);
+          } else {
+            el.classList.remove("is-typing");
+            resolve();
+          }
+        }
+        tick();
+      });
+    }
+
+    async function runTypewriter(): Promise<void> {
+      if (!closingSlide) return;
+      const l1 = closingSlide.querySelector<HTMLElement>(".l1");
+      const l2em = closingSlide.querySelector<HTMLElement>(".l2 em");
+      const l3 = closingSlide.querySelector<HTMLElement>(".l3");
+      if (!l1 || !l2em || !l3) return;
+      const t1 = l1.textContent ?? "";
+      const t2 = l2em.textContent ?? "";
+      const t3 = l3.textContent ?? "";
+      l1.textContent = "";
+      l2em.textContent = "";
+      l3.textContent = "";
+      await typeText(l1, t1);
+      await new Promise((r) => window.setTimeout(r, LINE_GAP_MS));
+      await typeText(l2em, t2);
+      await new Promise((r) => window.setTimeout(r, LINE_GAP_MS));
+      await typeText(l3, t3);
+    }
+
+    function loop(): void {
+      const rect = pin!.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      targetT = total > 0 ? Math.max(0, Math.min(1, -rect.top / total)) : 0;
+
+      const diff = targetT - currentT;
+      currentT += diff * 0.085;
+      if (Math.abs(diff) < SETTLED) currentT = targetT;
+
+      // Map currentT (0 → 1) to stop-progress (0 → NUM_STOPS-1).
+      // Reserve last 8% of the pin so the closing stays anchored before exit.
+      const SCROLL_END = 0.92;
+      const stopProgress =
+        Math.min(NUM_STOPS - 1, (currentT / SCROLL_END) * (NUM_STOPS - 1));
+      const fromIdx = Math.min(NUM_STOPS - 2, Math.floor(stopProgress));
+      const localT = Math.max(0, Math.min(1, stopProgress - fromIdx));
+      const eased = easeInOutCubic(localT);
+
+      const fromOffset = getStopOffset(fromIdx);
+      const toOffset = getStopOffset(fromIdx + 1);
+      const offset = fromOffset + (toOffset - fromOffset) * eased;
+      track!.style.transform = `translate3d(${(-offset).toFixed(2)}px, 0, 0)`;
+
+      const vpCenter = window.innerWidth / 2;
+      const maxDist = window.innerWidth * 0.55;
+      for (const slide of slides) {
+        const r = slide.getBoundingClientRect();
+        const slideCenter = r.left + r.width / 2;
+        const k = Math.min(maxDist, Math.abs(slideCenter - vpCenter)) / maxDist;
+        slide.style.setProperty("--s-scale", (1 - k * 0.08).toFixed(3));
+        slide.style.setProperty("--s-opacity", (1 - k * 0.28).toFixed(3));
+      }
+
+      // Reveal each stop's slide as the step progresses past it.
+      const activeIdx = localT > 0.45 ? fromIdx + 1 : fromIdx;
+      for (let i = 0; i <= activeIdx && i < NUM_STOPS; i++) {
+        const el = stopElements[i];
+        const needsReveal =
+          el.classList.contains("slide--photo") ||
+          el.classList.contains("slide--pair") ||
+          el.classList.contains("slide--closing");
+        if (needsReveal && !el.classList.contains("is-revealed")) {
+          el.classList.add("is-revealed");
+          if (el === closingSlide && !typewriterFired) {
+            typewriterFired = true;
+            void runTypewriter();
+          }
+        }
+      }
+
+      // Auto-reveal the first pair shortly after the section enters the viewport,
+      // so the screen doesn't feel empty before the first scroll.
+      if (!firstPairAutoFired) {
+        const sectionInView = rect.top < window.innerHeight && rect.bottom > 0;
+        if (sectionInView && firstPairTimer === null) {
+          firstPairTimer = window.setTimeout(() => {
+            const firstPair = stopElements.find((s) =>
+              s.classList.contains("slide--pair")
+            );
+            if (firstPair && !firstPair.classList.contains("is-revealed")) {
+              firstPair.classList.add("is-revealed");
+            }
+            firstPairAutoFired = true;
+          }, FIRST_PAIR_AUTO_DELAY);
+        }
+      }
+
+      const stillSettling = Math.abs(diff) > SETTLED;
+      if (stillSettling || initialFrames > 0) {
+        if (initialFrames > 0) initialFrames--;
+        raf = requestAnimationFrame(loop);
+      } else {
+        raf = null;
+      }
+    }
+
+    function kick(): void {
+      if (raf === null) raf = requestAnimationFrame(loop);
+    }
+    window.addEventListener("scroll", kick, { passive: true });
+    window.addEventListener("resize", kick);
+    kick();
+  }
+  document.addEventListener("astro:page-load", wireCraft);
+</script>
+
+<style>
+  .craft {
+    background: var(--color-ivory);
+    color: var(--color-ink);
+  }
+
+  /* ---- Desktop: horizontal scroll pinning ---- */
+  .craft__pin {
+    position: relative;
+    height: 720vh; /* 6 stops × ~110vh + exit room */
+  }
+  .craft__sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--color-ivory);
+  }
+  .craft__track {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    padding: 0 5vw;
+    will-change: transform;
+  }
+
+  .slide {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transform: scale(var(--s-scale, 1));
+    opacity: var(--s-opacity, 1);
+    transform-origin: center center;
+    will-change: transform, opacity;
+  }
+
+  /* Title slide */
+  .slide--title {
+    width: 50vw;
+    max-width: 640px;
+    gap: 22px;
+  }
+  .slide--title .eyebrow { color: var(--color-stone); }
+  .slide--title h2 {
+    font-size: clamp(38px, 4.6vw, 78px);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+  }
+  .slide--title h2 span { display: block; }
+  .slide--title h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-ink);
+    display: block;
+  }
+  .craft__intro {
+    margin-top: 14px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(21, 17, 13, 0.68);
+    max-width: 460px;
+  }
+
+  /* Pair: photo + stat together as one editorial composition */
+  .slide--pair {
+    width: 70vw;
+    max-width: 1080px;
+    flex-direction: row;
+    align-items: center;
+    gap: 50px;
+  }
+  .pair__photo {
+    flex: 0 0 auto;
+    width: 38vw;
+    max-width: 560px;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    box-shadow:
+      0 1px 2px rgba(15, 11, 8, 0.05),
+      0 30px 80px -20px rgba(15, 11, 8, 0.32);
+    clip-path: inset(100% 0 0 0);
+    -webkit-clip-path: inset(100% 0 0 0);
+    transition: clip-path 1.4s var(--ease-soft);
+  }
+  .slide--pair.is-revealed .pair__photo {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+  }
+  .pair__photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.96) contrast(1.03);
+    animation: kenBurns 16s var(--ease-soft) infinite alternate;
+    transform-origin: 50% 50%;
+  }
+  .pair__stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding-left: 36px;
+    border-left: 1px solid rgba(21, 17, 13, 0.18);
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 1.4s var(--ease-soft) 0.4s,
+      transform 1.4s var(--ease-soft) 0.4s;
+  }
+  .slide--pair.is-revealed .pair__stat {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Standalone photo (feature shot, wider format) */
+  .slide--photo {
+    position: relative;
+    width: 36vw;
+    max-width: 520px;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    box-shadow:
+      0 1px 2px rgba(15, 11, 8, 0.05),
+      0 30px 80px -20px rgba(15, 11, 8, 0.32);
+    clip-path: inset(100% 0 0 0);
+    -webkit-clip-path: inset(100% 0 0 0);
+    transition: clip-path 1.4s var(--ease-soft);
+  }
+  .slide--photo.is-revealed {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+  }
+  .slide--photo :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.96) contrast(1.03);
+    animation: kenBurns 16s var(--ease-soft) infinite alternate;
+    transform-origin: 50% 50%;
+  }
+  .slide--feature {
+    width: 44vw;
+    max-width: 640px;
+    aspect-ratio: 4 / 5;
+  }
+
+  @keyframes kenBurns {
+    0%   { transform: scale(1.02) translate(0, 0); }
+    100% { transform: scale(1.10) translate(-1.5%, 1%); }
+  }
+
+  .stat__value {
+    font-family: var(--font-display);
+    font-size: clamp(54px, 5.6vw, 96px);
+    line-height: 0.92;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+  }
+  .stat__label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+    max-width: 220px;
+    line-height: 1.55;
+  }
+  .stat__caption {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(21, 17, 13, 0.08);
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(15px, 1.15vw, 19px);
+    line-height: 1.5;
+    color: rgba(21, 17, 13, 0.72);
+    max-width: 320px;
+    letter-spacing: 0.005em;
+  }
+
+  /* Buffer keeps the closing slide on screen longer */
+  .slide--buffer {
+    width: 35vw;
+    flex: 0 0 auto;
+  }
+
+  /* Closing slide — typewriter reveal of each line, like a typing machine */
+  .slide--closing {
+    width: 44vw;
+    max-width: 540px;
+  }
+  .slide--closing h3 {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3.4vw, 56px);
+    line-height: 1.18;
+    font-weight: 400;
+    color: var(--color-ink);
+    letter-spacing: 0.005em;
+  }
+  .slide--closing h3 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-ink);
+  }
+  .slide--closing h3 span {
+    display: block;
+    opacity: 0;
+    min-height: 1.2em;
+    transition: opacity 0.3s var(--ease-soft);
+  }
+  .slide--closing.is-revealed h3 span { opacity: 1; }
+  /* Blinking cursor at the end of the active line during typewriter */
+  .slide--closing h3 span.is-typing::after {
+    content: "|";
+    display: inline-block;
+    margin-left: 0.06em;
+    color: var(--color-cognac);
+    animation: blinkCursor 0.6s step-end infinite;
+    font-weight: 300;
+  }
+  @keyframes blinkCursor {
+    50% { opacity: 0; }
+  }
+
+  /* ---- Notebook (≤1280px): more compact pairs ---- */
+  @media (max-width: 1280px) {
+    .slide--title { width: 56vw; max-width: 540px; }
+    .slide--pair { width: 76vw; max-width: 920px; gap: 40px; }
+    .pair__photo { width: 36vw; max-width: 460px; }
+    .slide--feature { width: 48vw; max-width: 540px; }
+    .slide--closing { width: 48vw; max-width: 480px; }
+  }
+
+  /* ---- Mobile ---- */
+  .craft__mobile { display: none; }
+
+  @media (max-width: 900px) {
+    .craft__pin { display: none; }
+    .craft__mobile {
+      display: block;
+      padding: 90px 0 110px;
+    }
+    .craft__head {
+      max-width: 720px;
+      margin: 0 auto 50px;
+      padding: 0 7vw;
+      text-align: center;
+    }
+    .craft__head h2 {
+      font-size: clamp(36px, 7vw, 56px);
+      line-height: 1.05;
+      margin: 22px 0 26px;
+    }
+    .craft__head h2 em {
+      font-family: var(--font-italic);
+      font-style: italic;
+      font-weight: 300;
+      color: var(--color-cognac);
+    }
+    .craft__head p {
+      color: rgba(21, 17, 13, 0.7);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+    .m-block {
+      max-width: 720px;
+      margin: 0 auto 40px;
+      padding: 0 7vw;
+    }
+    .m-block :global(img) {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 9 / 12;
+      object-fit: cover;
+      margin-bottom: 18px;
+    }
+    .m-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 18px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .m-stat .stat__value {
+      font-size: 56px;
+    }
+  }
+</style>

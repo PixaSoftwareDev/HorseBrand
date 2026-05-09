@@ -1,0 +1,154 @@
+@import "./fonts.css";
+@import "./tokens.css";
+
+/* ========== RESET & BASE ========== */
+*,
+*::before,
+*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/legacy Edge */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar { display: none; } /* Chrome, Safari, modern Edge */
+body {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  overflow-x: hidden;
+  cursor: none;
+  letter-spacing: 0.005em;
+  line-height: 1.5;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; border: 0; background: 0; cursor: none; color: inherit; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  color: var(--color-ink);
+}
+
+/* ========== CURSOR ========== */
+.cursor,
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.35s var(--ease-soft), height 0.35s var(--ease-soft),
+    background-color 0.3s, border-color 0.3s;
+  mix-blend-mode: difference;
+}
+.cursor { width: 30px; height: 30px; border: 1px solid #f7f3ec; }
+.cursor-dot { width: 4px; height: 4px; background: #f7f3ec; }
+.cursor.hover { width: 60px; height: 60px; border-color: var(--color-cognac); }
+@media (hover: none), (max-width: 900px) {
+  .cursor, .cursor-dot { display: none; }
+  body, button, a { cursor: auto; }
+}
+
+/* ========== TYPOGRAPHY UTILITIES ========== */
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--color-stone);
+  font-weight: 400;
+}
+h2 {
+  font-size: clamp(36px, 4.5vw, 72px);
+  line-height: 1.05;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+h2 em {
+  font-family: var(--font-italic);
+  font-style: italic;
+  font-weight: 300;
+}
+.section__head {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 110px 5vw 60px;
+}
+.section__head h2 { margin-top: 22px; }
+
+/* ========== BUTTONS ========== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 30px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 400;
+  border: 1px solid transparent;
+  transition: all 0.5s var(--ease-editorial);
+  white-space: nowrap;
+}
+.btn svg { width: 16px; height: 16px; transition: transform 0.5s var(--ease-editorial); }
+.btn:hover svg { transform: translateX(6px); }
+.btn--primary {
+  background: #f7f3ec;
+  color: var(--color-ink);
+  border-color: #f7f3ec;
+}
+.btn--primary:hover { background: transparent; color: #f7f3ec; }
+.btn--ghost {
+  color: #f7f3ec;
+  border-color: rgba(247, 243, 236, 0.45);
+}
+.btn--ghost:hover { background: #f7f3ec; color: var(--color-ink); border-color: #f7f3ec; }
+.btn--dark {
+  color: var(--color-ink);
+  border-color: var(--color-ink);
+  background: transparent;
+}
+.btn--dark:hover { background: var(--color-ink); color: #f7f3ec; }
+
+/* ========== REVEAL ========== */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 1.1s var(--ease-editorial), transform 1.1s var(--ease-editorial);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+/* Scroll-driven image reveal (used on editorial photos).
+   Image is clipped from the bottom; --reveal-bottom goes 100% → 0%
+   continuously as the element crosses the viewport. */
+[data-scroll-reveal] {
+  clip-path: inset(0 0 var(--reveal-bottom, 100%) 0);
+  -webkit-clip-path: inset(0 0 var(--reveal-bottom, 100%) 0);
+  will-change: clip-path;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes wordIn { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { to { opacity: 0.95; } }
+@keyframes eq {
+  0%, 100% { height: 3px; }
+  50% { height: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

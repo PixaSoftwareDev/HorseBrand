@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.production
+.env.local
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vscode/*
+!.vscode/extensions.json
+
+# Claude Code (local IDE state — never commit)
+.claude/
+.cursor/
+.idea/
+
+# OS / editor scratch
+Thumbs.db
+*.swp
+
+# Python bytecode (in case any tool drops one)
+__pycache__/
+*.py[cod]

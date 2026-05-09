@@ -1,0 +1,256 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import { cldImage } from "@/lib/cloudinary";
+import {
+  WHATSAPP_URL,
+  WHATSAPP_NUMBER_DISPLAY,
+  EMAIL,
+  EMAIL_URL,
+  ATELIER_ADDRESS,
+  ATELIER_HOURS_ES,
+  ATELIER_HOURS_EN,
+} from "@/lib/contact";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const hours = lang === "es" ? ATELIER_HOURS_ES : ATELIER_HOURS_EN;
+const heroImage = cldImage("v1778360916/IMG_3017_cijgiv.jpg", 1800);
+---
+
+<section class="contact" id="contacto">
+  <!-- Left · editorial image (light treatment) -->
+  <div class="contact__media">
+    <div data-scroll-reveal>
+      <img
+        src={heroImage}
+        alt={lang === "es" ? "Atelier Horse Brand" : "Horse Brand atelier"}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  </div>
+
+  <!-- Right · light editorial panel -->
+  <div class="contact__panel">
+    <div class="contact__panel-inner">
+      <Reveal class="eyebrow">{t("contact.eyebrow")}</Reveal>
+      <Reveal as="h2">
+        <span>{t("contact.title_1")}</span>
+        <em>{t("contact.title_2")}</em>
+      </Reveal>
+
+      <Reveal class="contact__atelier" delay={80}>
+        <span class="contact__label">{t("contact.atelier_title")}</span>
+        <p class="contact__address">{ATELIER_ADDRESS}</p>
+        <span class="contact__label contact__label--soft">{t("contact.atelier_hours_label")}</span>
+        <div class="contact__hours">
+          {hours.map((line) => <p>{line}</p>)}
+        </div>
+      </Reveal>
+
+      <Reveal class="contact__direct" delay={160}>
+        <a href={WHATSAPP_URL} target="_blank" rel="noopener" class="contact__wa">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.5 14.4c-.3-.2-1.7-.8-2-.9-.3-.1-.5-.2-.7.2-.2.3-.8.9-1 1.1-.2.2-.4.2-.6 0-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.7.1-.1.3-.4.5-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.7-1.7-.9-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4 0 1.4 1 2.8 1.2 3 .1.2 2 3 4.8 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.4z M12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.4 5L2 22l5.1-1.3c1.5.8 3.1 1.2 4.9 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z M12 20c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3.1.8.8-3-.2-.3C3.9 14.9 3.5 13.5 3.5 12 3.5 7.3 7.3 3.5 12 3.5s8.5 3.8 8.5 8.5S16.7 20 12 20z"/>
+          </svg>
+          <span>{t("contact.direct_whatsapp")}</span>
+        </a>
+        <span class="contact__phone">{WHATSAPP_NUMBER_DISPLAY}</span>
+
+        <span class="contact__label contact__label--soft contact__email-label">{t("contact.direct_email_label")}</span>
+        <a href={EMAIL_URL} class="contact__email">{EMAIL}</a>
+      </Reveal>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* ---- Image side · contained image inside the column ---- */
+  .contact__media {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 50px;
+    background: var(--color-paper);
+  }
+  .contact__media > div {
+    width: 100%;
+    max-width: 600px;
+    /* cap by viewport so the image never causes scroll on shorter screens */
+    max-height: calc(100vh - 140px);
+    max-height: calc(100dvh - 140px);
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -20px rgba(15, 11, 8, 0.18);
+  }
+  .contact__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.94) contrast(1.02);
+  }
+
+  /* ---- Light panel ---- */
+  .contact__panel {
+    display: flex;
+    align-items: center;
+    padding: 110px 7vw;
+    background: var(--color-paper);
+  }
+  .contact__panel-inner {
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .contact__panel :global(.eyebrow) {
+    color: var(--color-cognac);
+  }
+
+  .contact__panel h2 {
+    color: var(--color-ink);
+    font-size: clamp(32px, 3.6vw, 52px);
+    line-height: 1.06;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .contact__panel h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-ink);
+    display: block;
+    margin-top: 4px;
+  }
+
+  /* shared label */
+  .contact__label {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--color-cognac);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .contact__label--soft {
+    color: var(--color-stone);
+    margin-top: 22px;
+  }
+
+  /* atelier block */
+  :global(.contact__atelier) {
+    padding-top: 30px;
+    border-top: 1px solid rgba(21, 17, 13, 0.12);
+    display: flex;
+    flex-direction: column;
+  }
+  .contact__address {
+    font-family: var(--font-display);
+    font-size: clamp(18px, 1.4vw, 22px);
+    line-height: 1.5;
+    color: var(--color-ink);
+    font-weight: 400;
+    margin: 0;
+  }
+  .contact__hours {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .contact__hours p {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: rgba(21, 17, 13, 0.72);
+    font-size: 17px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* direct contact block */
+  :global(.contact__direct) {
+    padding-top: 28px;
+    border-top: 1px solid rgba(21, 17, 13, 0.12);
+    display: flex;
+    flex-direction: column;
+  }
+  .contact__wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 26px;
+    background: var(--color-ink);
+    color: #f7f3ec;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    width: fit-content;
+    cursor: none;
+    transition: transform 0.4s var(--ease-soft), background 0.4s, color 0.4s;
+  }
+  .contact__wa svg { width: 18px; height: 18px; }
+  .contact__wa:hover {
+    transform: translateY(-2px);
+    background: var(--color-cognac);
+    color: #f7f3ec;
+  }
+  .contact__phone {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 15.5px;
+    color: rgba(21, 17, 13, 0.55);
+    margin-top: 12px;
+    letter-spacing: 0.02em;
+  }
+
+  .contact__email-label { margin-top: 28px; }
+  .contact__email {
+    font-family: var(--font-display);
+    font-size: clamp(17px, 1.3vw, 20px);
+    color: var(--color-ink);
+    border-bottom: 1px solid rgba(21, 17, 13, 0.22);
+    padding-bottom: 4px;
+    align-self: flex-start;
+    transition: border-color 0.35s, color 0.35s;
+  }
+  .contact__email:hover {
+    border-bottom-color: var(--color-cognac);
+    color: var(--color-cognac);
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 1280px) {
+    .contact__panel { padding: 90px 6vw; }
+  }
+  @media (max-width: 900px) {
+    .contact {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .contact__media {
+      aspect-ratio: 4 / 3;
+      max-height: 60vh;
+      max-height: 60dvh;
+    }
+    .contact__panel { padding: 70px 7vw 90px; }
+    .contact__panel-inner { max-width: 100%; }
+  }
+</style>

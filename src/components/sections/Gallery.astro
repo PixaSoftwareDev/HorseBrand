@@ -1,0 +1,114 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import ZoomParallax, { type ZoomImage } from "@/components/ui/ZoomParallax";
+import { cldZoomImage } from "@/lib/cloudinary";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Cloudinary public IDs — served via CDN with f_auto/q_auto:best/w_3000/16:9 crop.
+// Crisp at the parallax max zoom (9x) and much faster than processing locally.
+const ZOOM_PUBLIC_IDS = [
+  "v1778360931/IMG_2955_mo2hsl.jpg",
+  "v1778360918/IMG_2988_x6bexo.jpg",
+  "v1778360908/IMG_3123_gbsvx0.jpg",
+  "v1778360899/IMG_3137_xr9jtc.jpg",
+  "v1778360901/IMG_3140_td7uw8.jpg",
+  "v1778360902/IMG_3119_cliy4v.jpg",
+  "v1778360915/IMG_3115_qvcecp.jpg",
+];
+
+const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
+  const r = cldZoomImage(id);
+  return { src: r.src, srcSet: r.srcSet, alt: "" };
+});
+---
+
+<section class="gallery" id="galeria">
+  <div class="section__head">
+    <Reveal class="eyebrow">{t("gallery.eyebrow")}</Reveal>
+    <Reveal as="h2">
+      <span>{t("gallery.title_1")}</span> <em>{t("gallery.title_2")}</em> <span>{t("gallery.title_3")}</span>
+    </Reveal>
+  </div>
+
+  <div class="zoom-wrap" aria-hidden="true">
+    <ZoomParallax client:visible images={zoomImages} />
+  </div>
+</section>
+
+<style>
+  .gallery { background: var(--color-ivory); padding-bottom: 140px; }
+
+  .zoom-wrap { margin: 30px 0 60px; }
+
+  :global(.zoom-parallax) {
+    position: relative;
+    height: 300vh;
+  }
+  :global(.zp-sticky) {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--color-ivory);
+  }
+  :global(.zp-item) {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+  }
+  :global(.zp-inner) {
+    overflow: hidden;
+    border-radius: 3px;
+    box-shadow:
+      0 1px 2px rgba(15, 11, 8, 0.06),
+      0 22px 60px -12px rgba(15, 11, 8, 0.28);
+    outline: 1px solid rgba(247, 243, 236, 0.04);
+  }
+  :global(.zp-inner img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.96) contrast(1.02);
+  }
+
+  /* ---- Touch / mobile fallback ----
+   * Framer Motion's useScroll keeps running on touch devices but the
+   * absolute layout + 9x scaling is built for hover-driven scroll
+   * progress and feels broken on mobile. Convert the whole composition
+   * into a clean vertical grid on (hover: none) screens — keeps every
+   * image visible without burning CPU on the parallax. */
+  @media (hover: none), (max-width: 700px) {
+    :global(.zoom-parallax) {
+      height: auto !important;
+    }
+    :global(.zp-sticky) {
+      position: static;
+      height: auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 0 5vw;
+    }
+    :global(.zp-item) {
+      position: static;
+      transform: none !important;
+    }
+    :global(.zp-inner) {
+      position: static !important;
+      top: auto !important;
+      left: auto !important;
+      width: 100% !important;
+      height: auto !important;
+      aspect-ratio: 16 / 9;
+    }
+  }
+</style>

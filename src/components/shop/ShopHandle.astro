@@ -1,0 +1,95 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<button class="shop-handle" id="shopHandle" aria-label={t("shop.handle")} aria-controls="shopDrawer">
+  <span class="shop-handle__dot"></span>
+  <span class="shop-handle__label">{t("shop.handle")}</span>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+    <path d="M5 12h14M13 5l7 7-7 7"/>
+  </svg>
+</button>
+
+<style>
+  .shop-handle {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 90;
+    background: var(--color-ink);
+    color: var(--color-ivory);
+    border: 0;
+    cursor: none;
+    padding: 22px 12px 22px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    box-shadow: -2px 6px 28px rgba(15, 11, 8, 0.22);
+    transition: padding-right 0.5s var(--ease-editorial), background 0.45s,
+      transform 0.55s var(--ease-editorial), box-shadow 0.5s, opacity 0.5s;
+  }
+  .shop-handle:hover {
+    padding-right: 18px;
+    background: var(--color-leather);
+    box-shadow: -2px 8px 36px rgba(91, 57, 36, 0.4);
+  }
+  .shop-handle__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-gold);
+    box-shadow: 0 0 0 3px rgba(176, 133, 82, 0.18);
+    animation: shopPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes shopPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(176, 133, 82, 0.16); }
+    50% { box-shadow: 0 0 0 7px rgba(176, 133, 82, 0); }
+  }
+  .shop-handle__label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  .shop-handle svg {
+    width: 14px;
+    height: 14px;
+    transform: rotate(90deg);
+    transition: transform 0.45s var(--ease-editorial);
+  }
+  .shop-handle:hover svg { transform: rotate(90deg) translateX(-3px); }
+
+  /* Hide while drawer is open */
+  :global(body.shop-open) .shop-handle {
+    transform: translateY(-50%) translateX(110%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (max-width: 700px) {
+    .shop-handle { padding: 16px 10px 16px 12px; gap: 10px; }
+    .shop-handle__label { font-size: 10px; letter-spacing: 0.32em; }
+  }
+</style>
+
+<script>
+  function wireShopHandle(): void {
+    const handle = document.getElementById("shopHandle");
+    if (!handle) return;
+    handle.addEventListener("click", () => {
+      window.dispatchEvent(new CustomEvent("shop:open"));
+    });
+  }
+  document.addEventListener("astro:page-load", wireShopHandle);
+</script>

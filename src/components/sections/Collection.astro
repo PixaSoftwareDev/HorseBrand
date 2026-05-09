@@ -1,0 +1,456 @@
+---
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import { SHOP_BASE_URL } from "@/lib/shop";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const products = (await getCollection("products")).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+// Map product slug → Cloudinary URL. If a product is missing here it falls
+// back to the local image declared in its .md frontmatter.
+const PRODUCT_CLD: Record<string, string | undefined> = {
+  weekender: cldImage(CLD_IDS.IMG_2977, 1000),
+  "boot-bag": cldImage(CLD_IDS.IMG_2971, 1000),
+  "stable-clutch": cldImage(CLD_IDS.IMG_3060, 1000),
+  "wallet-trio": cldImage(CLD_IDS.IMG_3054, 1000),
+  "heritage-tote": cldImage(CLD_IDS.IMG_2945, 1000),
+  // equestrian-tote (IMG_3127) sigue local: no fue subida a Cloudinary.
+};
+---
+
+<section class="collection" id="coleccion">
+  <div class="section__head">
+    <Reveal class="eyebrow">{t("collection.eyebrow")}</Reveal>
+    <h2 class="collection__title" data-coll-title>
+      <span class="line">{t("collection.title_1")} <em>{t("collection.title_2")}</em></span>
+    </h2>
+    <p class="collection__sub" data-coll-sub>{t("collection.sub")}</p>
+  </div>
+
+  <div class="collection__grid">
+    {products.map((product, i) => (
+      <article
+        class="card"
+        data-card
+        style={`--card-delay: ${i * 90}ms`}
+      >
+        <span class="card__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+        <div class="card__media">
+          <div class="card__media-inner">
+            {PRODUCT_CLD[product.slug] ? (
+              <img
+                src={PRODUCT_CLD[product.slug]}
+                alt={product.data.alt}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <Image
+                src={product.data.image}
+                alt={product.data.alt}
+                widths={[400, 700, 1000]}
+                sizes="(min-width:1100px) 30vw, (min-width:700px) 45vw, 90vw"
+              />
+            )}
+          </div>
+          {product.data.badge && (
+            <span class="card__badge">
+              {product.data.badge === "atelier" ? t("badge.atelier") : t("badge.handmade")}
+            </span>
+          )}
+          <a
+            class="card__buy"
+            href={product.data.tiendanubeUrl ?? SHOP_BASE_URL}
+            target="_blank"
+            rel="noopener"
+            aria-label={`${t("collection.buy")} ${product.data.name[lang]}`}
+          >
+            <span>{t("collection.buy")}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+        <div class="card__body">
+          <h3 class="card__name">{product.data.name[lang]}</h3>
+          <p class="card__tag">{product.data.tagline[lang]}</p>
+          <a
+            class="card__cta"
+            href={product.data.tiendanubeUrl ?? SHOP_BASE_URL}
+            target="_blank"
+            rel="noopener"
+          >
+            {t("collection.buy")}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  function wireCollection(): void {
+    // ---- IntersectionObserver-driven reveals ----
+    const reveal = (el: Element): void => el.classList.add("is-revealed");
+
+    const cards = document.querySelectorAll<HTMLElement>("[data-card]");
+    const title = document.querySelector<HTMLElement>("[data-coll-title]");
+    const sub = document.querySelector<HTMLElement>("[data-coll-sub]");
+
+    const ioCard = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            reveal(e.target);
+            ioCard.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -60px 0px" }
+    );
+    cards.forEach((c) => ioCard.observe(c));
+
+    const ioTitle = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            reveal(e.target);
+            ioTitle.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+    if (title) ioTitle.observe(title);
+    if (sub) ioTitle.observe(sub);
+
+    // ---- Mouse-follow micro-parallax on hover (desktop only) ----
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const noHover = window.matchMedia("(hover: none)").matches;
+    if (reduced || noHover) return;
+
+    cards.forEach((card) => {
+      const inner = card.querySelector<HTMLElement>(".card__media-inner");
+      if (!inner) return;
+      let raf: number | null = null;
+      let tx = 0, ty = 0, mx = 0, my = 0;
+      let active = false;
+
+      const tick = (): void => {
+        mx += (tx - mx) * 0.12;
+        my += (ty - my) * 0.12;
+        const baseScale = active ? 1.04 : 1;
+        inner.style.transform = `translate3d(${mx.toFixed(2)}px, ${my.toFixed(2)}px, 0) scale(${baseScale})`;
+        if (Math.abs(tx - mx) > 0.1 || Math.abs(ty - my) > 0.1) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          raf = null;
+        }
+      };
+
+      card.addEventListener("pointerenter", () => { active = true; });
+      card.addEventListener("pointermove", (e) => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        tx = px * 12;
+        ty = py * 8;
+        if (raf === null) raf = requestAnimationFrame(tick);
+      });
+      card.addEventListener("pointerleave", () => {
+        active = false;
+        tx = 0; ty = 0;
+        if (raf === null) raf = requestAnimationFrame(tick);
+      });
+    });
+  }
+  document.addEventListener("astro:page-load", wireCollection);
+</script>
+
+<style>
+  .collection { background: var(--color-ivory); padding-bottom: 160px; }
+
+  /* ---------- Section head ---------- */
+  .collection__title {
+    font-size: clamp(36px, 4.5vw, 72px);
+    line-height: 1.05;
+    font-weight: 400;
+    margin-top: 22px;
+    color: var(--color-ink);
+  }
+  .collection__title .line {
+    display: inline-block;
+    /* generous padding so descenders / italic glyphs don't get clipped */
+    padding: 0.12em 0.06em;
+    margin: -0.12em -0.06em;
+    clip-path: inset(100% 0 0 0);
+    -webkit-clip-path: inset(100% 0 0 0);
+    filter: blur(6px);
+    transform: translateY(8px);
+    will-change: clip-path, filter, transform;
+  }
+  .collection__title.is-revealed .line {
+    animation: collTitleRise 1.5s var(--ease-editorial) forwards;
+  }
+  @keyframes collTitleRise {
+    0% {
+      clip-path: inset(100% 0 0 0);
+      -webkit-clip-path: inset(100% 0 0 0);
+      filter: blur(6px);
+      transform: translateY(8px);
+    }
+    60% { filter: blur(2px); }
+    100% {
+      clip-path: inset(0 0 0 0);
+      -webkit-clip-path: inset(0 0 0 0);
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+  .collection__title em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-cognac);
+  }
+
+  .collection__sub {
+    margin-top: 26px;
+    max-width: 540px;
+    color: rgba(21, 17, 13, 0.65);
+    font-size: 16px;
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 1s var(--ease-editorial) 0.35s,
+      transform 1s var(--ease-editorial) 0.35s;
+  }
+  .collection__sub.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---------- Grid ---------- */
+  .collection__grid {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 60px 5vw 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px 28px;
+  }
+
+  /* ---------- Card ---------- */
+  .card {
+    position: relative;
+    display: block;
+  }
+
+  .card__num {
+    position: absolute;
+    top: -22px;
+    left: 0;
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+    z-index: 2;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 0.7s var(--ease-editorial),
+      transform 0.7s var(--ease-editorial),
+      color 0.4s;
+    transition-delay: calc(var(--card-delay, 0ms) + 0.7s);
+  }
+  .card.is-revealed .card__num {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .card:hover .card__num { color: var(--color-cognac); }
+
+  /* Image wrapper handles the mask reveal; inner handles transform (parallax/scale) */
+  .card__media {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    margin-bottom: 22px;
+    background: var(--color-bone);
+    clip-path: inset(0 0 100% 0);
+    -webkit-clip-path: inset(0 0 100% 0);
+    filter: blur(6px) saturate(0.92);
+    will-change: clip-path, filter;
+  }
+  .card.is-revealed .card__media {
+    animation: cardImageRise 1.4s var(--ease-editorial) forwards;
+    animation-delay: var(--card-delay, 0ms);
+  }
+  @keyframes cardImageRise {
+    0% {
+      clip-path: inset(0 0 100% 0);
+      -webkit-clip-path: inset(0 0 100% 0);
+      filter: blur(6px) saturate(0.92);
+    }
+    60% { filter: blur(1.5px) saturate(0.97); }
+    100% {
+      clip-path: inset(0 0 0 0);
+      -webkit-clip-path: inset(0 0 0 0);
+      filter: blur(0) saturate(1);
+    }
+  }
+
+  .card__media-inner {
+    width: 100%;
+    height: 100%;
+    will-change: transform;
+    transition: transform 0.6s var(--ease-soft);
+  }
+  .card__media-inner :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.6s;
+    filter: saturate(0.94);
+  }
+  .card:hover .card__media-inner :global(img) { filter: saturate(1.02); }
+
+  .card__badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(247, 243, 236, 0.92);
+    padding: 7px 14px;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    z-index: 2;
+  }
+
+  .card__buy {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--color-ivory);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    border: 1px solid var(--color-ivory);
+    transform: translateY(8px);
+    opacity: 0;
+    transition: opacity 0.45s var(--ease-editorial),
+      transform 0.55s var(--ease-editorial),
+      background 0.4s, color 0.4s;
+    cursor: none;
+    z-index: 2;
+  }
+  .card__buy svg { width: 12px; height: 12px; transition: transform 0.4s; }
+  .card:hover .card__buy { opacity: 1; transform: translateY(0); }
+  .card__buy:hover { background: var(--color-ink); color: var(--color-ivory); border-color: var(--color-ink); }
+  .card__buy:hover svg { transform: translateX(3px); }
+
+  /* ---------- Body — staggered reveal ---------- */
+  .card__name,
+  .card__tag,
+  .card__cta {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.85s var(--ease-editorial),
+      transform 0.85s var(--ease-editorial);
+  }
+  .card.is-revealed .card__name {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(var(--card-delay, 0ms) + 0.55s);
+  }
+  .card.is-revealed .card__tag {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(var(--card-delay, 0ms) + 0.7s);
+  }
+  .card.is-revealed .card__cta {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: calc(var(--card-delay, 0ms) + 0.85s);
+  }
+
+  .card__name {
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  .card__tag {
+    color: var(--color-stone);
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+  }
+  .card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--color-ink);
+    /* hover-only transitions live on a separate timing so they don't fight reveal */
+  }
+  .card__cta svg { width: 14px; height: 14px; transition: transform 0.4s; }
+  .card.is-revealed .card__cta:hover svg { transform: translateX(4px); }
+  .card.is-revealed .card__cta {
+    transition: opacity 0.85s var(--ease-editorial),
+      transform 0.85s var(--ease-editorial),
+      gap 0.4s var(--ease-editorial),
+      border-color 0.35s,
+      color 0.35s;
+  }
+  .card.is-revealed:hover .card__cta { gap: 16px; }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .collection__title .line,
+    .card__media,
+    .card__name,
+    .card__tag,
+    .card__cta,
+    .card__num,
+    .collection__sub {
+      clip-path: none;
+      -webkit-clip-path: none;
+      filter: none;
+      transform: none;
+      opacity: 1;
+      animation: none;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .collection__grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .collection__grid { grid-template-columns: 1fr; }
+  }
+</style>

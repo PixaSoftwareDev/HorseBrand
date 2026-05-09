@@ -1,0 +1,77 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import { localizedPath } from "@/i18n/utils";
+import Reveal from "@/components/shared/Reveal.astro";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const home = localizedPath(lang, "/");
+const splitImg = cldImage(CLD_IDS.IMG_3098, 1800);
+---
+
+<section class="split">
+  <Reveal class="split__media">
+    <div data-scroll-reveal>
+      <img src={splitImg} alt="Editorial AW" loading="lazy" decoding="async" />
+    </div>
+  </Reveal>
+  <div class="split__content">
+    <Reveal class="eyebrow">{t("split.eyebrow")}</Reveal>
+    <Reveal as="h2">
+      <span>{t("split.title_1")}</span> <em>{t("split.title_2")}</em><br />
+      <span>{t("split.title_3")}</span>
+    </Reveal>
+    <Reveal as="p">{t("split.p")}</Reveal>
+    <Reveal>
+      <a href={`${home}#galeria`} class="btn btn--dark">
+        {t("split.cta")}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M5 12h14M13 5l7 7-7 7" />
+        </svg>
+      </a>
+    </Reveal>
+  </div>
+</section>
+
+<style>
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--color-bone);
+  }
+  .split__media :global(img) {
+    width: 100%;
+    height: 100%;
+    min-height: 620px;
+    object-fit: cover;
+  }
+  .split__content {
+    padding: 110px 7vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 26px;
+    max-width: 640px;
+  }
+  .split__content h2 { line-height: 1.05; }
+  .split__content p {
+    color: rgba(21, 17, 13, 0.72);
+    font-size: 16px;
+    line-height: 1.7;
+    max-width: 460px;
+  }
+  .split__content .btn { align-self: flex-start; margin-top: 14px; }
+
+  @media (max-width: 1280px) {
+    .split__media :global(img) { min-height: 540px; }
+    .split__content { padding: 90px 7vw; }
+  }
+  @media (max-width: 900px) {
+    .split { grid-template-columns: 1fr; }
+    .split__media :global(img) { min-height: 420px; }
+    .split__content { padding: 80px 7vw; }
+  }
+</style>
