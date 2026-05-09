@@ -23,23 +23,24 @@ export interface ResponsiveSrc {
 }
 
 /**
- * High-resolution crop for the zoom-parallax (scales up to 9x).
+ * High-resolution crop for the zoom-parallax (scales capped at 5x).
  *
- * Returns DPR-aware sources via srcset:
- *   - 1x → 3200px wide (standard displays, lighter)
- *   - 2x → 6400px wide (retina / 4K, headroom for peak zoom)
+ * Math (worst case at peak zoom):
+ *   container 30vw × viewport 1920px × scale 5 × DPR 2 = 5760px physical
+ * We deliver:
+ *   1x → 5400px wide (covers 1080p / standard laptops up to scale 5)
+ *   2x → 9000px wide (covers retina / 4K screens at peak with headroom)
  *
- * The browser picks the right one based on devicePixelRatio. Without srcset
- * the browser can't ask for the bigger variant on high-DPR screens, so even
- * a w_5400 source ends up looking blurry at peak zoom.
+ * The browser picks via DPR. Without srcset, even w_9000 looks blurry on
+ * retina because the browser would still pick 1x by default.
  *
  * AVIF via f_auto + q_auto:best keeps weight reasonable
- * (~600 KB at 1x, ~1.5 MB at 2x).
+ * (~1 MB at 1x, ~2.2 MB at 2x — only 1 of the two ever ships per visit).
  */
 export function cldZoomImage(publicId: string): ResponsiveSrc {
   const base = "f_auto,q_auto:best,c_fill,ar_16:9";
-  const src1x = cldTransform(publicId, `${base},w_3200`);
-  const src2x = cldTransform(publicId, `${base},w_6400`);
+  const src1x = cldTransform(publicId, `${base},w_5400`);
+  const src2x = cldTransform(publicId, `${base},w_9000`);
   return {
     src: src1x,
     srcSet: `${src1x} 1x, ${src2x} 2x`,

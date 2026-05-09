@@ -78,6 +78,13 @@ const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
     object-fit: cover;
     display: block;
     filter: saturate(0.96) contrast(1.02);
+    /* Hint browsers to keep texture at the highest available resolution
+     * when CSS-scaled by transform. Without this, some browsers downsample
+     * the GPU texture to layout-box × DPR and the high-res srcset is wasted. */
+    image-rendering: high-quality;
+    image-rendering: -webkit-optimize-contrast;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   /* ---- Touch / mobile fallback ----
