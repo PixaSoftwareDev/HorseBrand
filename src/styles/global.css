@@ -11,6 +11,12 @@ html {
   -moz-osx-font-smoothing: grayscale;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/legacy Edge */
+  /* `overflow: clip` is stricter than `hidden` and crucially does NOT create
+   * a scroll container — so `position: sticky` in the gallery keeps working.
+   * Catches any fixed-positioned descendant that escapes off-screen on iOS
+   * Safari (which otherwise creates a horizontal scroll bar even when body
+   * has overflow-x: hidden). Safari 16+ / Chrome 90+ supported. */
+  overflow-x: clip;
 }
 html::-webkit-scrollbar,
 body::-webkit-scrollbar { display: none; } /* Chrome, Safari, modern Edge */
