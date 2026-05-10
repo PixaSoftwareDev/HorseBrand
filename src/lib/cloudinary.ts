@@ -52,6 +52,32 @@ export function cldImage(publicId: string, width = 1600): string {
   return cldTransform(publicId, `f_auto,q_auto:good,w_${width}`);
 }
 
+/**
+ * Responsive editorial image — returns `src` + `srcSet` so the browser can
+ * pick the right size based on the rendered width × DPR. Use this for any
+ * full-bleed or half-bleed photo (manifesto, split, hero slide).
+ *
+ * Pair with a meaningful `sizes` attribute on the <img>, e.g.
+ *   sizes="(min-width:900px) 50vw, 100vw"
+ */
+export function cldImageSrcset(publicId: string): {
+  src: string;
+  srcSet: string;
+} {
+  const make = (w: number): string =>
+    cldTransform(publicId, `f_auto,q_auto:good,w_${w}`);
+  return {
+    src: make(1600),
+    srcSet: [
+      `${make(640)} 640w`,
+      `${make(960)} 960w`,
+      `${make(1280)} 1280w`,
+      `${make(1600)} 1600w`,
+      `${make(2400)} 2400w`,
+    ].join(", "),
+  };
+}
+
 /** Open Graph share image: 1200×630 (the standard for Facebook / LinkedIn / Twitter). */
 export function cldOgImage(publicId: string): string {
   return cldTransform(publicId, "f_auto,q_auto:good,w_1200,h_630,c_fill");
