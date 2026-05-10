@@ -26,23 +26,18 @@ export interface ResponsiveSrc {
 /**
  * Responsive crop for the zoom-parallax.
  *
- * Math at peak zoom: the worst-case tile is `30vw × scale 8` on a 1920px
- * viewport = 4608 CSS px wide. Retina DPR 2 wants 9216 physical px. So the
- * top-end source MUST be at least ~9000px to stay sharp at peak. The next
- * size up (7200w) covers DPR 1.5 displays; below that, smaller sources for
- * mobile / pre-zoom states.
+ * Cap: w_3600 max. Going higher caused 400s on other machines because
+ * Cloudinary refuses to upscale above the original (most uploaded sources
+ * are ~4000px wide phone photos, so w_5400+ is never delivered cleanly,
+ * and free plans return 400 for upscale attempts).
  *
- * Width descriptors (not 1x/2x) so the browser can pick the right size for
- * mobile (where layout collapses to a 1-col flat grid and the giant source
- * would be wasted bandwidth).
- *
- * `sizes` hint: tells the browser the desktop layout box is effectively
- * ~5400px wide so on retina/4K laptops (DPR ≥ 2) the picker selects the
- * 9000w source for peak-zoom sharpness, not the 5400w which would fall
- * short by ~50% on the worst tile.
+ * The counter-scale architecture in ZoomParallax already renders the IMG
+ * at peak layout size, so the GPU keeps a sharp texture from frame 0 —
+ * we don't need a giant source on top of that. 3600w on retina at scale 6
+ * gives enough resolution without any upscale risk.
  */
 export function cldZoomImage(publicId: string): ResponsiveSrc {
-  const base = "f_auto,q_auto:best,c_fill,ar_16:9";
+  const base = "f_auto,q_auto:good,c_fill,ar_16:9";
   const make = (w: number): string => cldTransform(publicId, `${base},w_${w}`);
   return {
     src: make(1600),
@@ -52,11 +47,8 @@ export function cldZoomImage(publicId: string): ResponsiveSrc {
       `${make(1600)} 1600w`,
       `${make(2400)} 2400w`,
       `${make(3600)} 3600w`,
-      `${make(5400)} 5400w`,
-      `${make(7200)} 7200w`,
-      `${make(9000)} 9000w`,
     ].join(", "),
-    sizes: "(max-width: 900px) 100vw, 5400px",
+    sizes: "(max-width: 900px) 100vw, 3600px",
   };
 }
 

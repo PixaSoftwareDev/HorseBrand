@@ -70,7 +70,6 @@ export default function ZoomParallax({ images }: Props) {
       <div className="zp-sticky">
         {images.slice(0, 7).map(({ src, srcSet, sizes, alt }, i) => {
           const tile = TILES[i] ?? TILES[0];
-          const isPriority = i < 4;
           // Pre-multiply layout vh/vw values by the tile's max scale.
           const peakTop = `${tile.top * tile.max}vh`;
           const peakLeft = `${tile.left * tile.max}vw`;
@@ -89,24 +88,26 @@ export default function ZoomParallax({ images }: Props) {
                 }}
               >
                 {/*
-                  Lowercase `srcset` / `sizes` / `fetchpriority` via prop
-                  spread — Astro 5 + React 19 SSR has a known glitch where
-                  camelCase `srcSet` is serialized with a literal capital S
-                  in the HTML, so browsers ignore it and fall back to the
-                  default `src` (1600w default), defeating the whole point
-                  of the high-res srcset. Spreading lowercase keys forces
-                  the renderer to emit valid HTML attribute names.
+                  Lowercase `srcset` / `sizes` via prop spread — Astro 5 +
+                  React 19 SSR has a known glitch where camelCase `srcSet`
+                  is serialized with a literal capital S in the HTML, so
+                  browsers ignore it and fall back to the default `src`
+                  (1600w default), defeating the whole point of the high-res
+                  srcset. Spreading lowercase keys forces the renderer to
+                  emit valid HTML attribute names.
+
+                  All gallery images are `loading="lazy"` (no `eager` /
+                  `fetchpriority="high"`) because the section sits ~9 blocks
+                  below the fold. Eager preloads on below-fold images
+                  trigger Chrome's "preloaded but not used in time" warning
+                  AND waste bandwidth on every page-load.
                 */}
                 <img
                   src={src}
                   alt={alt ?? ""}
-                  loading={isPriority ? "eager" : "lazy"}
+                  loading="lazy"
                   decoding="async"
-                  {...({
-                    srcset: srcSet,
-                    sizes,
-                    fetchpriority: isPriority ? "high" : "auto",
-                  } as Record<string, string>)}
+                  {...({ srcset: srcSet, sizes } as Record<string, string>)}
                 />
               </div>
             </motion.div>
