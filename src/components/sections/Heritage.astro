@@ -1,0 +1,164 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const stats = [
+  { value: t("heritage.stat_1_value"), label: t("heritage.stat_1_label") },
+  { value: t("heritage.stat_2_value"), label: t("heritage.stat_2_label") },
+  { value: t("heritage.stat_3_value"), label: t("heritage.stat_3_label") },
+];
+---
+
+<section class="heritage" aria-label="Horse Brand Heritage">
+  <div class="heritage__inner">
+    <Reveal class="heritage__eyebrow">{t("heritage.eyebrow")}</Reveal>
+
+    <Reveal as="ul" class="heritage__stats">
+      {stats.map((s, i) => (
+        <li class="heritage-stat" style={`--i: ${i}`}>
+          <span class="heritage-stat__value">{s.value}</span>
+          <span class="heritage-stat__label">{s.label}</span>
+        </li>
+      ))}
+    </Reveal>
+
+    <Reveal as="div" class="heritage__tagline" delay={120}>
+      <p class="heritage__line-1">{t("heritage.tagline_1")}</p>
+      <p class="heritage__line-2">{t("heritage.tagline_2")}</p>
+    </Reveal>
+  </div>
+</section>
+
+<style>
+  .heritage {
+    background: var(--color-ink);
+    color: #f7f3ec;
+    padding: 110px 5vw;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Subtle gold glow on the bottom-left so the band doesn't feel flat. */
+  .heritage::before {
+    content: "";
+    position: absolute;
+    left: -10%;
+    bottom: -40%;
+    width: 60%;
+    height: 100%;
+    background: radial-gradient(
+      circle at 30% 70%,
+      rgba(176, 133, 82, 0.18) 0%,
+      transparent 60%
+    );
+    pointer-events: none;
+  }
+
+  .heritage__inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 50px;
+  }
+
+  :global(.heritage__eyebrow) {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    font-weight: 400;
+    display: inline-block;
+  }
+
+  /* Stats row — 3 columns separated by hairline dividers */
+  .heritage__stats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .heritage-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 30px 20px;
+    border-left: 1px solid rgba(247, 243, 236, 0.12);
+  }
+  .heritage-stat:first-child { border-left: 0; }
+
+  .heritage-stat__value {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 5.4vw, 78px);
+    line-height: 1;
+    letter-spacing: 0;
+    color: #f7f3ec;
+    font-weight: 400;
+  }
+  .heritage-stat__label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(247, 243, 236, 0.55);
+    line-height: 1.4;
+    max-width: 200px;
+  }
+
+  /* The closing tagline lines. First in italic gold, second in cream sans. */
+  :global(.heritage__tagline) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .heritage__line-1 {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(18px, 1.6vw, 24px);
+    color: var(--color-gold);
+    letter-spacing: 0.005em;
+  }
+  .heritage__line-2 {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(247, 243, 236, 0.65);
+  }
+
+  /* ---- Mobile ---- */
+  @media (max-width: 800px) {
+    .heritage { padding: 80px 5vw; }
+    .heritage__inner { gap: 36px; }
+    .heritage__stats {
+      grid-template-columns: 1fr;
+      max-width: 360px;
+    }
+    .heritage-stat {
+      padding: 22px 0;
+      border-left: 0;
+      border-top: 1px solid rgba(247, 243, 236, 0.12);
+    }
+    .heritage-stat:first-child { border-top: 0; }
+  }
+  @media (max-width: 400px) {
+    .heritage-stat__value { font-size: 40px; }
+    .heritage__line-2 { letter-spacing: 0.24em; }
+  }
+</style>

@@ -1,0 +1,254 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Five worlds of the brand. Order matters — the first tile is the wide hero.
+const tiles = [
+  {
+    img: cldImage(CLD_IDS.IMG_3144, 1600),
+    title: t("universe.atelier_title"),
+    text: t("universe.atelier_text"),
+    span: "wide",
+  },
+  {
+    img: cldImage(CLD_IDS.IMG_3092, 1200),
+    title: t("universe.stables_title"),
+    text: t("universe.stables_text"),
+    span: "tall",
+  },
+  {
+    img: cldImage(CLD_IDS.IMG_2990, 1000),
+    title: t("universe.restaurant_title"),
+    text: t("universe.restaurant_text"),
+    span: "normal",
+  },
+  {
+    img: cldImage(CLD_IDS.IMG_2984, 1000),
+    title: t("universe.home_title"),
+    text: t("universe.home_text"),
+    span: "normal",
+  },
+  {
+    img: cldImage(CLD_IDS.IMG_3001, 1000),
+    title: t("universe.equestrian_title"),
+    text: t("universe.equestrian_text"),
+    span: "normal",
+  },
+];
+---
+
+<section class="universe" id="universo">
+  <div class="universe__head">
+    <Reveal class="eyebrow">{t("universe.eyebrow")}</Reveal>
+    <Reveal as="h2">
+      <span>{t("universe.title_1")}</span>
+      <em>{t("universe.title_2")}</em>
+    </Reveal>
+    <Reveal as="p" class="universe__sub">{t("universe.sub")}</Reveal>
+  </div>
+
+  <div class="universe__grid">
+    {tiles.map((tile, i) => (
+      <Reveal class={`universe__tile universe__tile--${tile.span}`} delay={i * 90}>
+        <div class="universe__media">
+          <img src={tile.img} alt={tile.title} loading="lazy" decoding="async" />
+        </div>
+        <div class="universe__caption">
+          <span class="universe__num">{String(i + 1).padStart(2, "0")}</span>
+          <h3 class="universe__title">{tile.title}</h3>
+          <p class="universe__text">{tile.text}</p>
+        </div>
+      </Reveal>
+    ))}
+  </div>
+</section>
+
+<style>
+  .universe {
+    background: var(--color-ivory);
+    padding: 140px 0 160px;
+  }
+
+  .universe__head {
+    max-width: 980px;
+    margin: 0 auto 80px;
+    padding: 0 5vw;
+    text-align: center;
+  }
+  .universe__head h2 { margin-top: 22px; }
+  .universe__head h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-cognac);
+    display: block;
+  }
+  .universe__sub {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(17px, 1.4vw, 21px);
+    line-height: 1.55;
+    color: var(--color-stone);
+    max-width: 600px;
+    margin: 26px auto 0;
+  }
+
+  /* Bento: 3 columns, 2 rows. Atelier (1st) spans 2 cols. Caballerizas (2nd)
+   * spans 2 rows. Restaurant / Home / Equestrian fill the rest. */
+  .universe__grid {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 5vw;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1.2fr 1fr;
+    gap: 14px;
+  }
+  :global(.universe__tile--wide) { grid-column: span 2; grid-row: 1; }
+  :global(.universe__tile--tall) { grid-column: 3; grid-row: 1 / 3; }
+  :global(.universe__tile--normal) { grid-row: 2; }
+
+  :global(.universe__tile) {
+    position: relative;
+    overflow: hidden;
+    background: var(--color-bone);
+    cursor: none;
+    /* Inherit reveal opacity/transform from .reveal global until visible */
+  }
+  .universe__media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .universe__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 1.6s var(--ease-editorial), filter 0.6s;
+    filter: saturate(0.92) contrast(1.02);
+  }
+  :global(.universe__tile:hover) .universe__media img {
+    transform: scale(1.05);
+    filter: saturate(1.02);
+  }
+
+  /* Caption sits on top of image with a gradient scrim for legibility. */
+  .universe__caption {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 28px 28px 26px;
+    color: #f7f3ec;
+    background: linear-gradient(
+      180deg,
+      rgba(15, 11, 8, 0) 35%,
+      rgba(15, 11, 8, 0.55) 100%
+    );
+    transition: background 0.5s var(--ease-editorial);
+  }
+  :global(.universe__tile:hover) .universe__caption {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 11, 8, 0) 25%,
+      rgba(15, 11, 8, 0.7) 100%
+    );
+  }
+
+  .universe__num {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    margin-bottom: 10px;
+  }
+  .universe__title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 2.6vw, 38px);
+    font-weight: 400;
+    color: #f7f3ec;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: 0.005em;
+  }
+  .universe__text {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(13px, 1vw, 15px);
+    line-height: 1.5;
+    color: rgba(247, 243, 236, 0.85);
+    max-width: 360px;
+  }
+
+  /* The wide hero card gets bigger typography */
+  :global(.universe__tile--wide) .universe__title {
+    font-size: clamp(32px, 3.4vw, 52px);
+  }
+  :global(.universe__tile--wide) .universe__text {
+    font-size: clamp(14px, 1.1vw, 17px);
+  }
+
+  /* The tall card aligns content to bottom-left as well */
+  :global(.universe__tile--tall) .universe__caption {
+    justify-content: flex-end;
+  }
+
+  /* ---- Aspect ratios per span — desktop ---- */
+  :global(.universe__tile--wide) { aspect-ratio: auto; }
+  :global(.universe__tile--tall) { aspect-ratio: auto; }
+  :global(.universe__tile--normal) { aspect-ratio: auto; }
+  /* Aspect is governed by grid-template-rows on desktop. We only enforce
+   * a min-height so cards don't collapse if content is short. */
+  :global(.universe__tile) { min-height: 280px; }
+  :global(.universe__tile--wide) { min-height: 420px; }
+  :global(.universe__tile--tall) { min-height: 700px; }
+
+  @media (max-width: 1100px) {
+    :global(.universe__tile--tall) { min-height: 600px; }
+    :global(.universe__tile--wide) { min-height: 360px; }
+    :global(.universe__tile) { min-height: 240px; }
+  }
+
+  /* ---- Mobile fallback: 1 column, every tile becomes a portrait card ---- */
+  @media (max-width: 800px) {
+    .universe { padding: 90px 0 100px; }
+    .universe__head { margin-bottom: 50px; }
+    .universe__grid {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      gap: 12px;
+    }
+    :global(.universe__tile),
+    :global(.universe__tile--wide),
+    :global(.universe__tile--tall),
+    :global(.universe__tile--normal) {
+      grid-column: 1;
+      grid-row: auto;
+      aspect-ratio: 4 / 5;
+      min-height: 0;
+    }
+    .universe__caption { padding: 22px 22px 20px; }
+    .universe__title { font-size: 24px; }
+    :global(.universe__tile--wide) .universe__title { font-size: 28px; }
+  }
+  @media (max-width: 400px) {
+    :global(.universe__tile),
+    :global(.universe__tile--wide),
+    :global(.universe__tile--tall),
+    :global(.universe__tile--normal) {
+      aspect-ratio: 3 / 4;
+    }
+  }
+</style>
