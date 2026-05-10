@@ -158,7 +158,18 @@ const stats = [
     .heritage-stat:first-child { border-top: 0; }
   }
   @media (max-width: 400px) {
-    .heritage-stat__value { font-size: 40px; }
-    .heritage__line-2 { letter-spacing: 0.24em; }
+    .heritage { padding: 60px 5vw; }
+    /* The third stat is a city list ("BA · UAE · USA", ~14 chars). At a fixed
+     * 40px on a 320px-wide phone it overflows the column. Clamp scales it
+     * with viewport width while keeping the bigger numbers ("30+", "10")
+     * legible — they hit the upper bound of the clamp. */
+    .heritage-stat__value {
+      font-size: clamp(26px, 8vw, 40px);
+      line-height: 1.05;
+      word-break: break-word;
+    }
+    .heritage-stat__label { font-size: 10px; letter-spacing: 0.28em; }
+    .heritage__line-1 { font-size: 16px; }
+    .heritage__line-2 { letter-spacing: 0.24em; font-size: 11px; }
   }
 </style>

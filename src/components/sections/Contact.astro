@@ -240,46 +240,43 @@ const heroImage = cldImage("v1778360916/IMG_3017_cijgiv.jpg", 1800);
   @media (max-width: 1280px) {
     .contact__panel { padding: 90px 6vw; }
   }
+  /* Single mobile rule. The previous setup had two overlapping queries
+   * (1024 and 900) that fought each other: the 900 rule applied
+   * `aspect-ratio: 4/3` to the COLUMN while the 1024 rule kept the image
+   * wrapper at `4/5`. Result: the column was squat (4/3) but the image
+   * inside wanted to be tall (4/5) — visible squish/overflow.
+   * Below we collapse to one column and let only the IMAGE WRAPPER own
+   * its aspect, with no constraint on the column itself. */
   @media (max-width: 1024px) {
     .contact {
       grid-template-columns: 1fr;
       min-height: 0;
     }
     .contact__media {
-      padding: 30px 7vw;
+      padding: 40px 7vw 0;
       max-height: none;
+      aspect-ratio: auto;
     }
-    /* Reset the wrapper on mobile — desktop has aspect 3/4 + max-height clamp
-     * that conflicts with the parent's smaller height in stacked layout.
-     * On mobile we let the image be a clean 4/5 portrait, full column width. */
     .contact__media > div {
-      max-width: 480px;
+      width: 100%;
+      max-width: 460px;
       max-height: none;
       aspect-ratio: 4 / 5;
     }
-    .contact__media::after {
-      background: none;
-    }
-    .contact__panel { padding: 70px 7vw 90px; }
+    .contact__media::after { background: none; }
+    .contact__panel { padding: 60px 7vw 90px; }
     .contact__panel-inner { max-width: 100%; }
   }
-  @media (max-width: 900px) {
-    .contact {
-      grid-template-columns: 1fr;
-      min-height: 0;
-    }
-    .contact__media {
-      aspect-ratio: 4 / 3;
-      max-height: 60vh;
-      max-height: 60dvh;
-    }
-    .contact__panel { padding: 70px 7vw 90px; }
-    .contact__panel-inner { max-width: 100%; }
+  @media (max-width: 600px) {
+    .contact__media { padding: 30px 6vw 0; }
+    .contact__media > div { aspect-ratio: 3 / 4; }
+    .contact__panel { padding: 50px 6vw 70px; }
+    .contact__panel-inner { gap: 22px; }
   }
-  /* On short phones (e.g. iPhone SE @ 568px tall) 60dvh leaves the panel
-   * cramped — clamp the image to half-viewport so the data column gets the
-   * room it needs without scrolling extra. */
   @media (max-width: 400px) {
-    .contact__media { max-height: 50dvh; }
+    .contact__panel h2 { font-size: clamp(28px, 9vw, 36px); }
+    .contact__address { font-size: 17px; }
+    .contact__hours p { font-size: 15px; }
+    .contact__wa { padding: 14px 22px; font-size: 11px; letter-spacing: 0.18em; }
   }
 </style>
