@@ -276,4 +276,10 @@ const heroImage = cldImage("v1778360916/IMG_3017_cijgiv.jpg", 1800);
     .contact__panel { padding: 70px 7vw 90px; }
     .contact__panel-inner { max-width: 100%; }
   }
+  /* On short phones (e.g. iPhone SE @ 568px tall) 60dvh leaves the panel
+   * cramped — clamp the image to half-viewport so the data column gets the
+   * room it needs without scrolling extra. */
+  @media (max-width: 400px) {
+    .contact__media { max-height: 50dvh; }
+  }
 </style>

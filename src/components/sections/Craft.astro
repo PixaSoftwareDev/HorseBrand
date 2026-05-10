@@ -601,7 +601,9 @@ const closingTitleEnd = lang === "es" ? "Es nuestro material." : "It is our mate
   }
   @media (max-width: 400px) {
     .craft__head h2 { font-size: clamp(30px, 9vw, 44px); }
-    .m-stat .stat__value { font-size: 44px; }
+    /* clamp prevents value text overflow on the very narrowest phones —
+     * "+40" / "100%" stay readable but never blow past the column width. */
+    .m-stat .stat__value { font-size: clamp(38px, 11vw, 44px); }
     .stat__caption { font-size: 14px; }
   }
 </style>

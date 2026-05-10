@@ -74,4 +74,10 @@ const splitImg = cldImage(CLD_IDS.IMG_3098, 1800);
     .split__media :global(img) { min-height: 420px; }
     .split__content { padding: 80px 7vw; }
   }
+  /* On phones, 420px image min-height + 80px section padding eats most of the
+   * viewport before the user even reaches the copy. Tighter on small screens. */
+  @media (max-width: 600px) {
+    .split__media :global(img) { min-height: 320px; }
+    .split__content { padding: 60px 7vw 70px; }
+  }
 </style>
