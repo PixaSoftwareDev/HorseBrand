@@ -1,29 +1,31 @@
 ---
 import { type Lang, useTranslations } from "@/i18n/ui";
 import Reveal from "@/components/shared/Reveal.astro";
-import ZoomParallax, { type ZoomImage } from "@/components/ui/ZoomParallax";
 import { cldZoomImage } from "@/lib/cloudinary";
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Cloudinary public IDs — served via CDN with f_auto/q_auto:best/w_3000/16:9 crop.
-// Crisp at the parallax max zoom (9x) and much faster than processing locally.
-const ZOOM_PUBLIC_IDS = [
-  "v1778360931/IMG_2955_mo2hsl.jpg",
-  "v1778360918/IMG_2988_x6bexo.jpg",
-  "v1778360908/IMG_3123_gbsvx0.jpg",
-  "v1778360899/IMG_3137_xr9jtc.jpg",
-  "v1778360901/IMG_3140_td7uw8.jpg",
-  "v1778360902/IMG_3119_cliy4v.jpg",
-  "v1778360915/IMG_3115_qvcecp.jpg",
-];
+/**
+ * Zoom-parallax tiles — each entry has:
+ *   - id:     Cloudinary public ID
+ *   - scale:  max scale at peak scroll progress (replicates the demo)
+ *   - pos:    top/left/width/height for the inner div, used ONLY in
+ *             desktop parallax mode. Mobile / no-JS / reduced-motion
+ *             ignores these and lays everything out as a normal grid.
+ */
+const TILES = [
+  { id: "v1778360931/IMG_2955_mo2hsl.jpg", scale: 4, top: "0",      left: "0",       w: "25vw", h: "25vh" },
+  { id: "v1778360918/IMG_2988_x6bexo.jpg", scale: 5, top: "-30vh",  left: "5vw",     w: "35vw", h: "30vh" },
+  { id: "v1778360908/IMG_3123_gbsvx0.jpg", scale: 6, top: "-10vh",  left: "-25vw",   w: "20vw", h: "45vh" },
+  { id: "v1778360899/IMG_3137_xr9jtc.jpg", scale: 5, top: "0",      left: "27.5vw",  w: "25vw", h: "25vh" },
+  { id: "v1778360901/IMG_3140_td7uw8.jpg", scale: 6, top: "27.5vh", left: "5vw",     w: "20vw", h: "25vh" },
+  { id: "v1778360902/IMG_3119_cliy4v.jpg", scale: 8, top: "27.5vh", left: "-22.5vw", w: "30vw", h: "25vh" },
+  { id: "v1778360915/IMG_3115_qvcecp.jpg", scale: 9, top: "22.5vh", left: "25vw",    w: "15vw", h: "15vh" },
+] as const;
 
-const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
-  const r = cldZoomImage(id);
-  return { src: r.src, srcSet: r.srcSet, sizes: r.sizes, alt: "" };
-});
+const sources = TILES.map((t) => cldZoomImage(t.id));
 ---
 
 <section class="gallery" id="galeria">
@@ -34,96 +36,296 @@ const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
     </Reveal>
   </div>
 
-  <div class="zoom-wrap" aria-hidden="true">
-    <ZoomParallax client:visible images={zoomImages} />
+  <!--
+    `.zp` is the parallax container.
+
+    Default state (no JS, mobile, reduced-motion): renders as a clean
+    responsive grid via CSS — every tile visible, in flow, sensible
+    aspect ratio. Page below sits naturally — no 300vh ghost.
+
+    With JS on desktop: gets `.is-ready` → switches to sticky parallax.
+  -->
+  <div class="zp" id="zpContainer" aria-label={t("gallery.eyebrow")}>
+    <div class="zp__sticky">
+      {TILES.map((tile, i) => {
+        const src = sources[i];
+        const isPriority = i < 4;
+        return (
+          <div
+            class="zp__item"
+            data-scale={tile.scale}
+            style={`--top:${tile.top}; --left:${tile.left}; --w:${tile.w}; --h:${tile.h};`}
+          >
+            <div class="zp__inner">
+              <img
+                src={src.src}
+                srcset={src.srcSet}
+                sizes={src.sizes}
+                alt=""
+                loading={isPriority ? "eager" : "lazy"}
+                fetchpriority={isPriority ? "high" : "auto"}
+                decoding="async"
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
   </div>
 </section>
 
+<script>
+  import { onPageReady } from "@/lib/onPageReady";
+
+  /**
+   * Vanilla parallax driver. Replaces the previous React + framer-motion
+   * implementation, which suffered from a hydration race in production
+   * (Astro `client:visible` + Vite-bundled deferred scripts) where
+   * `useScroll` could capture `scrollYProgress` AFTER the user had
+   * scrolled past, so the effect appeared frozen and the 300vh container
+   * left a giant gap that broke the sections below it visually.
+   *
+   * Strategy:
+   *   - Server-render the structure inside a container with no special
+   *     height (default = grid fallback).
+   *   - Only after the script runs do we add `.is-ready` to opt INTO the
+   *     300vh sticky parallax layout. Until then it's a clean grid that
+   *     doesn't disturb anything.
+   *   - Skip entirely on touch / small screens — CSS handles those.
+   */
+  function wireGallery(): void {
+    const container = document.getElementById("zpContainer");
+    if (!container || container.dataset.wired === "1") return;
+
+    // Skip parallax on touch / small. CSS grid takes over.
+    const isTouch =
+      window.matchMedia("(hover: none)").matches ||
+      window.matchMedia("(max-width: 899px)").matches;
+    if (isTouch) {
+      container.dataset.wired = "1";
+      return;
+    }
+
+    const items = Array.from(
+      container.querySelectorAll<HTMLElement>(".zp__item")
+    );
+    if (!items.length) return;
+
+    const maxScales = items.map(
+      (el) => parseFloat(el.dataset.scale ?? "1") || 1
+    );
+
+    let raf: number | null = null;
+    let attached = false;
+
+    const update = (): void => {
+      raf = null;
+      const rect = container.getBoundingClientRect();
+      const span = rect.height - window.innerHeight;
+      if (span <= 0) {
+        items.forEach((el) => el.style.setProperty("--scale", "1"));
+        return;
+      }
+      const progress = Math.max(0, Math.min(1, -rect.top / span));
+      for (let i = 0; i < items.length; i++) {
+        const scale = 1 + (maxScales[i] - 1) * progress;
+        items[i].style.setProperty("--scale", scale.toFixed(3));
+      }
+    };
+
+    const onScroll = (): void => {
+      if (raf === null) raf = requestAnimationFrame(update);
+    };
+
+    const attach = (): void => {
+      if (attached) return;
+      attached = true;
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      update();
+    };
+    const detach = (): void => {
+      if (!attached) return;
+      attached = false;
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf !== null) {
+        cancelAnimationFrame(raf);
+        raf = null;
+      }
+    };
+
+    // Switch the layout to sticky-parallax mode. Without this class the
+    // CSS keeps a flat grid — bulletproof fallback if JS fails / is slow.
+    container.classList.add("is-ready");
+
+    // Run scroll math only when the section is near the viewport.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) attach();
+          else detach();
+        }
+      },
+      { rootMargin: "200px 0px" }
+    );
+    io.observe(container);
+
+    container.dataset.wired = "1";
+
+    document.addEventListener(
+      "astro:before-swap",
+      () => {
+        detach();
+        io.disconnect();
+        container.classList.remove("is-ready");
+        delete container.dataset.wired;
+      },
+      { once: true }
+    );
+  }
+
+  onPageReady(wireGallery);
+</script>
+
 <style>
-  .gallery { background: var(--color-ivory); padding-bottom: 140px; }
-
-  .zoom-wrap { margin: 30px 0 60px; }
-
-  :global(.zoom-parallax) {
-    position: relative;
-    height: 300vh;
-  }
-  :global(.zp-sticky) {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+  .gallery {
     background: var(--color-ivory);
+    padding-bottom: 140px;
   }
-  :global(.zp-item) {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    will-change: transform;
+
+  /* =========================================================================
+     DEFAULT LAYOUT — clean responsive grid.
+     This is what the user sees if (a) JS hasn't run yet, (b) we're on touch /
+     mobile, (c) JS fails entirely. Always sensible, never broken.
+     ========================================================================= */
+  .zp {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 30px 5vw 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
-  :global(.zp-inner) {
+  .zp__sticky {
+    display: contents; /* dissolve wrapper so children join the .zp grid */
+  }
+  .zp__item {
+    position: relative;
     overflow: hidden;
-    border-radius: 3px;
-    box-shadow:
-      0 1px 2px rgba(15, 11, 8, 0.06),
-      0 22px 60px -12px rgba(15, 11, 8, 0.28);
-    outline: 1px solid rgba(247, 243, 236, 0.04);
+    aspect-ratio: 4 / 5;
+    background: var(--color-bone);
   }
-  :global(.zp-inner img) {
+  .zp__inner {
+    width: 100%;
+    height: 100%;
+  }
+  .zp__inner img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
     filter: saturate(0.96) contrast(1.02);
-    /* Hint browsers to keep texture at the highest available resolution
-     * when CSS-scaled by transform. Without this, some browsers downsample
-     * the GPU texture to layout-box × DPR and the high-res srcset is wasted. */
-    image-rendering: high-quality;
-    image-rendering: -webkit-optimize-contrast;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
   }
 
-  /* ---- Touch / mobile fallback ----
-   * The 7-image absolute parallax layout + framer-motion's inline transforms
-   * collapse into a clean vertical grid on touch screens. Every override is
-   * !important because framer-motion writes inline style="transform: scale(...)"
-   * and the original component sets style="position: relative; top; left; ..."
-   * — both have higher specificity than scoped CSS without !important. */
-  @media (hover: none), (max-width: 900px) {
-    :global(.zoom-parallax) {
-      height: auto !important;
-    }
-    :global(.zp-sticky) {
-      position: static !important;
-      height: auto !important;
-      display: grid !important;
-      grid-template-columns: 1fr;
+  /* Tablet: 2 columns */
+  @media (min-width: 600px) {
+    .zp { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  }
+
+  /* Desktop default (without JS or before init): 3 columns, wider aspect */
+  @media (min-width: 900px) {
+    .zp {
+      grid-template-columns: repeat(3, 1fr);
       gap: 14px;
-      padding: 0 5vw;
+      padding: 40px 5vw 0;
     }
-    :global(.zp-item) {
-      position: static !important;
-      inset: auto !important;
-      display: block !important;
-      transform: none !important;
+    .zp__item { aspect-ratio: 16 / 9; }
+  }
+
+  /* =========================================================================
+     PARALLAX MODE — only desktop-with-JS opts in via `.is-ready`.
+     The 300vh height applies ONLY here, so if JS fails the page stays a
+     normal grid and the sections below are not pushed down by a ghost.
+     ========================================================================= */
+  @media (min-width: 900px) and (hover: hover) {
+    .zp.is-ready {
+      display: block;
+      max-width: none;
+      padding: 0;
+      height: 300vh;
     }
-    :global(.zp-inner) {
-      position: static !important;
-      top: auto !important;
-      left: auto !important;
-      width: 100% !important;
+    .zp.is-ready .zp__sticky {
+      display: block;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--color-ivory);
+    }
+    .zp.is-ready .zp__item {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: auto;
+      background: transparent;
+      transform: scale(var(--scale, 1));
+      transform-origin: center;
+      will-change: transform;
+    }
+    .zp.is-ready .zp__inner {
+      position: relative;
+      top: var(--top);
+      left: var(--left);
+      width: var(--w);
+      height: var(--h);
+      overflow: hidden;
+      border-radius: 3px;
+      box-shadow:
+        0 1px 2px rgba(15, 11, 8, 0.06),
+        0 22px 60px -12px rgba(15, 11, 8, 0.28);
+    }
+    .zp.is-ready .zp__inner img {
+      /* Keep GPU texture at full source resolution under transform scale. */
+      image-rendering: high-quality;
+      image-rendering: -webkit-optimize-contrast;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+  }
+
+  /* =========================================================================
+     REDUCED MOTION — never apply scale, show a quiet static grid.
+     ========================================================================= */
+  @media (prefers-reduced-motion: reduce) {
+    .zp.is-ready {
+      display: grid !important;
       height: auto !important;
-      max-width: 100% !important;
+      padding: 40px 5vw 0 !important;
+      max-width: 1500px !important;
+      margin: 0 auto !important;
+    }
+    .zp.is-ready .zp__sticky {
+      display: contents !important;
+      position: static !important;
+      height: auto !important;
+    }
+    .zp.is-ready .zp__item {
+      position: relative !important;
+      inset: auto !important;
       aspect-ratio: 16 / 9 !important;
       transform: none !important;
     }
-    :global(.zp-inner img) {
-      filter: none;
-      image-rendering: auto;
+    .zp.is-ready .zp__inner {
+      position: static !important;
+      width: 100% !important;
+      height: 100% !important;
+      top: auto !important;
+      left: auto !important;
+      box-shadow: none !important;
     }
   }
 </style>
