@@ -100,4 +100,11 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3081, 1600);
     .manifesto__grid { grid-template-columns: 1fr; gap: 50px; }
     .manifesto__media :global(img) { height: 460px; }
   }
+  @media (max-width: 500px) {
+    .manifesto { padding: 70px 0; }
+    .manifesto__grid { gap: 36px; }
+    .manifesto__list { margin-top: 28px; }
+    .manifesto__list li { font-size: 12px; gap: 14px; padding: 14px 0; }
+    .manifesto__media :global(img) { height: 360px; }
+  }
 </style>

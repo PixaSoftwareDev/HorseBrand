@@ -597,4 +597,9 @@ const closingTitleEnd = lang === "es" ? "Es nuestro material." : "It is our mate
       font-size: 56px;
     }
   }
+  @media (max-width: 400px) {
+    .craft__head h2 { font-size: clamp(30px, 9vw, 44px); }
+    .m-stat .stat__value { font-size: 44px; }
+    .stat__caption { font-size: 14px; }
+  }
 </style>

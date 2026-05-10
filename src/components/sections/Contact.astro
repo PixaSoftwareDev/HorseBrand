@@ -240,6 +240,26 @@ const heroImage = cldImage("v1778360916/IMG_3017_cijgiv.jpg", 1800);
   @media (max-width: 1280px) {
     .contact__panel { padding: 90px 6vw; }
   }
+  @media (max-width: 1024px) {
+    .contact {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .contact__media {
+      aspect-ratio: 4 / 3;
+      max-height: 60vh;
+      max-height: 60dvh;
+    }
+    .contact__media::after {
+      background: linear-gradient(
+        to bottom,
+        rgba(251, 248, 242, 0) 75%,
+        rgba(251, 248, 242, 0.5) 100%
+      );
+    }
+    .contact__panel { padding: 70px 7vw 90px; }
+    .contact__panel-inner { max-width: 100%; }
+  }
   @media (max-width: 900px) {
     .contact {
       grid-template-columns: 1fr;

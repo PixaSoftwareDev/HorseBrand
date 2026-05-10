@@ -451,6 +451,12 @@ const PRODUCT_CLD: Record<string, string | undefined> = {
     .collection__grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 700px) {
-    .collection__grid { grid-template-columns: 1fr; }
+    .collection__grid { grid-template-columns: 1fr; gap: 56px 0; padding-top: 40px; }
+  }
+  @media (max-width: 500px) {
+    /* Numbers floated above each card need more breathing room when 1-col */
+    .card__num { top: -18px; font-size: 10px; letter-spacing: 0.32em; }
+    .card__name { font-size: 22px; }
+    .card__media { margin-bottom: 18px; }
   }
 </style>

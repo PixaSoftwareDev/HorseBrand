@@ -451,15 +451,23 @@ const slides = [
   /* < 400px: stack the CTAs vertically full-width so neither button breaks
    * to two lines, and tap targets stay generous. */
   @media (max-width: 400px) {
+    .hero__content {
+      bottom: 6vh;
+      left: 6vw;
+      right: 6vw;
+      max-width: none;
+    }
+    .hero__title { font-size: clamp(34px, 9vw, 48px); }
     .hero__cta {
       flex-direction: column;
       align-items: stretch;
       gap: 10px;
-      width: min(86vw, 320px);
+      width: 100%;
     }
     .hero__btn {
       justify-content: center;
       width: 100%;
     }
+    .hero__progress { height: 2px; }
   }
 </style>

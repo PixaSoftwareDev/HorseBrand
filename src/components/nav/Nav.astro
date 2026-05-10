@@ -134,6 +134,14 @@ const home = localizedPath(lang, "/");
     .nav__logo :global(img) { height: 56px; }
     .nav.scrolled .nav__logo :global(img) { height: 48px; }
   }
+  @media (max-width: 400px) {
+    .nav { padding: 10px 0; }
+    .nav.scrolled { padding: 6px 0; }
+    .nav__logo :global(img) { height: 44px; }
+    .nav.scrolled .nav__logo :global(img) { height: 38px; }
+    .nav__inner { padding: 0 5vw; gap: 16px; }
+    .nav__right { gap: 14px; }
+  }
 
   .nav__links {
     display: flex;

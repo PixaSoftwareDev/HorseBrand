@@ -81,6 +81,13 @@ const t = useTranslations(lang);
     .shop-handle { padding: 16px 10px 16px 12px; gap: 10px; }
     .shop-handle__label { font-size: 10px; letter-spacing: 0.32em; }
   }
+
+  /* On phones the always-visible handle eats edge space + competes with the
+   * cart icon already in the nav. Drop it under 600px and rely on the nav
+   * cart for shop entry. */
+  @media (max-width: 600px) {
+    .shop-handle { display: none; }
+  }
 </style>
 
 <script>
