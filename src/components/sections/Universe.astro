@@ -8,36 +8,43 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Five worlds of the brand. Order matters — the first tile is the wide hero.
+// Five worlds of the brand. Each tile carries an action verb that turns
+// the section from a description ("we have a restaurant") into an
+// invitation ("book the restaurant").
 const tiles = [
   {
     img: cldImage(CLD_IDS.IMG_3144, 1600),
     title: t("universe.atelier_title"),
     text: t("universe.atelier_text"),
+    cta: t("universe.cta_visit"),
     span: "wide",
   },
   {
     img: cldImage(CLD_IDS.IMG_3092, 1200),
     title: t("universe.stables_title"),
     text: t("universe.stables_text"),
+    cta: t("universe.cta_visit"),
     span: "tall",
   },
   {
     img: cldImage(CLD_IDS.IMG_2990, 1000),
     title: t("universe.restaurant_title"),
     text: t("universe.restaurant_text"),
+    cta: t("universe.cta_book"),
     span: "normal",
   },
   {
     img: cldImage(CLD_IDS.IMG_2984, 1000),
     title: t("universe.home_title"),
     text: t("universe.home_text"),
+    cta: t("universe.cta_explore"),
     span: "normal",
   },
   {
     img: cldImage(CLD_IDS.IMG_3005, 1000),
     title: t("universe.equestrian_title"),
     text: t("universe.equestrian_text"),
+    cta: t("universe.cta_explore"),
     span: "normal",
   },
 ];
@@ -63,6 +70,12 @@ const tiles = [
           <span class="universe__num">{String(i + 1).padStart(2, "0")}</span>
           <h3 class="universe__title">{tile.title}</h3>
           <p class="universe__text">{tile.text}</p>
+          <span class="universe__cta">
+            {tile.cta}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+              <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+          </span>
         </div>
       </Reveal>
     ))}
@@ -190,6 +203,47 @@ const tiles = [
     line-height: 1.5;
     color: rgba(247, 243, 236, 0.85);
     max-width: 360px;
+  }
+
+  /* Action verb on each tile — turns the description into an invitation.
+   * Hidden by default, slides up + fades in on hover. Underline grows from
+   * left to right via gradient size, no border-bottom flicker. */
+  .universe__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s var(--ease-editorial),
+      transform 0.5s var(--ease-editorial),
+      gap 0.4s var(--ease-editorial);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    padding-bottom: 4px;
+    width: fit-content;
+  }
+  .universe__cta svg { width: 14px; height: 14px; }
+  :global(.universe__tile:hover) .universe__cta {
+    opacity: 1;
+    transform: translateY(0);
+    background-size: 100% 1px;
+    gap: 14px;
+  }
+  /* On touch devices there's no hover — show the CTA quietly always. */
+  @media (hover: none) {
+    .universe__cta {
+      opacity: 0.85;
+      transform: none;
+      background-size: 30% 1px;
+    }
   }
 
   /* The wide hero card gets bigger typography */

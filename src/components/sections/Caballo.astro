@@ -1,0 +1,359 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// PLACEHOLDER · idealmente un close-up de un caballo solo (cara, ojo, cuello).
+// Por ahora uso IMG_3092 que es el momento más íntimo con caballo.
+// El usuario va a swappear esta ID en Cloudinary cuando tenga la foto definitiva.
+const horseImg = cldImage(CLD_IDS.IMG_3092, 2400);
+
+const words = [
+  { id: 1, key: "caballo.word_1", pos: "tl" }, // top-left
+  { id: 2, key: "caballo.word_2", pos: "tr" }, // top-right
+  { id: 3, key: "caballo.word_3", pos: "bl" }, // bottom-left
+  { id: 4, key: "caballo.word_4", pos: "br" }, // bottom-right
+] as const;
+---
+
+<section class="caballo" id="caballo" aria-label={t("caballo.eyebrow")}>
+  <!-- Parallax bg image — sits behind everything, scrolls slower than content -->
+  <div class="caballo__bg" aria-hidden="true" data-caballo-bg>
+    <img src={horseImg} alt="" loading="lazy" decoding="async" />
+  </div>
+  <div class="caballo__scrim" aria-hidden="true"></div>
+
+  <!-- 4 keyword anchors — fade in on scroll progress, positioned at corners -->
+  <div class="caballo__words" aria-hidden="true">
+    {words.map((w) => (
+      <span class={`caballo__word caballo__word--${w.pos}`} data-caballo-word>
+        {t(w.key as any)}
+      </span>
+    ))}
+  </div>
+
+  <!-- Center stack: eyebrow → big italic title → closer line -->
+  <div class="caballo__center">
+    <span class="caballo__eyebrow" data-caballo-rev>{t("caballo.eyebrow")}</span>
+    <h2 class="caballo__title">
+      <span class="caballo__line" data-caballo-rev>{t("caballo.title_1")}</span>
+      <span class="caballo__line caballo__line--italic" data-caballo-rev>{t("caballo.title_2")}</span>
+    </h2>
+    <p class="caballo__closer" data-caballo-rev>{t("caballo.closer")}</p>
+  </div>
+</section>
+
+<script>
+  import { onPageReady } from "@/lib/onPageReady";
+
+  /**
+   * Parallax driver for the "Caballo" section.
+   *
+   * Effects (desktop only — touch falls back to static, perf-friendly):
+   *   - Background image translates ~12% slower than the foreground scroll
+   *     so the horse "breathes" inside the frame as you read past it.
+   *   - The 4 keywords animate their opacity and translate based on the
+   *     section's progress in the viewport (0 = entering, 1 = leaving).
+   *   - Title lines + closer reveal once the section is in view (one-shot,
+   *     via IntersectionObserver, like the rest of the site).
+   */
+  function wireCaballo(): void {
+    const section = document.querySelector<HTMLElement>(".caballo");
+    if (!section || section.dataset.wired === "1") return;
+    section.dataset.wired = "1";
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isTouch = window.matchMedia("(hover: none)").matches;
+
+    // ---- One-shot reveal of title / eyebrow / closer ----
+    const revealTargets = section.querySelectorAll<HTMLElement>("[data-caballo-rev]");
+    const revealIO = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-revealed");
+            revealIO.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.25 }
+    );
+    revealTargets.forEach((el) => revealIO.observe(el));
+
+    if (reduced || isTouch) return; // skip the live parallax loop on touch / RM
+
+    // ---- Live parallax loop (bg + words by section progress) ----
+    const bg = section.querySelector<HTMLElement>("[data-caballo-bg]");
+    const words = section.querySelectorAll<HTMLElement>("[data-caballo-word]");
+
+    let raf: number | null = null;
+
+    const update = (): void => {
+      raf = null;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // progress: 0 when the section's top hits the viewport bottom,
+      //           1 when the section's bottom hits the viewport top.
+      const span = rect.height + vh;
+      const passed = vh - rect.top;
+      const progress = Math.max(0, Math.min(1, passed / span));
+
+      // Background subtle translate (max ±10% of viewport height)
+      if (bg) {
+        const offset = (progress - 0.5) * 12;
+        bg.style.setProperty("--bg-y", `${offset.toFixed(2)}%`);
+      }
+
+      // Words: opacity + slide based on progress
+      // Each word reaches full visibility around progress 0.45-0.7
+      words.forEach((w, i) => {
+        const delay = i * 0.06;
+        const local = Math.max(0, Math.min(1, (progress - 0.15 - delay) / 0.5));
+        w.style.setProperty("--w-opacity", local.toFixed(3));
+        w.style.setProperty("--w-y", `${(1 - local) * 18}px`);
+      });
+    };
+
+    const onScroll = (): void => {
+      if (raf === null) raf = requestAnimationFrame(update);
+    };
+
+    const visIO = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            window.addEventListener("scroll", onScroll, { passive: true });
+            window.addEventListener("resize", onScroll);
+            update();
+          } else {
+            window.removeEventListener("scroll", onScroll);
+            window.removeEventListener("resize", onScroll);
+            if (raf !== null) {
+              cancelAnimationFrame(raf);
+              raf = null;
+            }
+          }
+        }
+      },
+      { rootMargin: "200px 0px" }
+    );
+    visIO.observe(section);
+
+    document.addEventListener(
+      "astro:before-swap",
+      () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+        visIO.disconnect();
+        revealIO.disconnect();
+      },
+      { once: true }
+    );
+  }
+
+  onPageReady(wireCaballo);
+</script>
+
+<style>
+  .caballo {
+    position: relative;
+    background: var(--color-ink);
+    color: #f7f3ec;
+    min-height: 110vh;
+    min-height: 110dvh;
+    overflow: hidden;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---- Parallax background ---- */
+  .caballo__bg {
+    position: absolute;
+    inset: -10% 0;
+    z-index: 0;
+    transform: translateY(var(--bg-y, 0%));
+    will-change: transform;
+  }
+  .caballo__bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.85) contrast(1.08) brightness(0.7);
+  }
+  /* Vignette + dark scrim so the typography reads cleanly */
+  .caballo__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(ellipse 70% 60% at center, rgba(15, 11, 8, 0.25) 0%, rgba(15, 11, 8, 0.7) 80%),
+      linear-gradient(180deg, rgba(15, 11, 8, 0.5) 0%, rgba(15, 11, 8, 0.3) 50%, rgba(15, 11, 8, 0.5) 100%);
+    pointer-events: none;
+  }
+
+  /* ---- Center stack ---- */
+  .caballo__center {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    padding: 0 5vw;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+  .caballo__eyebrow {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 1s var(--ease-editorial), transform 1s var(--ease-editorial);
+  }
+  .caballo__eyebrow.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .caballo__title {
+    font-family: var(--font-italic);
+    font-weight: 300;
+    font-size: clamp(56px, 8vw, 132px);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+    color: #f7f3ec;
+    text-shadow: 0 4px 40px rgba(0, 0, 0, 0.5);
+  }
+  .caballo__line {
+    display: block;
+    clip-path: inset(100% 0 0 0);
+    -webkit-clip-path: inset(100% 0 0 0);
+    transition: clip-path 1.6s var(--ease-editorial);
+    will-change: clip-path;
+    padding: 0.06em 0.04em;
+    margin: -0.06em -0.04em;
+  }
+  .caballo__line--italic {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-gold);
+  }
+  .caballo__line.is-revealed {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+  }
+  .caballo__line:nth-child(2).is-revealed {
+    transition-delay: 0.25s;
+  }
+
+  .caballo__closer {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(16px, 1.4vw, 21px);
+    line-height: 1.4;
+    color: rgba(247, 243, 236, 0.78);
+    max-width: 520px;
+    margin-top: 18px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 1s var(--ease-editorial) 0.6s, transform 1s var(--ease-editorial) 0.6s;
+  }
+  .caballo__closer.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---- 4 keywords at corners ---- */
+  .caballo__words {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .caballo__word {
+    position: absolute;
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2.2vw, 32px);
+    font-weight: 400;
+    color: rgba(247, 243, 236, 0.72);
+    letter-spacing: 0.05em;
+    opacity: var(--w-opacity, 0);
+    transform: translateY(var(--w-y, 18px));
+    will-change: opacity, transform;
+    transition: opacity 0.45s linear, transform 0.45s linear;
+  }
+  .caballo__word::before {
+    content: "—";
+    margin-right: 12px;
+    color: var(--color-gold);
+    font-style: normal;
+  }
+  .caballo__word--tl { top: 12vh; left: 8vw; }
+  .caballo__word--tr { top: 12vh; right: 8vw; }
+  .caballo__word--bl { bottom: 14vh; left: 8vw; }
+  .caballo__word--br { bottom: 14vh; right: 8vw; }
+
+  /* ---- Reduced motion + touch · words show statically ---- */
+  @media (prefers-reduced-motion: reduce), (hover: none) {
+    .caballo__bg { transform: none !important; }
+    .caballo__word {
+      opacity: 0.55;
+      transform: none !important;
+      transition: none;
+    }
+  }
+
+  /* ---- Mobile · stack the 4 words below the title (no corner anchoring) ---- */
+  @media (max-width: 800px) {
+    .caballo {
+      min-height: auto;
+      padding: 110px 5vw 100px;
+      align-items: flex-start;
+    }
+    .caballo__bg { inset: 0; }
+    .caballo__center {
+      padding: 0;
+      max-width: 100%;
+      gap: 20px;
+    }
+    .caballo__words {
+      position: relative;
+      inset: auto;
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px 18px;
+      width: 100%;
+      pointer-events: auto;
+    }
+    .caballo__word {
+      position: static;
+      font-size: 16px;
+      opacity: 0.85 !important;
+      transform: none !important;
+      text-align: left;
+    }
+    .caballo__word--tl,
+    .caballo__word--tr,
+    .caballo__word--bl,
+    .caballo__word--br { top: auto; bottom: auto; left: auto; right: auto; }
+  }
+  @media (max-width: 400px) {
+    .caballo { padding: 80px 5vw 80px; }
+    .caballo__title { font-size: clamp(40px, 12vw, 60px); }
+    .caballo__words { grid-template-columns: 1fr; gap: 10px; }
+    .caballo__word { font-size: 15px; }
+    .caballo__word::before { margin-right: 8px; }
+  }
+</style>

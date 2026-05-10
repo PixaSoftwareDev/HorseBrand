@@ -6,27 +6,41 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-const stats = [
-  { value: t("heritage.stat_1_value"), label: t("heritage.stat_1_label") },
-  { value: t("heritage.stat_2_value"), label: t("heritage.stat_2_label") },
-  { value: t("heritage.stat_3_value"), label: t("heritage.stat_3_label") },
+const cities = [
+  { name: t("heritage.city_1"), year: t("heritage.city_1_year") },
+  { name: t("heritage.city_2"), year: t("heritage.city_2_year") },
+  { name: t("heritage.city_3"), year: t("heritage.city_3_year") },
+  { name: t("heritage.city_4"), year: t("heritage.city_4_year") },
+  { name: t("heritage.city_5"), year: t("heritage.city_5_year") },
+  { name: t("heritage.city_6"), year: t("heritage.city_6_year") },
 ];
 ---
 
-<section class="heritage" aria-label="Horse Brand Heritage">
+<section class="heritage" aria-label={t("heritage.eyebrow")}>
   <div class="heritage__inner">
-    <Reveal class="heritage__eyebrow">{t("heritage.eyebrow")}</Reveal>
+    <div class="heritage__head">
+      <Reveal class="heritage__eyebrow">{t("heritage.eyebrow")}</Reveal>
+      <Reveal as="h2">
+        <span>{t("heritage.title_1")}</span>
+        <em>{t("heritage.title_2")}</em>
+      </Reveal>
+      <Reveal as="p" class="heritage__intro" delay={120}>{t("heritage.intro")}</Reveal>
+    </div>
 
-    <Reveal as="ul" class="heritage__stats">
-      {stats.map((s, i) => (
-        <li class="heritage-stat" style={`--i: ${i}`}>
-          <span class="heritage-stat__value">{s.value}</span>
-          <span class="heritage-stat__label">{s.label}</span>
-        </li>
-      ))}
+    <Reveal as="div" class="heritage__cities-wrap" delay={200}>
+      <span class="heritage__cities-label">{t("heritage.cities_label")}</span>
+
+      <ul class="heritage__cities" data-heritage-cities>
+        {cities.map((c, i) => (
+          <li class="heritage-city" style={`--i:${i}`}>
+            <span class="heritage-city__year">{c.year}</span>
+            <span class="heritage-city__name">{c.name}</span>
+          </li>
+        ))}
+      </ul>
     </Reveal>
 
-    <Reveal as="div" class="heritage__tagline" delay={120}>
+    <Reveal as="div" class="heritage__tagline" delay={300}>
       <p class="heritage__line-1">{t("heritage.tagline_1")}</p>
       <p class="heritage__line-2">{t("heritage.tagline_2")}</p>
     </Reveal>
@@ -37,11 +51,11 @@ const stats = [
   .heritage {
     background: var(--color-ink);
     color: #f7f3ec;
-    padding: 110px 5vw;
+    padding: 130px 5vw 120px;
     position: relative;
     overflow: hidden;
   }
-  /* Subtle gold glow on the bottom-left so the band doesn't feel flat. */
+  /* Subtle gold glow, kept from previous version */
   .heritage::before {
     content: "";
     position: absolute;
@@ -66,9 +80,17 @@ const stats = [
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 50px;
+    gap: 72px;
   }
 
+  /* ---- Head ---- */
+  .heritage__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    max-width: 700px;
+  }
   :global(.heritage__eyebrow) {
     font-family: var(--font-sans);
     font-size: 11px;
@@ -76,55 +98,122 @@ const stats = [
     text-transform: uppercase;
     color: var(--color-gold);
     font-weight: 400;
-    display: inline-block;
+  }
+  .heritage__head h2 {
+    color: #f7f3ec;
+    font-size: clamp(36px, 4.4vw, 64px);
+    line-height: 1.05;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .heritage__head h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-gold);
+    display: block;
+  }
+  .heritage__intro {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(16px, 1.4vw, 20px);
+    line-height: 1.55;
+    color: rgba(247, 243, 236, 0.78);
+    max-width: 580px;
   }
 
-  /* Stats row — 3 columns separated by hairline dividers */
-  .heritage__stats {
+  /* ---- Cities · the real "presence" map ---- */
+  :global(.heritage__cities-wrap) {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+  .heritage__cities-label {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(247, 243, 236, 0.45);
+  }
+
+  .heritage__cities {
     list-style: none;
     margin: 0;
     padding: 0;
     width: 100%;
-    max-width: 1100px;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 0;
+    border-top: 1px solid rgba(247, 243, 236, 0.14);
+    border-bottom: 1px solid rgba(247, 243, 236, 0.14);
   }
-  .heritage-stat {
+  .heritage-city {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
-    padding: 30px 20px;
-    border-left: 1px solid rgba(247, 243, 236, 0.12);
+    gap: 10px;
+    padding: 32px 14px;
+    border-left: 1px solid rgba(247, 243, 236, 0.10);
+    position: relative;
+    transition: background 0.5s var(--ease-editorial);
+    /* Stagger the city entrance with a small delay per index */
+    opacity: 0;
+    transform: translateY(10px);
+    animation: cityRise 0.9s var(--ease-editorial) forwards;
+    animation-delay: calc(var(--i) * 0.1s + 0.4s);
   }
-  .heritage-stat:first-child { border-left: 0; }
+  .heritage-city:first-child { border-left: 0; }
+  .heritage-city:hover { background: rgba(247, 243, 236, 0.03); }
+  /* Subtle pulsing dot above each city — like a place marker on a map */
+  .heritage-city::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-gold);
+    box-shadow: 0 0 0 3px rgba(176, 133, 82, 0.15);
+    animation: cityPulse 3.2s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.4s);
+  }
+  @keyframes cityRise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes cityPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(176, 133, 82, 0.15); }
+    50% { box-shadow: 0 0 0 7px rgba(176, 133, 82, 0); }
+  }
 
-  .heritage-stat__value {
-    font-family: var(--font-display);
-    font-size: clamp(44px, 5.4vw, 78px);
-    line-height: 1;
-    letter-spacing: 0;
-    color: #f7f3ec;
-    font-weight: 400;
-  }
-  .heritage-stat__label {
+  .heritage-city__year {
     font-family: var(--font-sans);
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: rgba(247, 243, 236, 0.55);
-    line-height: 1.4;
-    max-width: 200px;
+    color: var(--color-gold);
+    font-weight: 400;
+  }
+  .heritage-city__name {
+    font-family: var(--font-display);
+    font-size: clamp(15px, 1.2vw, 19px);
+    color: #f7f3ec;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
   }
 
-  /* The closing tagline lines. First in italic gold, second in cream sans. */
+  /* ---- Tagline ---- */
   :global(.heritage__tagline) {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    margin-top: 14px;
+    margin-top: 6px;
   }
   .heritage__line-1 {
     font-family: var(--font-italic);
@@ -142,34 +231,37 @@ const stats = [
     color: rgba(247, 243, 236, 0.65);
   }
 
-  /* ---- Mobile ---- */
-  @media (max-width: 800px) {
-    .heritage { padding: 80px 5vw; }
-    .heritage__inner { gap: 36px; }
-    .heritage__stats {
-      grid-template-columns: 1fr;
-      max-width: 360px;
+  /* ---- Responsive ---- */
+  @media (max-width: 1024px) {
+    .heritage__cities { grid-template-columns: repeat(3, 1fr); }
+    .heritage-city:nth-child(4) { border-left: 0; }
+    .heritage-city:nth-child(n+4) {
+      border-top: 1px solid rgba(247, 243, 236, 0.10);
     }
-    .heritage-stat {
-      padding: 22px 0;
-      border-left: 0;
-      border-top: 1px solid rgba(247, 243, 236, 0.12);
+  }
+  @media (max-width: 600px) {
+    .heritage { padding: 90px 5vw 90px; }
+    .heritage__inner { gap: 50px; }
+    .heritage__cities { grid-template-columns: repeat(2, 1fr); }
+    .heritage-city:nth-child(odd) { border-left: 0; }
+    .heritage-city:nth-child(n+3) {
+      border-top: 1px solid rgba(247, 243, 236, 0.10);
     }
-    .heritage-stat:first-child { border-top: 0; }
+    .heritage-city { padding: 22px 10px; }
   }
   @media (max-width: 400px) {
-    .heritage { padding: 60px 5vw; }
-    /* The third stat is a city list ("BA · UAE · USA", ~14 chars). At a fixed
-     * 40px on a 320px-wide phone it overflows the column. Clamp scales it
-     * with viewport width while keeping the bigger numbers ("30+", "10")
-     * legible — they hit the upper bound of the clamp. */
-    .heritage-stat__value {
-      font-size: clamp(26px, 8vw, 40px);
-      line-height: 1.05;
-      word-break: break-word;
+    .heritage__head h2 { font-size: clamp(28px, 9vw, 40px); }
+    .heritage-city__name { font-size: 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .heritage-city {
+      opacity: 1;
+      transform: none;
+      animation: none;
     }
-    .heritage-stat__label { font-size: 10px; letter-spacing: 0.28em; }
-    .heritage__line-1 { font-size: 16px; }
-    .heritage__line-2 { letter-spacing: 0.24em; font-size: 11px; }
+    .heritage-city::before {
+      animation: none;
+    }
   }
 </style>

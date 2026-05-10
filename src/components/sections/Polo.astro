@@ -1,0 +1,215 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import { localizedPath } from "@/i18n/utils";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const home = localizedPath(lang, "/");
+
+// PLACEHOLDER · usuario va a swappear por foto de polo / salto / doma.
+// Por ahora uso IMG_3041 (mujer + caballo + boots ecuestres) que es lo más
+// cercano al territorio deportivo en lo que ya está en Cloudinary.
+const poloImg = cldImage(CLD_IDS.IMG_3041, 2000);
+
+const disciplines = [
+  { id: "01", name: lang === "es" ? "Polo" : "Polo" },
+  { id: "02", name: lang === "es" ? "Salto" : "Jumping" },
+  { id: "03", name: lang === "es" ? "Doma" : "Dressage" },
+];
+---
+
+<section class="polo" id="polo" aria-label={t("polo.eyebrow")}>
+  <!-- Layout inverted vs Split: text on the left, image on the right.
+       Gives the section a different visual rhythm so it doesn't feel
+       like another editorial split. -->
+  <div class="polo__text">
+    <Reveal class="eyebrow">{t("polo.eyebrow")}</Reveal>
+    <Reveal as="h2">
+      <span>{t("polo.title_1")}</span>
+      <em>{t("polo.title_2")}</em>
+    </Reveal>
+    <Reveal as="p" class="polo__p" delay={120}>{t("polo.p")}</Reveal>
+
+    <Reveal as="ul" class="polo__disciplines" delay={200}>
+      {disciplines.map((d) => (
+        <li class="polo-disc">
+          <span class="polo-disc__num">{d.id}</span>
+          <span class="polo-disc__name">{d.name}</span>
+        </li>
+      ))}
+    </Reveal>
+
+    <Reveal delay={280}>
+      <a href={`${home}#contacto`} class="polo__cta">
+        <span>{t("polo.cta")}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+          <path d="M5 12h14M13 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </Reveal>
+  </div>
+
+  <Reveal class="polo__media">
+    <div data-scroll-reveal class="polo__media-frame">
+      <img
+        src={poloImg}
+        alt={t("polo.eyebrow")}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  </Reveal>
+</section>
+
+<style>
+  .polo {
+    background: var(--color-bone);
+    color: var(--color-ink);
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    gap: 0;
+    align-items: stretch;
+    min-height: 88vh;
+    overflow: hidden;
+  }
+
+  /* ---- Text side ---- */
+  .polo__text {
+    padding: 130px 7vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 660px;
+    margin-left: auto;
+    margin-right: 0;
+  }
+  .polo__text h2 {
+    margin: 22px 0 32px;
+    font-size: clamp(40px, 5vw, 76px);
+    line-height: 1.05;
+  }
+  .polo__text h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-cognac);
+    display: block;
+  }
+  .polo__p {
+    font-size: 17px;
+    line-height: 1.75;
+    color: rgba(21, 17, 13, 0.78);
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+
+  /* Disciplines list — numbered editorial rows with a hairline above each */
+  :global(.polo__disciplines) {
+    list-style: none;
+    margin: 0 0 44px;
+    padding: 0;
+    border-top: 1px solid rgba(21, 17, 13, 0.14);
+  }
+  .polo-disc {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(21, 17, 13, 0.14);
+    transition: padding-left 0.45s var(--ease-editorial);
+  }
+  .polo-disc:hover {
+    padding-left: 6px;
+  }
+  .polo-disc__num {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    color: var(--color-cognac);
+    flex-shrink: 0;
+    width: 36px;
+  }
+  .polo-disc__name {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2vw, 30px);
+    color: var(--color-ink);
+    letter-spacing: 0.005em;
+  }
+
+  .polo__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 32px;
+    background: var(--color-ink);
+    color: #f7f3ec;
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    width: fit-content;
+    transition: gap 0.4s var(--ease-editorial), transform 0.4s var(--ease-soft),
+      background 0.4s;
+  }
+  .polo__cta:hover {
+    gap: 20px;
+    transform: translateY(-2px);
+    background: var(--color-cognac);
+  }
+  .polo__cta svg { width: 16px; height: 16px; }
+
+  /* ---- Image side ---- */
+  :global(.polo__media) {
+    position: relative;
+    overflow: hidden;
+  }
+  .polo__media-frame {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .polo__media-frame img {
+    width: 100%;
+    height: 100%;
+    min-height: 88vh;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.94) contrast(1.04);
+    transition: transform 1.6s var(--ease-soft);
+    transform: scale(1.04);
+  }
+  :global(.polo__media:hover) .polo__media-frame img {
+    transform: scale(1.08);
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 1024px) {
+    .polo__text { padding: 100px 7vw; }
+  }
+  @media (max-width: 900px) {
+    .polo {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .polo__text {
+      padding: 90px 7vw 60px;
+      max-width: 100%;
+      order: 2;
+    }
+    :global(.polo__media) { order: 1; }
+    .polo__media-frame img {
+      min-height: 0;
+      aspect-ratio: 4 / 3;
+    }
+  }
+  @media (max-width: 400px) {
+    .polo__text { padding: 70px 6vw 50px; }
+    .polo__text h2 { font-size: clamp(30px, 9vw, 44px); margin: 18px 0 24px; }
+    .polo__p { font-size: 15px; margin-bottom: 32px; }
+    .polo-disc__name { font-size: 20px; }
+  }
+</style>

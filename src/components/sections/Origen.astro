@@ -1,0 +1,208 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// PLACEHOLDER · usuario va a swappear por foto del taller / saddle vintage.
+// Por ahora uso una imagen de cuero (cartera grabada) que sugiere oficio.
+const originImg = cldImage(CLD_IDS.IMG_3144, 1800);
+---
+
+<section class="origen" id="origen" aria-label={t("origen.eyebrow")}>
+  <div class="origen__grid">
+    <!-- Image side · vintage feel + scroll-driven reveal -->
+    <Reveal class="origen__media">
+      <div data-scroll-reveal class="origen__media-frame">
+        <img
+          src={originImg}
+          alt={t("origen.eyebrow")}
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="origen__year" aria-hidden="true">
+          <span class="origen__year-label">{t("origen.year_label")}</span>
+          <span class="origen__year-value">{t("origen.year_value")}</span>
+        </div>
+      </div>
+    </Reveal>
+
+    <!-- Text side · staggered reveals -->
+    <div class="origen__text">
+      <Reveal class="eyebrow">{t("origen.eyebrow")}</Reveal>
+      <Reveal as="h2">
+        <span>{t("origen.title_1")}</span>
+        <em>{t("origen.title_2")}</em>
+      </Reveal>
+      <Reveal as="p" class="origen__p" delay={120}>{t("origen.p1")}</Reveal>
+      <Reveal as="p" class="origen__p" delay={200}>{t("origen.p2")}</Reveal>
+      <Reveal as="div" class="origen__quote" delay={300}>
+        <span class="origen__quote-rule" aria-hidden="true"></span>
+        <p>{t("origen.quote")}</p>
+      </Reveal>
+    </div>
+  </div>
+</section>
+
+<style>
+  .origen {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    padding: 140px 0 160px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .origen__grid {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 5vw;
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    gap: 90px;
+    align-items: center;
+  }
+
+  /* ---- Image side ---- */
+  .origen__media-frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -22px rgba(15, 11, 8, 0.28);
+  }
+  .origen__media-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    /* Subtle vintage tone — sepia + slight desaturation evokes "archive". */
+    filter: saturate(0.78) contrast(1.05) sepia(0.08);
+    transition: transform 1.4s var(--ease-soft);
+    transform: scale(1.02);
+  }
+  .origen__media:hover .origen__media-frame img {
+    transform: scale(1.06);
+  }
+
+  /* Year stamp — floating editorial badge on the image */
+  .origen__year {
+    position: absolute;
+    bottom: -28px;
+    left: -28px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--color-ink);
+    color: var(--color-gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 18px 40px -10px rgba(15, 11, 8, 0.4);
+    animation: yearRotate 28s linear infinite;
+  }
+  .origen__year-label {
+    font-family: var(--font-sans);
+    font-size: 9.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: rgba(176, 133, 82, 0.7);
+  }
+  .origen__year-value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    line-height: 1;
+    color: var(--color-gold);
+    letter-spacing: 0.04em;
+  }
+  @keyframes yearRotate {
+    to { transform: rotate(360deg); }
+  }
+  /* Counter-rotate inner text so it stays upright while the badge spins */
+  .origen__year-label,
+  .origen__year-value {
+    animation: yearCounterRotate 28s linear infinite;
+  }
+  @keyframes yearCounterRotate {
+    to { transform: rotate(-360deg); }
+  }
+
+  /* ---- Text side ---- */
+  .origen__text {
+    display: flex;
+    flex-direction: column;
+    max-width: 540px;
+  }
+  .origen__text h2 {
+    margin: 22px 0 32px;
+    font-size: clamp(36px, 4.4vw, 64px);
+    line-height: 1.05;
+  }
+  .origen__text h2 em {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--color-cognac);
+    display: block;
+  }
+  .origen__p {
+    font-size: 16px;
+    line-height: 1.78;
+    color: rgba(21, 17, 13, 0.78);
+    margin-bottom: 18px;
+  }
+  :global(.origen__quote) {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .origen__quote-rule {
+    flex-shrink: 0;
+    width: 48px;
+    height: 1px;
+    background: var(--color-cognac);
+  }
+  .origen__quote p {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(20px, 2vw, 26px);
+    line-height: 1.35;
+    color: var(--color-cognac);
+    letter-spacing: 0.005em;
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 1024px) {
+    .origen { padding: 110px 0 120px; }
+    .origen__grid { gap: 60px; }
+    .origen__year { width: 120px; height: 120px; bottom: -20px; left: -20px; }
+  }
+  @media (max-width: 768px) {
+    .origen { padding: 90px 0 100px; }
+    .origen__grid {
+      grid-template-columns: 1fr;
+      gap: 50px;
+    }
+    .origen__media-frame { max-width: 460px; aspect-ratio: 4 / 5; }
+    .origen__year {
+      width: 100px;
+      height: 100px;
+      bottom: -16px;
+      left: -16px;
+    }
+    .origen__year-value { font-size: 22px; }
+  }
+  @media (max-width: 400px) {
+    .origen { padding: 70px 0 80px; }
+    .origen__text h2 { font-size: clamp(28px, 9vw, 40px); margin: 18px 0 24px; }
+    .origen__p { font-size: 15px; }
+    .origen__quote p { font-size: 18px; }
+  }
+</style>
