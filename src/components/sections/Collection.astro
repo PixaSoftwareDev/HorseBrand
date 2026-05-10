@@ -101,6 +101,8 @@ const PRODUCT_CLD: Record<string, string | undefined> = {
 </section>
 
 <script>
+  import { onPageReady } from "@/lib/onPageReady";
+
   function wireCollection(): void {
     // ---- IntersectionObserver-driven reveals ----
     const reveal = (el: Element): void => el.classList.add("is-revealed");
@@ -176,7 +178,7 @@ const PRODUCT_CLD: Record<string, string | undefined> = {
       });
     });
   }
-  document.addEventListener("astro:page-load", wireCollection);
+  onPageReady(wireCollection);
 </script>
 
 <style>

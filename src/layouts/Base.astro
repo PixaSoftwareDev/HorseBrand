@@ -99,6 +99,7 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
       import { initReveal } from "@/lib/reveal";
       import { initScrollReveal } from "@/lib/scrollReveal";
       import { initCursor, initNavScrollState, initSmoothAnchors } from "@/lib/cursor";
+      import { onPageReady } from "@/lib/onPageReady";
 
       function bootstrap(): void {
         initCursor();
@@ -109,7 +110,7 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
         initAmbientAudio();
       }
 
-      document.addEventListener("astro:page-load", bootstrap);
+      onPageReady(bootstrap);
     </script>
   </body>
 </html>

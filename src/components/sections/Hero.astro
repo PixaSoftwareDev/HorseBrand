@@ -54,6 +54,8 @@ const slides = [
 </section>
 
 <script>
+  import { onPageReady } from "@/lib/onPageReady";
+
   function wireHero(): void {
     const hero = document.querySelector<HTMLElement>(".hero");
     const slides = document.querySelectorAll<HTMLElement>(".hero__slide");
@@ -164,7 +166,7 @@ const slides = [
       { once: true }
     );
   }
-  document.addEventListener("astro:page-load", wireHero);
+  onPageReady(wireHero);
 </script>
 
 <style>

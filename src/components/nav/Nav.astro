@@ -44,6 +44,8 @@ const home = localizedPath(lang, "/");
 </header>
 
 <script>
+  import { onPageReady } from "@/lib/onPageReady";
+
   function wireToggle(): void {
     const toggle = document.getElementById("navToggle");
     const menu = document.getElementById("mobileMenu");
@@ -71,7 +73,7 @@ const home = localizedPath(lang, "/");
       });
     }
   }
-  document.addEventListener("astro:page-load", wireToggle);
+  onPageReady(wireToggle);
 </script>
 
 <style>

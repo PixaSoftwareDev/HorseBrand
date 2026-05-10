@@ -135,6 +135,8 @@ const closingTitleEnd = lang === "es" ? "Es nuestro material." : "It is our mate
 </section>
 
 <script>
+  import { onPageReady } from "@/lib/onPageReady";
+
   function wireCraft(): void {
     const pin = document.getElementById("craftPin");
     const track = document.getElementById("craftTrack");
@@ -297,7 +299,7 @@ const closingTitleEnd = lang === "es" ? "Es nuestro material." : "It is our mate
     window.addEventListener("resize", kick);
     kick();
   }
-  document.addEventListener("astro:page-load", wireCraft);
+  onPageReady(wireCraft);
 </script>
 
 <style>

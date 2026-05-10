@@ -299,6 +299,8 @@ const t = useTranslations(lang);
 </style>
 
 <script>
+  import { onPageReady } from "@/lib/onPageReady";
+
   function wireDrawer(): void {
     const drawer = document.getElementById("shopDrawer");
     if (!drawer) return;
@@ -327,5 +329,5 @@ const t = useTranslations(lang);
       if (e.key === "Escape" && drawer.classList.contains("open")) close();
     });
   }
-  document.addEventListener("astro:page-load", wireDrawer);
+  onPageReady(wireDrawer);
 </script>

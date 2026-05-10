@@ -91,6 +91,8 @@ const t = useTranslations(lang);
 </style>
 
 <script>
+  import { onPageReady } from "@/lib/onPageReady";
+
   function wireShopHandle(): void {
     const handle = document.getElementById("shopHandle");
     if (!handle) return;
@@ -98,5 +100,5 @@ const t = useTranslations(lang);
       window.dispatchEvent(new CustomEvent("shop:open"));
     });
   }
-  document.addEventListener("astro:page-load", wireShopHandle);
+  onPageReady(wireShopHandle);
 </script>

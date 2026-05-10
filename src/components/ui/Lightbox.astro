@@ -8,6 +8,8 @@
 </div>
 
 <script>
+  import { onPageReady } from "@/lib/onPageReady";
+
   function wireLightbox(): void {
     const lightbox = document.getElementById("lightbox") as HTMLDivElement | null;
     const img = document.getElementById("lbImg") as HTMLImageElement | null;
@@ -60,7 +62,7 @@
       if (e.key === "ArrowLeft") nav(-1);
     });
   }
-  document.addEventListener("astro:page-load", wireLightbox);
+  onPageReady(wireLightbox);
 </script>
 
 <style>

@@ -128,6 +128,8 @@ const t = useTranslations(lang);
 </style>
 
 <script>
+  import { onPageReady } from "@/lib/onPageReady";
+
   const KEY = "hb_splash_seen";
   const HOLD_MS = 4900;
 
@@ -178,5 +180,5 @@ const t = useTranslations(lang);
     );
   }
 
-  document.addEventListener("astro:page-load", runSplash);
+  onPageReady(runSplash);
 </script>
