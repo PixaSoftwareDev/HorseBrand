@@ -4,6 +4,7 @@ import { useRef } from "react";
 export interface ZoomImage {
   src: string;
   srcSet?: string;
+  sizes?: string;
   alt?: string;
 }
 
@@ -48,7 +49,7 @@ export default function ZoomParallax({ images }: Props) {
   return (
     <div ref={container} className="zoom-parallax">
       <div className="zp-sticky">
-        {images.slice(0, 7).map(({ src, srcSet, alt }, i) => {
+        {images.slice(0, 7).map(({ src, srcSet, sizes, alt }, i) => {
           const pos = POSITIONS[i] ?? POSITIONS[0];
           // First 4 images come into peak zoom early — load eagerly with high
           // priority so the user never sees a blurry placeholder mid-zoom.
@@ -68,6 +69,7 @@ export default function ZoomParallax({ images }: Props) {
                 <img
                   src={src}
                   srcSet={srcSet}
+                  sizes={sizes}
                   alt={alt ?? ""}
                   loading={isPriority ? "eager" : "lazy"}
                   fetchPriority={isPriority ? "high" : "auto"}

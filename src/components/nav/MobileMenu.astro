@@ -25,7 +25,7 @@ const home = localizedPath(lang, "/");
   .mobile-menu {
     position: fixed;
     top: 0;
-    right: -100%;
+    right: 0;
     width: 82%;
     max-width: 380px;
     height: 100vh;
@@ -37,11 +37,17 @@ const home = localizedPath(lang, "/");
     justify-content: center;
     align-items: center;
     gap: 28px;
-    transition: right 0.55s var(--ease-editorial);
+    /* Use transform instead of `right: -100%` to slide the panel off-screen.
+     * Negative `right` on a fixed element causes horizontal page overflow
+     * in iOS Safari (the page slides right and breaks the layout) — even
+     * with `overflow-x: hidden` on body. Transforms don't trigger overflow. */
+    transform: translateX(100%);
+    transition: transform 0.55s var(--ease-editorial);
     padding: 0 30px;
     overflow-y: auto;
+    will-change: transform;
   }
-  .mobile-menu.open { right: 0; }
+  .mobile-menu.open { transform: translateX(0); }
   .mobile-menu a {
     font-family: var(--font-display);
     font-size: clamp(22px, 6vw, 28px);

@@ -22,7 +22,7 @@ const ZOOM_PUBLIC_IDS = [
 
 const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
   const r = cldZoomImage(id);
-  return { src: r.src, srcSet: r.srcSet, alt: "" };
+  return { src: r.src, srcSet: r.srcSet, sizes: r.sizes, alt: "" };
 });
 ---
 

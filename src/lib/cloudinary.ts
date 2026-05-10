@@ -20,30 +20,35 @@ export function cldTransform(publicId: string, transforms: string): string {
 export interface ResponsiveSrc {
   src: string;
   srcSet: string;
+  sizes: string;
 }
 
 /**
- * High-resolution crop for the zoom-parallax (scales capped at 5x).
+ * Responsive crop for the zoom-parallax.
  *
- * Math (worst case at peak zoom):
- *   container 30vw × viewport 1920px × scale 5 × DPR 2 = 5760px physical
- * We deliver:
- *   1x → 5400px wide (covers 1080p / standard laptops up to scale 5)
- *   2x → 9000px wide (covers retina / 4K screens at peak with headroom)
+ * Width descriptors (not 1x/2x): on mobile the layout collapses to a flat
+ * vertical stack and we want browsers to pick a small source (~640-960w),
+ * not the 9000w retina source — which used to fail on phones (broken-image
+ * placeholders) due to AVIF size + Cloudinary upscaling limits.
  *
- * The browser picks via DPR. Without srcset, even w_9000 looks blurry on
- * retina because the browser would still pick 1x by default.
- *
- * AVIF via f_auto + q_auto:best keeps weight reasonable
- * (~1 MB at 1x, ~2.2 MB at 2x — only 1 of the two ever ships per visit).
+ * The `sizes` hint lies a little: it tells the browser the desktop layout
+ * box is ~5400px wide so that on retina laptops the picker still chooses
+ * the largest available source — covering the parallax max zoom (9x).
  */
 export function cldZoomImage(publicId: string): ResponsiveSrc {
   const base = "f_auto,q_auto:best,c_fill,ar_16:9";
-  const src1x = cldTransform(publicId, `${base},w_5400`);
-  const src2x = cldTransform(publicId, `${base},w_9000`);
+  const make = (w: number): string => cldTransform(publicId, `${base},w_${w}`);
   return {
-    src: src1x,
-    srcSet: `${src1x} 1x, ${src2x} 2x`,
+    src: make(1600),
+    srcSet: [
+      `${make(640)} 640w`,
+      `${make(960)} 960w`,
+      `${make(1600)} 1600w`,
+      `${make(2400)} 2400w`,
+      `${make(3600)} 3600w`,
+      `${make(5400)} 5400w`,
+    ].join(", "),
+    sizes: "(max-width: 900px) 100vw, 5400px",
   };
 }
 
