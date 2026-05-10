@@ -30,19 +30,19 @@ export default function ZoomParallax({ images }: Props) {
     offset: ["start start", "end end"],
   });
 
-  // Scales capped at 5x. Original demo went up to 9x, but that broke pixel
-  // density on retina/4K screens (a 30vw container × 8x scale × DPR 2 needs
-  // ~9000+ source pixels — Cloudinary delivery at that size is heavy and
-  // visually 5x is still cinematic editorial). Trade: tiny bit less drama,
-  // image stays sharp at peak on every device.
+  // Original demo scales — the dramatic crescendo where the smallest
+  // back-positioned image (index 6) grows from 15vw to fill most of the
+  // viewport at 9x is what makes the effect feel cinematic. We keep the
+  // higher-resolution Cloudinary delivery (5400/9000) + image-rendering
+  // hints to fight any softness at peak zoom.
   const scales: MotionValue<number>[] = [
-    useTransform(scrollYProgress, [0, 1], [1, 3]),
     useTransform(scrollYProgress, [0, 1], [1, 4]),
-    useTransform(scrollYProgress, [0, 1], [1, 4.5]),
-    useTransform(scrollYProgress, [0, 1], [1, 4]),
-    useTransform(scrollYProgress, [0, 1], [1, 4.5]),
     useTransform(scrollYProgress, [0, 1], [1, 5]),
+    useTransform(scrollYProgress, [0, 1], [1, 6]),
     useTransform(scrollYProgress, [0, 1], [1, 5]),
+    useTransform(scrollYProgress, [0, 1], [1, 6]),
+    useTransform(scrollYProgress, [0, 1], [1, 8]),
+    useTransform(scrollYProgress, [0, 1], [1, 9]),
   ];
 
   return (
