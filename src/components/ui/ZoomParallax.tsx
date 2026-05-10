@@ -36,14 +36,18 @@ interface Props {
  * back to their original values at rest (because the entire item is
  * counter-scaled by 1/max).
  */
+/* Max scales softened from the 21st.dev original (4..9) to (3..6).
+ * The biggest tile (index 6, 15vw base × 6) reaches ~90vw at peak, leaving
+ * visible viewport margin instead of overflowing edge-to-edge. Same
+ * crescendo feel, less claustrophobic — closer to editorial than demo. */
 const TILES: { top: number; left: number; w: number; h: number; max: number }[] = [
-  { top: 0,     left: 0,      w: 25, h: 25, max: 4 },
-  { top: -30,   left: 5,      w: 35, h: 30, max: 5 },
-  { top: -10,   left: -25,    w: 20, h: 45, max: 6 },
-  { top: 0,     left: 27.5,   w: 25, h: 25, max: 5 },
-  { top: 27.5,  left: 5,      w: 20, h: 25, max: 6 },
-  { top: 27.5,  left: -22.5,  w: 30, h: 25, max: 8 },
-  { top: 22.5,  left: 25,     w: 15, h: 15, max: 9 },
+  { top: 0,     left: 0,      w: 25, h: 25, max: 3   },
+  { top: -30,   left: 5,      w: 35, h: 30, max: 3.5 },
+  { top: -10,   left: -25,    w: 20, h: 45, max: 4   },
+  { top: 0,     left: 27.5,   w: 25, h: 25, max: 3.5 },
+  { top: 27.5,  left: 5,      w: 20, h: 25, max: 4   },
+  { top: 27.5,  left: -22.5,  w: 30, h: 25, max: 5.5 },
+  { top: 22.5,  left: 25,     w: 15, h: 15, max: 6   },
 ];
 
 export default function ZoomParallax({ images }: Props) {

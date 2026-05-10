@@ -26,14 +26,20 @@ export interface ResponsiveSrc {
 /**
  * Responsive crop for the zoom-parallax.
  *
- * Width descriptors (not 1x/2x): on mobile the layout collapses to a flat
- * vertical stack and we want browsers to pick a small source (~640-960w),
- * not the 9000w retina source — which used to fail on phones (broken-image
- * placeholders) due to AVIF size + Cloudinary upscaling limits.
+ * Math at peak zoom: the worst-case tile is `30vw × scale 8` on a 1920px
+ * viewport = 4608 CSS px wide. Retina DPR 2 wants 9216 physical px. So the
+ * top-end source MUST be at least ~9000px to stay sharp at peak. The next
+ * size up (7200w) covers DPR 1.5 displays; below that, smaller sources for
+ * mobile / pre-zoom states.
  *
- * The `sizes` hint lies a little: it tells the browser the desktop layout
- * box is ~5400px wide so that on retina laptops the picker still chooses
- * the largest available source — covering the parallax max zoom (9x).
+ * Width descriptors (not 1x/2x) so the browser can pick the right size for
+ * mobile (where layout collapses to a 1-col flat grid and the giant source
+ * would be wasted bandwidth).
+ *
+ * `sizes` hint: tells the browser the desktop layout box is effectively
+ * ~5400px wide so on retina/4K laptops (DPR ≥ 2) the picker selects the
+ * 9000w source for peak-zoom sharpness, not the 5400w which would fall
+ * short by ~50% on the worst tile.
  */
 export function cldZoomImage(publicId: string): ResponsiveSrc {
   const base = "f_auto,q_auto:best,c_fill,ar_16:9";
@@ -47,6 +53,8 @@ export function cldZoomImage(publicId: string): ResponsiveSrc {
       `${make(2400)} 2400w`,
       `${make(3600)} 3600w`,
       `${make(5400)} 5400w`,
+      `${make(7200)} 7200w`,
+      `${make(9000)} 9000w`,
     ].join(", "),
     sizes: "(max-width: 900px) 100vw, 5400px",
   };

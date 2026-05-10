@@ -25,10 +25,14 @@ body {
   font-weight: 300;
   background: var(--color-ivory);
   color: var(--color-ink);
-  /* Horizontal overflow is clipped on body only — clipping <html> instead
-   * breaks `position: sticky` in the gallery (sticky needs a scrollable
-   * ancestor, and overflow:hidden on <html> removes that). */
-  overflow-x: hidden;
+  /* IMPORTANT: use `clip`, not `hidden`. `overflow-x: hidden` on body turns
+   * body into a scroll container and breaks `position: sticky` in the
+   * gallery (sticky anchors to the body's scrollY which never changes,
+   * because the actual scroll lives on <html>). `clip` clips overflow
+   * without creating a scroll container, so sticky keeps working.
+   * Combined with `overflow-x: clip` on <html>, any rogue inner element
+   * that escapes 100vw still gets clipped — without breaking sticky. */
+  overflow-x: clip;
   cursor: none;
   letter-spacing: 0.005em;
   line-height: 1.5;
