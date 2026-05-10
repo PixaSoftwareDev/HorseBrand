@@ -246,16 +246,19 @@ const heroImage = cldImage("v1778360916/IMG_3017_cijgiv.jpg", 1800);
       min-height: 0;
     }
     .contact__media {
-      aspect-ratio: 4 / 3;
-      max-height: 60vh;
-      max-height: 60dvh;
+      padding: 30px 7vw;
+      max-height: none;
+    }
+    /* Reset the wrapper on mobile — desktop has aspect 3/4 + max-height clamp
+     * that conflicts with the parent's smaller height in stacked layout.
+     * On mobile we let the image be a clean 4/5 portrait, full column width. */
+    .contact__media > div {
+      max-width: 480px;
+      max-height: none;
+      aspect-ratio: 4 / 5;
     }
     .contact__media::after {
-      background: linear-gradient(
-        to bottom,
-        rgba(251, 248, 242, 0) 75%,
-        rgba(251, 248, 242, 0.5) 100%
-      );
+      background: none;
     }
     .contact__panel { padding: 70px 7vw 90px; }
     .contact__panel-inner { max-width: 100%; }

@@ -138,6 +138,15 @@ h2 em {
   -webkit-clip-path: inset(0 0 var(--reveal-bottom, 100%) 0);
   will-change: clip-path;
 }
+/* On touch / small screens we disable the clip so the image is always visible.
+   Without this, if the scroll listener never updates the variable (timing
+   issue, slow first paint, etc.), the photo stays clipped at 100% = invisible. */
+@media (hover: none), (max-width: 900px) {
+  [data-scroll-reveal] {
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
+}
 
 /* ========== ANIMATIONS ========== */
 @keyframes wordIn { to { opacity: 1; transform: translateY(0); } }

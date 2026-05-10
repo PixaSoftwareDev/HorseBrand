@@ -88,25 +88,27 @@ const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
   }
 
   /* ---- Touch / mobile fallback ----
-   * Framer Motion's useScroll keeps running on touch devices but the
-   * absolute layout + 9x scaling is built for hover-driven scroll
-   * progress and feels broken on mobile. Convert the whole composition
-   * into a clean vertical grid on (hover: none) screens — keeps every
-   * image visible without burning CPU on the parallax. */
-  @media (hover: none), (max-width: 700px) {
+   * The 7-image absolute parallax layout + framer-motion's inline transforms
+   * collapse into a clean vertical grid on touch screens. Every override is
+   * !important because framer-motion writes inline style="transform: scale(...)"
+   * and the original component sets style="position: relative; top; left; ..."
+   * — both have higher specificity than scoped CSS without !important. */
+  @media (hover: none), (max-width: 900px) {
     :global(.zoom-parallax) {
       height: auto !important;
     }
     :global(.zp-sticky) {
-      position: static;
-      height: auto;
-      display: grid;
+      position: static !important;
+      height: auto !important;
+      display: grid !important;
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 14px;
       padding: 0 5vw;
     }
     :global(.zp-item) {
-      position: static;
+      position: static !important;
+      inset: auto !important;
+      display: block !important;
       transform: none !important;
     }
     :global(.zp-inner) {
@@ -115,7 +117,13 @@ const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
       left: auto !important;
       width: 100% !important;
       height: auto !important;
-      aspect-ratio: 16 / 9;
+      max-width: 100% !important;
+      aspect-ratio: 16 / 9 !important;
+      transform: none !important;
+    }
+    :global(.zp-inner img) {
+      filter: none;
+      image-rendering: auto;
     }
   }
 </style>
