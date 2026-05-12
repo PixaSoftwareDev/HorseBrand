@@ -1,11 +1,10 @@
 ---
-import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
 import { type Lang, useTranslations } from "@/i18n/ui";
 import Reveal from "@/components/shared/Reveal.astro";
 import { SHOP_BASE_URL } from "@/lib/shop";
 import { cldImage } from "@/lib/cloudinary";
-import { CLD_IDS } from "@/lib/cloudinaryAssets";
+import { CLD_IDS, type CldKey } from "@/lib/cloudinaryAssets";
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -14,17 +13,6 @@ const t = useTranslations(lang);
 const products = (await getCollection("products")).sort(
   (a, b) => a.data.order - b.data.order
 );
-
-// Map product slug → Cloudinary URL. If a product is missing here it falls
-// back to the local image declared in its .md frontmatter.
-const PRODUCT_CLD: Record<string, string | undefined> = {
-  weekender: cldImage(CLD_IDS.IMG_2977, 1000),
-  "boot-bag": cldImage(CLD_IDS.IMG_2971, 1000),
-  "stable-clutch": cldImage(CLD_IDS.IMG_3060, 1000),
-  "wallet-trio": cldImage(CLD_IDS.IMG_3054, 1000),
-  "heritage-tote": cldImage(CLD_IDS.IMG_2945, 1000),
-  // equestrian-tote (IMG_3127) sigue local: no fue subida a Cloudinary.
-};
 ---
 
 <section class="collection" id="coleccion">
@@ -46,21 +34,12 @@ const PRODUCT_CLD: Record<string, string | undefined> = {
         <span class="card__num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
         <div class="card__media">
           <div class="card__media-inner">
-            {PRODUCT_CLD[product.slug] ? (
-              <img
-                src={PRODUCT_CLD[product.slug]}
-                alt={product.data.alt}
-                loading="lazy"
-                decoding="async"
-              />
-            ) : (
-              <Image
-                src={product.data.image}
-                alt={product.data.alt}
-                widths={[400, 700, 1000]}
-                sizes="(min-width:1100px) 30vw, (min-width:700px) 45vw, 90vw"
-              />
-            )}
+            <img
+              src={cldImage(CLD_IDS[product.data.image as CldKey], 1000)}
+              alt={product.data.alt}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           {product.data.badge && (
             <span class="card__badge">

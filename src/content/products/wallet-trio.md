@@ -6,7 +6,7 @@ name:
 tagline:
   es: Black · Cognac · Espresso
   en: Black · Cognac · Espresso
-image: ../../assets/gallery/IMG_3054.JPG
+image: IMG_3054
 alt: Wallet Trio
 tiendanubeUrl: https://www.horse-brand.com/productos/wallet-trio
 ---

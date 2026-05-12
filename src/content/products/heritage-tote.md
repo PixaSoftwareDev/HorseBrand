@@ -6,7 +6,7 @@ name:
 tagline:
   es: Espresso · Trenzado a mano
   en: Espresso · Hand-braided
-image: ../../assets/gallery/IMG_2945.JPG
+image: IMG_2945
 alt: Heritage Tote
 tiendanubeUrl: https://www.horse-brand.com/productos/heritage-tote
 ---

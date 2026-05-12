@@ -7,7 +7,7 @@ tagline:
   es: Taupe · Hecho a medida
   en: Taupe · Bespoke
 badge: handmade
-image: ../../assets/gallery/IMG_2971.JPG
+image: IMG_2971
 alt: Boot Bag
 tiendanubeUrl: https://www.horse-brand.com/productos/boot-bag
 ---

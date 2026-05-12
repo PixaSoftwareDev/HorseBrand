@@ -6,7 +6,7 @@ name:
 tagline:
   es: Sand · Mini edición
   en: Sand · Mini edition
-image: ../../assets/gallery/IMG_3060.JPG
+image: IMG_3060
 alt: Stable Clutch
 tiendanubeUrl: https://www.horse-brand.com/productos/stable-clutch
 ---
