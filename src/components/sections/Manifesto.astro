@@ -7,7 +7,8 @@ import { CLD_IDS } from "@/lib/cloudinaryAssets";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const manifestoImg = cldImage(CLD_IDS.IMG_3081, 1600);
+// Montura vintage — símbolo del oficio que da origen al manifiesto.
+const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
 ---
 
 <section class="manifesto" id="manifiesto">
@@ -21,18 +22,24 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3081, 1600);
       <Reveal as="div" class="manifesto__body">
         <p>{t("manifesto.p1")}</p>
         <p>{t("manifesto.p2")}</p>
-        <p class="manifesto__quote">{t("manifesto.quote")}</p>
-        <ul class="manifesto__list">
-          <li><span></span>{t("manifesto.li_1")}</li>
-          <li><span></span>{t("manifesto.li_2")}</li>
-          <li><span></span>{t("manifesto.li_3")}</li>
-        </ul>
+
+        <figure class="manifesto__pullquote">
+          <span class="manifesto__pullquote-rule" aria-hidden="true"></span>
+          <blockquote>{t("manifesto.quote")}</blockquote>
+        </figure>
+
+        <ol class="manifesto__list">
+          <li><span class="num">01</span>{t("manifesto.li_1")}</li>
+          <li><span class="num">02</span>{t("manifesto.li_2")}</li>
+          <li><span class="num">03</span>{t("manifesto.li_3")}</li>
+        </ol>
       </Reveal>
     </div>
     <Reveal class="manifesto__media">
       <div data-scroll-reveal>
-        <img src={manifestoImg} alt="Atelier" loading="lazy" decoding="async" />
+        <img src={manifestoImg} alt={t("manifesto.caption")} loading="lazy" decoding="async" />
       </div>
+      <figcaption class="manifesto__caption">{t("manifesto.caption")}</figcaption>
     </Reveal>
   </div>
 </section>
@@ -52,57 +59,134 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3081, 1600);
     align-items: center;
   }
   .manifesto__text { max-width: 560px; }
-  .manifesto__text h2 { margin: 22px 0 36px; }
+  .manifesto__text h2 {
+    margin: 22px 0 64px;
+    /* Slightly looser line-height so italic descenders ("y", "c", "p") don't
+     * crowd the line below within the title block itself. */
+    line-height: 1.08;
+    /* Make the box reserve room for the italic descender of the last line so
+     * it doesn't crash into the paragraph below (the line-box clips the ink
+     * but the next element sits on the box, not the ink). */
+    padding-bottom: 0.18em;
+  }
   .manifesto__text h2 span { display: inline; }
   .manifesto__text h2 em { display: block; }
+  :global(.manifesto__body) {
+    margin-top: 8px;
+  }
   .manifesto__body p {
     font-size: 16px;
     line-height: 1.75;
     color: rgba(21, 17, 13, 0.78);
     margin-bottom: 18px;
   }
-  /* Pull quote — the manifesto signature line. Larger, italic, cognac, with
-   * a small leading rule so it visually separates from the body paragraphs. */
-  .manifesto__quote {
+  .manifesto__body p:first-child { margin-top: 0; }
+  /* Pull quote — the manifesto signature line. Centered, italic, prominent.
+   * Stands as the emotional anchor of the section, with a short gold rule
+   * above and generous breathing room below. */
+  .manifesto__pullquote {
+    margin: 48px 0 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+  }
+  .manifesto__pullquote-rule {
+    display: block;
+    width: 48px;
+    height: 1px;
+    background: var(--color-cognac);
+  }
+  .manifesto__pullquote blockquote {
+    margin: 0;
+    padding: 0;
     font-family: var(--font-italic);
     font-style: italic;
-    font-weight: 400;
-    font-size: clamp(22px, 2.2vw, 30px);
-    line-height: 1.3;
-    color: var(--color-cognac);
-    margin: 30px 0 0 !important;
-    padding-top: 20px;
-    border-top: 1px solid rgba(21, 17, 13, 0.1);
+    font-weight: 300;
+    font-size: clamp(28px, 3.2vw, 44px);
+    line-height: 1.2;
     letter-spacing: 0.005em;
+    color: var(--color-cognac);
+    max-width: 440px;
   }
+
+  /* Numbered list — editorial 01/02/03 in gold instead of cognac dots.
+   * Same hairline structure but the number replaces the dot, giving each
+   * row a chapter feel that matches the rest of the design system. */
   .manifesto__list {
     list-style: none;
     margin-top: 40px;
+    padding: 0;
+    counter-reset: manifesto-pillar;
   }
   .manifesto__list li {
     display: flex;
     align-items: center;
-    gap: 18px;
-    padding: 16px 0;
+    gap: 22px;
+    padding: 18px 0;
     border-top: 1px solid var(--line);
     font-family: var(--font-sans);
     font-size: 13px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--color-stone);
+    transition: padding-left 0.45s var(--ease-editorial), color 0.4s;
   }
   .manifesto__list li:last-child { border-bottom: 1px solid var(--line); }
-  .manifesto__list span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-cognac);
+  .manifesto__list li:hover {
+    padding-left: 6px;
+    color: var(--color-ink);
+  }
+  .manifesto__list .num {
+    flex-shrink: 0;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.36em;
+    font-weight: 400;
+    color: var(--color-gold);
+    /* Reset any inherited dot styles from earlier markup. */
+    width: auto;
+    height: auto;
+    background: transparent;
+    border-radius: 0;
+    min-width: 30px;
   }
 
+  /* Editorial caption under the image — small caps with stone tone. */
+  :global(.manifesto__media) {
+    display: flex;
+    flex-direction: column;
+  }
+  .manifesto__caption {
+    margin-top: 18px;
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+    align-self: flex-start;
+  }
+
+  /* Wrapper clips the scaling image so the Ken Burns motion stays inside. */
+  .manifesto__media :global([data-scroll-reveal]) {
+    overflow: hidden;
+  }
   .manifesto__media :global(img) {
     width: 100%;
     height: 720px;
     object-fit: cover;
+    /* Slow contemplative Ken Burns — scales from 1.02 to 1.07 with a tiny
+     * translate over 22s, alternating. Marks elegance without distracting. */
+    animation: manifestoKenBurns 22s var(--ease-soft) infinite alternate;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  @keyframes manifestoKenBurns {
+    0%   { transform: scale(1.02) translate(0%, 0%); }
+    100% { transform: scale(1.07) translate(-1%, 0.6%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .manifesto__media :global(img) { animation: none; transform: none; }
   }
 
   @media (max-width: 1280px) {

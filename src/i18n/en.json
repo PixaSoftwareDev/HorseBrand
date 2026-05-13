@@ -7,9 +7,9 @@
   "nav.shop": "Shop",
 
   "hero.eyebrow": "Lifestyle Equestrian Atelier",
-  "hero.title_1": "Made of leather,",
-  "hero.title_2": "lived with elegance.",
-  "hero.sub": "Artisanal leather goods inspired by the equestrian world. Every piece is born in the stable, forged in the workshop and lives with you.",
+  "hero.title_1": "The horse leads.",
+  "hero.title_2": "The leather remembers.",
+  "hero.sub": "A silent-luxury equestrian atelier. Leather goods, saddles and home born from the craft. Buenos Aires · present in 30+ countries.",
   "hero.cta_1": "Discover the collection",
   "hero.cta_2": "View gallery",
   "hero.scroll": "Scroll",
@@ -26,6 +26,7 @@
   "manifesto.li_1": "Born from the saddle craft",
   "manifesto.li_2": "Presence in more than 30 countries",
   "manifesto.li_3": "Silent luxury, timeless",
+  "manifesto.caption": "— Equestrian saddle · Archive piece",
 
   "origen.eyebrow": "The origin",
   "origen.title_1": "Born from the craft",
@@ -33,8 +34,7 @@
   "origen.p1": "At the origin: a workshop, hand-tanned leather, and a horse. A saddle brand that began dressing competition horses and never stopped.",
   "origen.p2": "Four decades later the craft remains intact. Every piece is born from the same vocation — to serve the horse. Everything else (the bag, the armchair, the table) came after, as a natural extension of the same gaze.",
   "origen.quote": "The horse leads. The craft follows.",
-  "origen.year_label": "Origin",
-  "origen.year_value": "1985",
+  "origen.caption": "— Show jumping",
 
   "caballo.eyebrow": "The horse",
   "caballo.title_1": "Speaks a",
@@ -42,7 +42,7 @@
   "caballo.word_1": "Freedom",
   "caballo.word_2": "Loyalty",
   "caballo.word_3": "Roots",
-  "caballo.word_4": "Language",
+  "caballo.word_4": "Silence",
   "caballo.closer": "Everything gathers around a singular being.",
 
   "polo.eyebrow": "Equestrian sport",
@@ -135,17 +135,11 @@
   "contact.direct_email_label": "Or by email",
 
   "footer.tag": "Lifestyle Equestrian Atelier",
-  "footer.rights": "Crafted with leather & love.",
-  "footer.newsletter_label": "AW Lookbook",
-  "footer.newsletter_text": "Receive every new collection and editorial directly in your inbox.",
-  "footer.newsletter_placeholder": "your@email.com",
-  "footer.newsletter_cta": "Subscribe",
-  "footer.newsletter_thanks": "Thank you for subscribing ✓",
-  "footer.policies": "Policies",
-  "footer.policy_shipping": "Shipping",
-  "footer.policy_returns": "Returns & exchanges",
-  "footer.policy_terms": "Terms & conditions",
-  "footer.payment_label": "Payment methods",
+  "footer.policy_terms": "Terms",
+  "footer.visit_shop": "Visit the shop",
+  "footer.links_label": "Links",
+
+  "splash.skip": "click to continue",
 
   "audio.label": "Toggle ambient music",
 

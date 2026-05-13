@@ -57,6 +57,7 @@ export const CLD_IDS = {
   IMG_3144: "v1778360890/IMG_3144_r3tens.jpg",
   IMG_3145: "v1778360888/IMG_3145_celw0a.jpg",
   IMG_3146: "v1778360884/IMG_3146_a8kprp.jpg",
+  CHA_2032: "v1778617128/CHA-2032_qdtwh1.jpg",
 } as const;
 
 export type CldKey = keyof typeof CLD_IDS;

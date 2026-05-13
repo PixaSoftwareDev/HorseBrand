@@ -5,10 +5,9 @@ import logoMain from "@/assets/logo/logo-main.png";
 import {
   INSTAGRAM_URL,
   INSTAGRAM_HANDLE,
-  SHIPPING_URL,
-  RETURNS_URL,
   TERMS_URL,
 } from "@/lib/contact";
+import { SHOP_BASE_URL } from "@/lib/shop";
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -17,367 +16,186 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="footer">
-  <div class="footer__top">
-    <!-- Newsletter -->
-    <div class="footer__col footer__col--news">
-      <span class="footer__col-label">{t("footer.newsletter_label")}</span>
-      <p class="footer__col-text">{t("footer.newsletter_text")}</p>
-      <form class="footer__news" id="newsletterForm" novalidate>
-        <input
-          type="email"
-          required
-          name="email"
-          autocomplete="email"
-          placeholder={t("footer.newsletter_placeholder")}
-          aria-label={t("footer.newsletter_placeholder")}
-        />
-        <button type="submit" aria-label={t("footer.newsletter_cta")}>
-          <span class="footer__news-label">{t("footer.newsletter_cta")}</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
-            <path d="M5 12h14M13 5l7 7-7 7"/>
-          </svg>
-        </button>
-        <span class="footer__news-thanks">{t("footer.newsletter_thanks")}</span>
-      </form>
-    </div>
-
-    <!-- Policies -->
-    <div class="footer__col">
-      <span class="footer__col-label">{t("footer.policies")}</span>
-      <ul class="footer__links">
-        <li><a href={SHIPPING_URL} target="_blank" rel="noopener">{t("footer.policy_shipping")}</a></li>
-        <li><a href={RETURNS_URL} target="_blank" rel="noopener">{t("footer.policy_returns")}</a></li>
-        <li><a href={TERMS_URL} target="_blank" rel="noopener">{t("footer.policy_terms")}</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="footer__bottom">
+  <div class="footer__row">
     <div class="footer__brand">
       <Image src={logoMain} alt="Horse Brand" widths={[160, 320]} sizes="160px" />
       <span class="footer__tag">{t("footer.tag")}</span>
     </div>
 
     <a
-      href={INSTAGRAM_URL}
+      class="footer__shop"
+      href={SHOP_BASE_URL}
       target="_blank"
       rel="noopener"
-      class="footer__social"
-      aria-label={`Instagram ${INSTAGRAM_HANDLE}`}
+      aria-label={t("footer.visit_shop")}
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="3" y="3" width="18" height="18" rx="5"/>
-        <circle cx="12" cy="12" r="4"/>
-        <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"/>
+      <span>{t("footer.visit_shop")}</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+        <path d="M5 12h14M13 5l7 7-7 7"/>
       </svg>
-      <span class="footer__social-handle">{INSTAGRAM_HANDLE}</span>
     </a>
 
-    <div class="footer__meta">
-      <span>© {year} Horse Brand</span>
-      <span class="footer__sep" aria-hidden="true">·</span>
-      <span>{t("footer.rights")}</span>
-    </div>
+    <nav class="footer__links" aria-label={t("footer.links_label")}>
+      {TERMS_URL && (
+        <a href={TERMS_URL} target="_blank" rel="noopener">{t("footer.policy_terms")}</a>
+      )}
+      <a href={INSTAGRAM_URL} target="_blank" rel="noopener" aria-label={`Instagram ${INSTAGRAM_HANDLE}`}>
+        Instagram
+      </a>
+    </nav>
   </div>
 
-  <div class="footer__pay-row">
-    <span class="footer__pay-label">{t("footer.payment_label")}</span>
-    <span class="footer__pay-list">Visa · Mastercard · American Express · Mercado Pago</span>
+  <div class="footer__meta">
+    <span>© {year}</span>
+    <span class="footer__sep" aria-hidden="true">·</span>
+    <span>Buenos Aires</span>
   </div>
 </footer>
-
-<script>
-  import { onPageReady } from "@/lib/onPageReady";
-
-  function wireNewsletter(): void {
-    const form = document.getElementById("newsletterForm") as HTMLFormElement | null;
-    if (!form) return;
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const data = new FormData(form);
-      const email = String(data.get("email") || "").trim();
-      if (!email || !email.includes("@")) {
-        form.querySelector("input")?.focus();
-        return;
-      }
-      console.info("[newsletter] subscribe:", email);
-      form.classList.add("is-sent");
-    });
-  }
-  onPageReady(wireNewsletter);
-</script>
 
 <style>
   .footer {
     background: var(--color-bone);
     color: rgba(21, 17, 13, 0.7);
-    padding: 90px 5vw 28px;
+    padding: 28px 5vw 24px;
     border-top: 1px solid rgba(21, 17, 13, 0.06);
-  }
-
-  /* ---- Top: 2-col grid (newsletter + policies) ---- */
-  .footer__top {
-    max-width: 1500px;
-    margin: 0 auto 60px;
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 80px;
-    padding-bottom: 56px;
-    border-bottom: 1px solid rgba(21, 17, 13, 0.1);
-  }
-
-  .footer__col {
     display: flex;
     flex-direction: column;
     gap: 18px;
   }
-  .footer__col-label {
+
+  /* ---- Top row · 3 zones (brand · shop · links) ---- */
+  .footer__row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 32px;
+    max-width: 1500px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* ---- Brand · left ---- */
+  .footer__brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-self: start;
+  }
+  .footer__brand :global(img) {
+    height: 64px;
+    width: auto;
+    opacity: 0.95;
+  }
+  .footer__tag {
     font-family: var(--font-sans);
-    font-size: 11px;
-    letter-spacing: 0.34em;
+    font-size: 12px;
+    letter-spacing: 0.36em;
     text-transform: uppercase;
     color: var(--color-stone);
   }
-  .footer__col-text {
-    font-family: var(--font-italic);
-    font-style: italic;
-    font-weight: 300;
-    font-size: 16px;
-    line-height: 1.55;
-    color: rgba(21, 17, 13, 0.78);
-    max-width: 380px;
-  }
 
-  /* Newsletter form */
-  .footer__news {
-    position: relative;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid rgba(21, 17, 13, 0.18);
-    padding: 14px 0 12px;
-    max-width: 420px;
-    transition: border-color 0.4s var(--ease-editorial);
-  }
-  .footer__news:focus-within { border-bottom-color: var(--color-ink); }
-  .footer__news input {
-    flex: 1;
-    background: transparent;
-    border: 0;
-    outline: none;
-    font-family: var(--font-display);
-    font-size: 16px;
-    color: var(--color-ink);
-    padding: 0;
-    cursor: none;
-    letter-spacing: 0.01em;
-  }
-  .footer__news input::placeholder {
-    color: rgba(21, 17, 13, 0.35);
-    font-style: italic;
-  }
-  .footer__news button {
+  /* ---- Shop CTA · center · ghost button with arrow ---- */
+  .footer__shop {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
+    padding: 12px 26px;
+    border: 1px solid rgba(21, 17, 13, 0.32);
     font-family: var(--font-sans);
     font-size: 11px;
     letter-spacing: 0.3em;
     text-transform: uppercase;
     color: var(--color-ink);
-    cursor: none;
-    padding: 4px 0 4px 14px;
-    transition: gap 0.4s var(--ease-editorial), color 0.4s;
+    background: transparent;
+    justify-self: center;
+    transition: background 0.45s var(--ease-editorial),
+      color 0.45s var(--ease-editorial),
+      border-color 0.45s var(--ease-editorial),
+      gap 0.45s var(--ease-editorial),
+      transform 0.45s var(--ease-soft);
   }
-  .footer__news button svg {
+  .footer__shop svg {
     width: 14px;
     height: 14px;
-    transition: transform 0.4s var(--ease-editorial);
+    transition: transform 0.45s var(--ease-editorial);
   }
-  .footer__news button:hover { color: var(--color-cognac); }
-  .footer__news button:hover svg { transform: translateX(4px); }
+  .footer__shop:hover {
+    background: var(--color-ink);
+    color: #f7f3ec;
+    border-color: var(--color-ink);
+    gap: 20px;
+    transform: translateY(-2px);
+  }
+  .footer__shop:hover svg { transform: translateX(4px); }
 
-  .footer__news-thanks {
-    position: absolute;
-    inset: 0;
+  /* ---- Links · right ---- */
+  .footer__links {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    background: var(--color-bone);
-    font-family: var(--font-italic);
-    font-style: italic;
-    font-size: 16px;
-    color: var(--color-cognac);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s var(--ease-editorial);
-    letter-spacing: 0.01em;
-  }
-  .footer__news.is-sent .footer__news-thanks { opacity: 1; }
-
-  /* Policies */
-  .footer__links {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
-    padding: 0;
-    margin: 0;
+    gap: 28px;
+    justify-self: end;
   }
   .footer__links a {
-    font-family: var(--font-display);
-    font-size: 16px;
+    position: relative;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
     color: var(--color-ink);
-    transition: color 0.35s, transform 0.35s var(--ease-soft);
-    display: inline-block;
-    width: fit-content;
+    padding-bottom: 3px;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size 0.5s var(--ease-editorial), color 0.4s;
   }
   .footer__links a:hover {
     color: var(--color-cognac);
-    transform: translateX(3px);
+    background-size: 100% 1px;
   }
 
-  /* ---- Bottom row: brand · ig · meta ---- */
-  .footer__bottom {
-    max-width: 1500px;
-    margin: 0 auto 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 30px;
-    flex-wrap: wrap;
-  }
-  .footer__brand {
-    display: flex;
-    align-items: center;
-    gap: 22px;
-  }
-  .footer__brand :global(img) {
-    height: 44px;
-    width: auto;
-  }
-  .footer__tag {
-    font-family: var(--font-sans);
-    font-size: 11px;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    color: var(--color-stone);
-  }
-
-  .footer__social {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    color: rgba(21, 17, 13, 0.7);
-    font-family: var(--font-sans);
-    font-size: 12px;
-    letter-spacing: 0.06em;
-    transition: color 0.4s, transform 0.4s var(--ease-soft);
-  }
-  .footer__social svg {
-    width: 18px;
-    height: 18px;
-  }
-  .footer__social:hover {
-    color: var(--color-ink);
-    transform: translateY(-1px);
-  }
-  .footer__social-handle {
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.4s;
-    padding-bottom: 1px;
-  }
-  .footer__social:hover .footer__social-handle {
-    border-bottom-color: var(--color-ink);
-  }
-
+  /* ---- Meta · hairline divider above, centered ---- */
   .footer__meta {
     display: flex;
     align-items: center;
-    gap: 18px;
-    font-family: var(--font-sans);
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    color: rgba(21, 17, 13, 0.62);
-  }
-  .footer__sep { color: rgba(21, 17, 13, 0.25); }
-
-  /* ---- Payments row · minimal text line ---- */
-  .footer__pay-row {
-    max-width: 1500px;
-    margin: 0 auto;
-    padding-top: 22px;
-    border-top: 1px solid rgba(21, 17, 13, 0.08);
-    display: flex;
-    align-items: center;
     justify-content: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .footer__pay-label {
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(21, 17, 13, 0.08);
     font-family: var(--font-sans);
     font-size: 10px;
     letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: var(--color-stone);
+    color: rgba(21, 17, 13, 0.45);
+    max-width: 1500px;
+    margin: 0 auto;
+    width: 100%;
   }
-  .footer__pay-list {
-    font-family: var(--font-italic);
-    font-style: italic;
-    font-weight: 300;
-    font-size: 13px;
-    color: rgba(21, 17, 13, 0.55);
-    letter-spacing: 0.02em;
-  }
+  .footer__sep { color: rgba(21, 17, 13, 0.25); }
 
-  /* ---- Responsive ---- */
-  @media (max-width: 1100px) {
-    .footer__top { gap: 56px; }
-  }
+  /* ---- Tablet (≤900px) · collapse the 3-column row to stacked center ---- */
   @media (max-width: 900px) {
-    .footer { padding: 60px 7vw 24px; }
-    .footer__top {
+    .footer { padding: 40px 6vw 26px; gap: 22px; }
+    .footer__row {
       grid-template-columns: 1fr;
-      gap: 40px;
-      padding-bottom: 40px;
-      margin-bottom: 40px;
-    }
-    .footer__bottom {
-      flex-direction: column;
-      align-items: flex-start;
+      justify-items: center;
       gap: 22px;
+      text-align: center;
     }
-    .footer__brand { gap: 16px; }
-    .footer__brand :global(img) { height: 38px; }
+    .footer__brand,
+    .footer__shop,
+    .footer__links { justify-self: center; }
   }
   @media (max-width: 600px) {
-    .footer { padding: 56px 6vw 22px; }
-    .footer__col-text { font-size: 15px; max-width: 100%; }
-    .footer__news { max-width: 100%; }
-    .footer__news input { font-size: 15px; min-width: 0; }
-    .footer__news button { padding-left: 10px; }
-    .footer__news-label { display: none; }
-    .footer__links a { font-size: 15px; }
     .footer__brand {
       flex-direction: column;
-      align-items: flex-start;
       gap: 10px;
     }
-    .footer__tag { font-size: 10px; letter-spacing: 0.22em; }
-    .footer__meta {
-      gap: 6px;
-      flex-direction: column;
-      align-items: flex-start;
-      font-size: 11px;
-      line-height: 1.5;
-    }
-    .footer__sep { display: none; }
-    .footer__pay-row {
-      flex-direction: column;
-      gap: 6px;
-      text-align: left;
-      align-items: flex-start;
-      padding-top: 18px;
-    }
-    .footer__pay-list { font-size: 12px; }
+    .footer__brand :global(img) { height: 52px; }
+    .footer__tag { font-size: 10px; letter-spacing: 0.28em; }
+    .footer__links { gap: 22px; }
+    .footer__links a { font-size: 10px; letter-spacing: 0.24em; }
+    .footer__shop { padding: 11px 22px; font-size: 10px; letter-spacing: 0.24em; }
+    .footer__meta { font-size: 9px; letter-spacing: 0.24em; gap: 8px; }
   }
 </style>

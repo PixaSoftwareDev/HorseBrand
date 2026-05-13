@@ -2,6 +2,7 @@
 import { type Lang, useTranslations } from "@/i18n/ui";
 import Reveal from "@/components/shared/Reveal.astro";
 import { cldImage } from "@/lib/cloudinary";
+import { CLD_IDS } from "@/lib/cloudinaryAssets";
 import {
   WHATSAPP_URL,
   WHATSAPP_NUMBER_DISPLAY,
@@ -16,7 +17,7 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const hours = lang === "es" ? ATELIER_HOURS_ES : ATELIER_HOURS_EN;
-const heroImage = cldImage("v1778360916/IMG_3017_cijgiv.jpg", 1800);
+const heroImage = cldImage(CLD_IDS.IMG_3116, 1800);
 ---
 
 <section class="contact" id="contacto">

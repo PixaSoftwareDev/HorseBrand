@@ -8,9 +8,9 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// PLACEHOLDER · usuario va a swappear por foto del taller / saddle vintage.
-// Por ahora uso una imagen de cuero (cartera grabada) que sugiere oficio.
-const originImg = cldImage(CLD_IDS.IMG_3144, 1800);
+// Caballo de competición — vincula directo al copy "vistiendo caballos de
+// competición". El filter sepia(0.08) del componente le da el patine de archivo.
+const originImg = cldImage(CLD_IDS.CHA_2032, 1800);
 ---
 
 <section class="origen" id="origen" aria-label={t("origen.eyebrow")}>
@@ -20,15 +20,12 @@ const originImg = cldImage(CLD_IDS.IMG_3144, 1800);
       <div data-scroll-reveal class="origen__media-frame">
         <img
           src={originImg}
-          alt={t("origen.eyebrow")}
+          alt={t("origen.caption")}
           loading="lazy"
           decoding="async"
         />
-        <div class="origen__year" aria-hidden="true">
-          <span class="origen__year-label">{t("origen.year_label")}</span>
-          <span class="origen__year-value">{t("origen.year_value")}</span>
-        </div>
       </div>
+      <figcaption class="origen__caption">{t("origen.caption")}</figcaption>
     </Reveal>
 
     <!-- Text side · staggered reveals -->
@@ -68,6 +65,10 @@ const originImg = cldImage(CLD_IDS.IMG_3144, 1800);
   }
 
   /* ---- Image side ---- */
+  :global(.origen__media) {
+    display: flex;
+    flex-direction: column;
+  }
   .origen__media-frame {
     position: relative;
     aspect-ratio: 4 / 5;
@@ -79,57 +80,40 @@ const originImg = cldImage(CLD_IDS.IMG_3144, 1800);
     height: 100%;
     object-fit: cover;
     display: block;
-    /* Subtle vintage tone — sepia + slight desaturation evokes "archive". */
-    filter: saturate(0.78) contrast(1.05) sepia(0.08);
+    /* Subtle archive tone — desaturate + slight contrast + darken so the
+     * photo matches the moody palette of the rest of the site (Caballo,
+     * Heritage). A whisper of sepia keeps the "1985" feel without tinting. */
+    filter: saturate(0.75) contrast(1.05) brightness(0.88) sepia(0.06);
     transition: transform 1.4s var(--ease-soft);
     transform: scale(1.02);
   }
   .origen__media:hover .origen__media-frame img {
     transform: scale(1.06);
   }
-
-  /* Year stamp — floating editorial badge on the image */
-  .origen__year {
+  /* Editorial scrim — soft top + bottom shading so the photo doesn't feel
+   * "flat clarito" against the paper background. Stronger at the bottom
+   * where the caption sits, leaving the subject (rider + horse) untouched. */
+  .origen__media-frame::after {
+    content: "";
     position: absolute;
-    bottom: -28px;
-    left: -28px;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: var(--color-ink);
-    color: var(--color-gold);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    box-shadow: 0 18px 40px -10px rgba(15, 11, 8, 0.4);
-    animation: yearRotate 28s linear infinite;
+    inset: 0;
+    background: linear-gradient(180deg,
+      rgba(15, 11, 8, 0.14) 0%,
+      transparent 28%,
+      transparent 72%,
+      rgba(15, 11, 8, 0.22) 100%);
+    pointer-events: none;
   }
-  .origen__year-label {
+
+  /* Editorial caption — same convention as Manifesto. */
+  .origen__caption {
+    margin-top: 18px;
     font-family: var(--font-sans);
-    font-size: 9.5px;
-    letter-spacing: 0.42em;
+    font-size: 10.5px;
+    letter-spacing: 0.34em;
     text-transform: uppercase;
-    color: rgba(176, 133, 82, 0.7);
-  }
-  .origen__year-value {
-    font-family: var(--font-display);
-    font-size: 26px;
-    line-height: 1;
-    color: var(--color-gold);
-    letter-spacing: 0.04em;
-  }
-  @keyframes yearRotate {
-    to { transform: rotate(360deg); }
-  }
-  /* Counter-rotate inner text so it stays upright while the badge spins */
-  .origen__year-label,
-  .origen__year-value {
-    animation: yearCounterRotate 28s linear infinite;
-  }
-  @keyframes yearCounterRotate {
-    to { transform: rotate(-360deg); }
+    color: var(--color-stone);
+    align-self: flex-start;
   }
 
   /* ---- Text side ---- */
@@ -182,7 +166,6 @@ const originImg = cldImage(CLD_IDS.IMG_3144, 1800);
   @media (max-width: 1024px) {
     .origen { padding: 110px 0 120px; }
     .origen__grid { gap: 60px; }
-    .origen__year { width: 120px; height: 120px; bottom: -20px; left: -20px; }
   }
   @media (max-width: 768px) {
     .origen { padding: 90px 0 100px; }
@@ -191,13 +174,6 @@ const originImg = cldImage(CLD_IDS.IMG_3144, 1800);
       gap: 50px;
     }
     .origen__media-frame { max-width: 460px; aspect-ratio: 4 / 5; }
-    .origen__year {
-      width: 100px;
-      height: 100px;
-      bottom: -16px;
-      left: -16px;
-    }
-    .origen__year-value { font-size: 22px; }
   }
   @media (max-width: 400px) {
     .origen { padding: 70px 0 80px; }

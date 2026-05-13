@@ -24,10 +24,8 @@ export const INSTAGRAM_HANDLE = "@horsebrand.lifestyle";
 export const INSTAGRAM_URL = "https://instagram.com/horsebrand.lifestyle";
 
 /**
- * Policy URLs — point to the corresponding pages inside Tiendanube
- * (the source of truth for shipping / returns / terms). Update with the
- * real slugs once Tiendanube is live.
+ * Policy URL — Tiendanube terms page. Currently the slug 404s, so the
+ * footer link is hidden (see Footer.astro). Restore the link once the
+ * Tiendanube terms page is live and confirm the final slug here.
  */
-export const SHIPPING_URL = "https://www.horse-brand.com/envios/";
-export const RETURNS_URL = "https://www.horse-brand.com/cambios-y-devoluciones/";
-export const TERMS_URL = "https://www.horse-brand.com/terminos-y-condiciones/";
+export const TERMS_URL: string | null = null;

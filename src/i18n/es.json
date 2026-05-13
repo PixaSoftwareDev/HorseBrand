@@ -7,9 +7,9 @@
   "nav.shop": "Tienda",
 
   "hero.eyebrow": "Lifestyle Equestrian Atelier",
-  "hero.title_1": "Hecho en cuero,",
-  "hero.title_2": "vivido con elegancia.",
-  "hero.sub": "Marroquinería artesanal inspirada en el mundo ecuestre. Cada pieza nace en el establo, se forja en el taller y vive contigo.",
+  "hero.title_1": "El caballo guía.",
+  "hero.title_2": "El cuero recuerda.",
+  "hero.sub": "Atelier ecuestre de lujo silencioso. Marroquinería, monturas y mobiliario nacidos del oficio. Buenos Aires · presencia en más de 30 países.",
   "hero.cta_1": "Descubrir la colección",
   "hero.cta_2": "Ver galería",
   "hero.scroll": "Scroll",
@@ -26,6 +26,7 @@
   "manifesto.li_1": "Origen en el oficio del montura",
   "manifesto.li_2": "Presencia en más de 30 países",
   "manifesto.li_3": "Lujo silencioso, atemporal",
+  "manifesto.caption": "— Montura ecuestre · Pieza de archivo",
 
   "origen.eyebrow": "El origen",
   "origen.title_1": "Nacida en el oficio",
@@ -33,8 +34,7 @@
   "origen.p1": "En el origen hay un taller, un cuero curtido a mano y un caballo. Una marca de monturas que comenzó vistiendo caballos de competición y nunca dejó de hacerlo.",
   "origen.p2": "Cuatro décadas después, el oficio sigue intacto. Cada pieza nace de la misma vocación: servir al caballo. Lo demás —el bolso, el sillón, la mesa— vino después, como extensión natural de la misma mirada.",
   "origen.quote": "El caballo guía. El oficio sigue.",
-  "origen.year_label": "Origen",
-  "origen.year_value": "1985",
+  "origen.caption": "— Salto ecuestre",
 
   "caballo.eyebrow": "El caballo",
   "caballo.title_1": "Habla un",
@@ -42,7 +42,7 @@
   "caballo.word_1": "Libertad",
   "caballo.word_2": "Lealtad",
   "caballo.word_3": "Raíces",
-  "caballo.word_4": "Idioma",
+  "caballo.word_4": "Silencio",
   "caballo.closer": "Todo se reúne alrededor de un ser inigualable.",
 
   "polo.eyebrow": "Sport ecuestre",
@@ -135,17 +135,11 @@
   "contact.direct_email_label": "O por correo",
 
   "footer.tag": "Lifestyle Equestrian Atelier",
-  "footer.rights": "Crafted with leather & love.",
-  "footer.newsletter_label": "Lookbook AW",
-  "footer.newsletter_text": "Recibí cada nueva colección y editorial directamente en tu correo.",
-  "footer.newsletter_placeholder": "tu@email.com",
-  "footer.newsletter_cta": "Suscribirme",
-  "footer.newsletter_thanks": "Gracias por suscribirte ✓",
-  "footer.policies": "Políticas",
-  "footer.policy_shipping": "Envíos",
-  "footer.policy_returns": "Cambios y devoluciones",
-  "footer.policy_terms": "Términos y condiciones",
-  "footer.payment_label": "Métodos de pago",
+  "footer.policy_terms": "Términos",
+  "footer.visit_shop": "Visitar la tienda",
+  "footer.links_label": "Enlaces",
+
+  "splash.skip": "click para continuar",
 
   "audio.label": "Activar música ambient",
 
