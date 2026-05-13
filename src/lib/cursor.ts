@@ -1,3 +1,5 @@
+import { lenisScrollTo } from "./lenis";
+
 export function initCursor(): void {
   if (window.matchMedia("(hover: none)").matches) return;
   const cursor = document.getElementById("cursor");
@@ -44,6 +46,9 @@ export function initNavScrollState(): void {
 }
 
 export function initSmoothAnchors(): void {
+  // Routed through lenisScrollTo so anchor jumps share the same easing as
+  // the global wheel-scroll. The helper falls back to native smooth scroll
+  // when Lenis is not active (reduced-motion users).
   document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
     a.addEventListener("click", (e) => {
       const id = a.getAttribute("href");
@@ -51,7 +56,7 @@ export function initSmoothAnchors(): void {
       const target = document.querySelector<HTMLElement>(id);
       if (!target) return;
       e.preventDefault();
-      window.scrollTo({ top: target.offsetTop - 60, behavior: "smooth" });
+      lenisScrollTo(target, -60);
     });
   });
 }

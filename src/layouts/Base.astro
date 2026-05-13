@@ -99,9 +99,15 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
       import { initReveal } from "@/lib/reveal";
       import { initScrollReveal } from "@/lib/scrollReveal";
       import { initCursor, initNavScrollState, initSmoothAnchors } from "@/lib/cursor";
+      import { initLenis } from "@/lib/lenis";
       import { onPageReady } from "@/lib/onPageReady";
 
       function bootstrap(): void {
+        // Lenis first: it owns the rAF ticker that GSAP ScrollTrigger and any
+        // future scroll-coupled timeline reads from. Booting it before the
+        // other modules means initSmoothAnchors picks up the live instance
+        // when it routes anchor clicks through lenisScrollTo.
+        initLenis();
         initCursor();
         initNavScrollState();
         initSmoothAnchors();
