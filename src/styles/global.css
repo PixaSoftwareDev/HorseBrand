@@ -6,7 +6,12 @@
 *::before,
 *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html {
-  scroll-behavior: smooth;
+  /* No `scroll-behavior: smooth` here — Lenis owns the easing now. The
+   * native smooth-scroll fights Lenis on every programmatic scroll
+   * (anchor jumps, scrollIntoView, history navigation) and the result is
+   * a perceptual no-op: you can't tell which one drove the motion.
+   * Under prefers-reduced-motion we explicitly fall back to native scroll,
+   * see the bottom of this file. */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scrollbar-width: none; /* Firefox */
@@ -17,6 +22,40 @@ html {
    * Safari (which otherwise creates a horizontal scroll bar even when body
    * has overflow-x: hidden). Safari 16+ / Chrome 90+ supported. */
   overflow-x: clip;
+}
+
+/* ========== LENIS · smooth-scroll engine integration ==========
+ * Lenis adds `lenis lenis-smooth` to <html> on init. These rules make
+ * the page behave as Lenis expects:
+ *
+ *  - `height: auto` — Lenis sets the wrapper height itself; forcing
+ *    100% here would clamp the document to viewport height.
+ *  - `scroll-behavior: auto !important` — kills any inherited native
+ *    smooth-scroll so Lenis is the only thing easing the scroll.
+ *  - `data-lenis-prevent` — opt-out hook. Add this attribute to any
+ *    inner container (e.g. modal, drawer) that needs to scroll
+ *    independently without Lenis hijacking its wheel.
+ *  - `.lenis-stopped` — Lenis adds this class when scroll is locked
+ *    (e.g. during a programmatic scrollTo lock). `overflow: clip`
+ *    prevents content from peeking out during the freeze.
+ *  - iframes get pointer-events:none while a Lenis programmatic scroll
+ *    is running, otherwise they steal the wheel mid-animation.
+ */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 html::-webkit-scrollbar,
 body::-webkit-scrollbar { display: none; } /* Chrome, Safari, modern Edge */

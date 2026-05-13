@@ -91,13 +91,19 @@ export function initLenis(): void {
   if (lenisInstance) return;
 
   lenisInstance = new Lenis({
-    // 1.2s feels editorial — slow enough that motion reads as "designed",
-    // fast enough that fast scrolls still feel responsive.
-    duration: 1.2,
-    // Exponential-out easing. The visible cue: the page glides to a stop
-    // instead of snapping to a halt.
-    easing: (t: number): number => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    // Lerp mode (not `duration`): the scroll position continuously
+    // interpolates toward the target by `lerp` each frame. This gives the
+    // "trailing" feel of Floema / Aesop — the page is always *catching
+    // up* to where you scrolled to, instead of running discrete animations
+    // per wheel tick. 0.08 is the sweet spot:
+    //   - lower (0.04) → very floaty, can feel laggy on long scrolls
+    //   - higher (0.15) → almost native, defeats the point
+    lerp: 0.08,
     smoothWheel: true,
+    // Each wheel tick is amplified slightly so a single wheel notch travels
+    // further than native — combined with the lerp easing, this is what
+    // creates the "the page drifts with momentum" perception.
+    wheelMultiplier: 1.1,
     // Touch is left alone — native momentum scrolling on mobile is already
     // tuned by the OS and overriding it makes the page feel laggy on iOS.
     syncTouch: false,
@@ -118,14 +124,17 @@ export function initLenis(): void {
   gsap.ticker.lagSmoothing(0);
 
   // Cleanup on SPA navigation so we don't leak rAF tickers or listeners
-  // when the user moves between locale pages.
-  document.addEventListener(
-    "astro:before-swap",
-    () => {
-      destroyLenis();
-    },
-    { once: true }
-  );
+  // when the user moves between locale pages. Registered once at module
+  // scope (not per-init) so it survives across re-inits and only ever
+  // attaches a single handler.
+  ensureSwapHandler();
+}
+
+let swapHandlerWired = false;
+function ensureSwapHandler(): void {
+  if (swapHandlerWired) return;
+  swapHandlerWired = true;
+  document.addEventListener("astro:before-swap", destroyLenis);
 }
 
 function destroyLenis(): void {
