@@ -100,6 +100,7 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
       import { initScrollReveal } from "@/lib/scrollReveal";
       import { initCursor, initNavScrollState, initSmoothAnchors } from "@/lib/cursor";
       import { initLenis } from "@/lib/lenis";
+      import { initHeroExit } from "@/lib/heroExit";
       import { onPageReady } from "@/lib/onPageReady";
 
       function bootstrap(): void {
@@ -114,6 +115,10 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
         initReveal();
         initScrollReveal();
         initAmbientAudio();
+        // Hero → Manifesto envolvente. Internally defers itself until the
+        // IntroSplash dispatches "hb:intro-done" so the pin starts from the
+        // Hero's settled post-intro state, not its pre-animation snapshot.
+        initHeroExit();
       }
 
       onPageReady(bootstrap);
