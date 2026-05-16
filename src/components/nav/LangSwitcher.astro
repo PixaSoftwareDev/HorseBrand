@@ -1,21 +1,26 @@
 ---
 import { type Lang } from "@/i18n/ui";
-import { alternateLang, localizedPath } from "@/i18n/utils";
+import { localizedPath } from "@/i18n/utils";
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
-const other = alternateLang(lang);
+
+// Cada botón apunta SIEMPRE al home de su idioma — ES → "/", EN → "/en/".
+// El active state se calcula contra la lang actual, pero el destino del
+// link es fijo, así clickear ES desde EN te lleva a ES (y viceversa).
+const esHref = localizedPath("es", "/");
+const enHref = localizedPath("en", "/");
 ---
 
 <div class="lang">
   <a
-    href={localizedPath(lang, "/")}
+    href={esHref}
     class:list={["lang__btn", lang === "es" && "active"]}
     aria-current={lang === "es" ? "true" : undefined}
   >ES</a>
   <span aria-hidden="true">/</span>
   <a
-    href={localizedPath(other === "es" ? "es" : "en", "/")}
+    href={enHref}
     class:list={["lang__btn", lang === "en" && "active"]}
     aria-current={lang === "en" ? "true" : undefined}
   >EN</a>
