@@ -1,13 +1,13 @@
 ---
 order: 1
 name:
-  es: Weekender
-  en: Weekender
+  es: Banco Hacienda
+  en: Hacienda Bench
 tagline:
-  es: Cognac · Cuero pleno flor
-  en: Cognac · Full-grain leather
+  es: Roble curado · Cuero pleno flor
+  en: Cured oak · Full-grain leather
 badge: atelier
-image: IMG_2977
-alt: Weekender Cognac
-tiendanubeUrl: https://www.horse-brand.com/productos/weekender
+image: LIFE_INE_39
+alt: Banco Hacienda — roble y cuero
+tiendanubeUrl: https://www.horse-brand.com/productos/muebles
 ---

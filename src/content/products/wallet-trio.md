@@ -1,12 +1,12 @@
 ---
 order: 5
 name:
-  es: Wallet Trio
-  en: Wallet Trio
+  es: Cartera Estancia
+  en: Estancia Bag
 tagline:
-  es: Black · Cognac · Espresso
-  en: Black · Cognac · Espresso
-image: IMG_3054
-alt: Wallet Trio
-tiendanubeUrl: https://www.horse-brand.com/productos/wallet-trio
+  es: Cognac · Costura a mano
+  en: Cognac · Hand-stitched
+image: IMG_2978
+alt: Cartera Estancia — cognac
+tiendanubeUrl: https://www.horse-brand.com/productos/bolsos
 ---

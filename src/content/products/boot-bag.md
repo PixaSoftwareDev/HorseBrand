@@ -1,13 +1,12 @@
 ---
-order: 3
+order: 2
 name:
-  es: Boot Bag
-  en: Boot Bag
+  es: Manta Pampa
+  en: Pampa Throw
 tagline:
-  es: Taupe · Hecho a medida
-  en: Taupe · Bespoke
-badge: handmade
+  es: Lana merino · Ribete de cuero
+  en: Merino wool · Leather trim
 image: IMG_2971
-alt: Boot Bag
-tiendanubeUrl: https://www.horse-brand.com/productos/boot-bag
+alt: Manta Pampa — lana merino y cuero
+tiendanubeUrl: https://www.horse-brand.com/productos/home
 ---

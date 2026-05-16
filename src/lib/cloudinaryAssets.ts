@@ -58,6 +58,16 @@ export const CLD_IDS = {
   IMG_3145: "v1778360888/IMG_3145_celw0a.jpg",
   IMG_3146: "v1778360884/IMG_3146_a8kprp.jpg",
   CHA_2032: "v1778617128/CHA-2032_qdtwh1.jpg",
+  LIFE_INE_41: "v1778942313/2026.5.14HorseLifeStyle_IneSchiopetto-41_sdvi6v.jpg",
+  LIFE_INE_17: "v1778617695/2026.5.14HorseLifeStyle_IneSchiopetto-17_nrmowg.jpg",
+  LIFE_INE_22: "v1778942659/2026.5.14HorseLifeStyle_IneSchiopetto-22_wtcjve.jpg",
+  LIFE_INE_39: "v1778943114/2026.5.14HorseLifeStyle_IneSchiopetto-39_kcwqia.jpg",
+  LIFE_INE_63: "v1778945249/2026.5.14HorseLifeStyle_IneSchiopetto-63_hvmwrz.jpg",
+  LIFE_INE_43: "v1778953244/2026.5.14HorseLifeStyle_IneSchiopetto-43_ywy8xd.jpg",
+  LIFE_INE_82: "v1778953452/2026.5.14HorseLifeStyle_IneSchiopetto-82_m3xbei.jpg",
+  IMG_3063: "v1778953557/IMG_3063_fsziul.jpg",
+  IMG_2955_B: "v1778953868/IMG_2955_ssizkf.jpg",
+  LIFE_INE_91: "v1778954155/2026.5.14HorseLifeStyle_IneSchiopetto-91_tz3teb.jpg",
 } as const;
 
 export type CldKey = keyof typeof CLD_IDS;
