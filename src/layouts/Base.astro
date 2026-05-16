@@ -4,6 +4,7 @@ import { ClientRouter } from "astro:transitions";
 import Nav from "@/components/nav/Nav.astro";
 import MobileMenu from "@/components/nav/MobileMenu.astro";
 import Cursor from "@/components/ui/Cursor.astro";
+import SectionMarker from "@/components/ui/SectionMarker.astro";
 import Lightbox from "@/components/ui/Lightbox.astro";
 import IntroSplash from "@/components/ui/IntroSplash.astro";
 import PageLoader from "@/components/ui/PageLoader.astro";
@@ -70,15 +71,27 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
     <meta name="twitter:description" content={finalDesc} />
     <meta name="twitter:image" content={ogImage} />
 
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="https://res.cloudinary.com/dukv3ov6t/image/upload/e_trim/v1778936977/HB_lite_positivo_nopab6.svg" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="https://res.cloudinary.com/dukv3ov6t/image/upload/f_png,e_trim,c_pad,b_transparent,w_64,h_64/v1778936977/HB_lite_positivo_nopab6.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://res.cloudinary.com/dukv3ov6t/image/upload/f_png,e_trim,c_pad,b_transparent,w_384,h_384/v1778936977/HB_lite_positivo_nopab6.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://res.cloudinary.com/dukv3ov6t/image/upload/f_png,e_trim,c_pad,b_transparent,w_360,h_360/v1778936977/HB_lite_positivo_nopab6.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fraunces (editorial display + italic with swashes; variable opsz,
+         wght, SOFT) + Inter (modern UI sans). Replaces the previous
+         Cormorant Garamond / Jost pair which had become the "free luxe
+         template" cliché — see tokens.css for the brief and reasoning. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,0..100;1,9..144,300..700,0..100&family=Inter:wght@300..600&display=swap"
+    />
     <ClientRouter />
   </head>
   <body>
     <PageLoader />
     <IntroSplash lang={lang} />
     <Cursor />
+    <SectionMarker lang={lang} />
     <Nav lang={lang} />
     <MobileMenu lang={lang} />
 
@@ -101,6 +114,7 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
       import { initCursor, initNavScrollState, initSmoothAnchors } from "@/lib/cursor";
       import { initLenis } from "@/lib/lenis";
       import { initHeroExit } from "@/lib/heroExit";
+      import { initSectionMarker } from "@/lib/sectionMarker";
       import { onPageReady } from "@/lib/onPageReady";
 
       function bootstrap(): void {
@@ -115,6 +129,7 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
         initReveal();
         initScrollReveal();
         initAmbientAudio();
+        initSectionMarker();
         // Hero → Manifesto envolvente. Internally defers itself until the
         // IntroSplash dispatches "hb:intro-done" so the pin starts from the
         // Hero's settled post-intro state, not its pre-animation snapshot.

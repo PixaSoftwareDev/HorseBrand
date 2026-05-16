@@ -1,184 +1,33 @@
 ---
-import { type Lang, useTranslations } from "@/i18n/ui";
-
-interface Props { lang: Lang }
-const { lang } = Astro.props;
-const t = useTranslations(lang);
+// Intro splash · stub.
+//
+// El splash negro con la frase italic ("El cuero recuerda / El caballo
+// perdura") se eliminó por pedido del usuario. La página ahora carga
+// directamente al Hero después del PageLoader (logo), como si fuera
+// un refresh.
+//
+// Este componente queda como stub porque el resto del sitio (Hero
+// reveals, heroExit pin, Footer, audio, Craft) está gateado por
+// `body.intro-done` + el evento `hb:intro-done`. En vez de tocar
+// todos esos archivos, este script se asegura de que ambas señales
+// se disparen apenas el PageLoader termina, así toda la cadena de
+// animaciones sigue funcionando igual.
 ---
 
-<div id="introSplash" class="splash" aria-hidden="false" role="presentation">
-  <div class="splash__inner">
-    <h1 class="splash__title">
-      <span class="splash__line splash__line--1">{t("hero.title_1")}</span>
-      <span class="splash__line splash__line--2">{t("hero.title_2")}</span>
-    </h1>
-  </div>
-  <span class="splash__skip" aria-hidden="true">{t("splash.skip")}</span>
-</div>
-
-<style>
-  .splash {
-    position: fixed;
-    inset: 0;
-    z-index: 9998;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    cursor: none;
-    transition: background 1.1s var(--ease-editorial), visibility 0s linear 1.2s;
-  }
-  .splash.is-out {
-    background: rgba(0, 0, 0, 0);
-    visibility: hidden;
-    pointer-events: none;
-  }
-  .splash.is-instant {
-    display: none;
-  }
-
-  .splash__inner {
-    position: relative;
-    text-align: center;
-    padding: 0 6vw;
-    max-width: 1500px;
-    z-index: 2;
-    transition: transform 1.1s var(--ease-editorial), opacity 0.9s var(--ease-editorial);
-    will-change: transform, opacity;
-  }
-  /* on exit, the phrase drifts toward the hero title position (left, slightly down) and fades */
-  .splash.is-out .splash__inner {
-    transform: translate(-22%, 6%) scale(0.62);
-    opacity: 0;
-  }
-
-  .splash__title {
-    font-family: var(--font-italic);
-    font-weight: 500;
-    font-size: clamp(48px, 8vw, 132px);
-    line-height: 1.02;
-    letter-spacing: 0.005em;
-    color: #f7f3ec;
-    margin: 0;
-  }
-
-  .splash__line {
-    display: block;
-    will-change: transform, opacity, filter, clip-path;
-  }
-
-  /* line 1 — enter (blur+lift), hold, exit (blur+lift) */
-  .splash__line--1 {
-    opacity: 0;
-    transform: translateY(48px) scale(0.94);
-    filter: blur(18px);
-    text-shadow: 0 12px 40px rgba(176, 133, 82, 0.25);
-  }
-  :global(body.loader-done) .splash__line--1 {
-    animation: splashLine1Full 3.4s var(--ease-soft) 0.25s forwards;
-  }
-
-  /* line 2 — italic, reveal with clip-path, then fade up */
-  .splash__line--2 {
-    font-style: italic;
-    font-weight: 300;
-    color: #f7f3ec;
-    clip-path: inset(0 100% 0 0);
-    -webkit-clip-path: inset(0 100% 0 0);
-    opacity: 1;
-  }
-  :global(body.loader-done) .splash__line--2 {
-    animation: splashLine2Full 3s cubic-bezier(0.77, 0, 0.18, 1) 1.4s forwards;
-  }
-
-  @keyframes splashLine1Full {
-    0%   { opacity: 0; transform: translateY(48px) scale(0.94); filter: blur(18px); }
-    35%  { opacity: 1; transform: translateY(0)    scale(1);    filter: blur(0); }
-    72%  { opacity: 1; transform: translateY(0)    scale(1);    filter: blur(0); }
-    100% { opacity: 0; transform: translateY(-16px) scale(0.97); filter: blur(6px); }
-  }
-  @keyframes splashLine2Full {
-    0%   { opacity: 1; clip-path: inset(0 100% 0 0); -webkit-clip-path: inset(0 100% 0 0); transform: translateY(0); }
-    45%  { opacity: 1; clip-path: inset(0 0 0 0);     -webkit-clip-path: inset(0 0 0 0);     transform: translateY(0); }
-    72%  { opacity: 1; clip-path: inset(0 0 0 0);     -webkit-clip-path: inset(0 0 0 0);     transform: translateY(0); }
-    100% { opacity: 0; clip-path: inset(0 0 0 0);     -webkit-clip-path: inset(0 0 0 0);     transform: translateY(-16px); }
-  }
-
-  .splash__skip {
-    position: absolute;
-    bottom: 36px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: var(--font-sans);
-    font-size: 10px;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: rgba(247, 243, 236, 0.35);
-    opacity: 0;
-  }
-  :global(body.loader-done) .splash__skip {
-    animation: fadeIn 1s ease-out 2.6s forwards;
-  }
-
-  /* lock body scroll while splash is visible */
-  :global(body.splash-active) {
-    overflow: hidden;
-  }
-</style>
-
 <script>
-  import { onPageReady } from "@/lib/onPageReady";
-
-  const KEY = "hb_splash_seen";
-  const HOLD_MS = 4900;
-
-  function runSplash(): void {
-    // wait for the page-loader to finish before kicking off the splash timeline
-    if (!document.body.classList.contains("loader-done")) {
-      document.body.addEventListener("hb:loader-done", runSplash, { once: true });
-      return;
-    }
-
-    const splash = document.getElementById("introSplash");
-    if (!splash) return;
-
-    if (sessionStorage.getItem(KEY) === "1") {
-      splash.classList.add("is-instant");
-      document.body.classList.add("intro-done");
-      window.dispatchEvent(new CustomEvent("hb:intro-done", { detail: { gesture: false } }));
-      return;
-    }
-
-    document.body.classList.add("splash-active");
-
-    const dismiss = (gesture: boolean): void => {
-      if (splash.classList.contains("is-out")) return;
-      splash.classList.add("is-out");
-      document.body.classList.remove("splash-active");
-      document.body.classList.add("intro-done");
-      sessionStorage.setItem(KEY, "1");
-      window.dispatchEvent(new CustomEvent("hb:intro-done", { detail: { gesture } }));
-      window.setTimeout(() => splash.classList.add("is-instant"), 1300);
-    };
-
-    const auto = window.setTimeout(() => dismiss(false), HOLD_MS);
-
-    splash.addEventListener("click", () => {
-      window.clearTimeout(auto);
-      dismiss(true);
-    });
-    window.addEventListener(
-      "keydown",
-      (e) => {
-        if (["Escape", "Enter", " "].includes(e.key)) {
-          window.clearTimeout(auto);
-          dismiss(true);
-        }
-      },
-      { once: true }
+  function fireIntroDone(): void {
+    if (document.body.classList.contains("intro-done")) return;
+    document.body.classList.add("intro-done");
+    window.dispatchEvent(
+      new CustomEvent("hb:intro-done", { detail: { gesture: false } })
     );
   }
 
-  onPageReady(runSplash);
+  if (document.body.classList.contains("loader-done")) {
+    fireIntroDone();
+  } else {
+    document.body.addEventListener("hb:loader-done", fireIntroDone, {
+      once: true,
+    });
+  }
 </script>

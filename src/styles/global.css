@@ -75,6 +75,18 @@ body {
   cursor: none;
   letter-spacing: 0.005em;
   line-height: 1.5;
+  /* Fraunces is a variable font with an `opsz` (optical sizing) axis. When
+   * `font-optical-sizing: auto` is enabled, the browser feeds the actual
+   * computed font-size into the axis — so headlines get the sharper,
+   * higher-contrast display cut and body copy gets a warmer text cut, all
+   * from a single weight file. Without this declaration the browser would
+   * stay at the default opsz and we'd lose the contrast we picked Fraunces
+   * for. Inter does not use this axis so it's a no-op for sans copy. */
+  font-optical-sizing: auto;
+  /* SOFT axis dialled to 30: subtle warmth in the curves without going
+   * rustic. Applied to the whole document — Fraunces respects it
+   * everywhere it renders. */
+  font-variation-settings: "SOFT" 30;
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
@@ -87,7 +99,17 @@ h1, h2, h3, h4 {
   color: var(--color-ink);
 }
 
-/* ========== CURSOR ========== */
+/* ========== CURSOR ==========
+ * Two-layer custom cursor:
+ *   `.cursor`     — ring that lags behind the pointer at lerp 0.18
+ *                   (set in cursor.ts). Gains `.hover` over any link or
+ *                   button — slightly bigger, cognac border.
+ *   `.cursor-dot` — precise dot snapped 1:1 to the pointer.
+ *
+ * mix-blend-mode: difference inverts whatever's underneath, so the
+ * cursor stays readable on both dark photos and the paper canvas
+ * without colour-switching logic. Magnetic pull on CTAs (`.is-magnetic`)
+ * is independent of the cursor — see the buttons' own translate. */
 .cursor,
 .cursor-dot {
   position: fixed;
@@ -96,13 +118,27 @@ h1, h2, h3, h4 {
   z-index: 9999;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  transition: width 0.35s var(--ease-soft), height 0.35s var(--ease-soft),
-    background-color 0.3s, border-color 0.3s;
+  transition: width 0.35s var(--ease-soft),
+    height 0.35s var(--ease-soft),
+    border-color 0.3s;
   mix-blend-mode: difference;
 }
-.cursor { width: 30px; height: 30px; border: 1px solid #f7f3ec; }
-.cursor-dot { width: 4px; height: 4px; background: #f7f3ec; }
-.cursor.hover { width: 60px; height: 60px; border-color: var(--color-cognac); }
+.cursor {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #f7f3ec;
+}
+.cursor-dot {
+  width: 4px;
+  height: 4px;
+  background: #f7f3ec;
+}
+.cursor.hover {
+  width: 60px;
+  height: 60px;
+  border-color: var(--color-cognac);
+}
+
 @media (hover: none), (max-width: 900px) {
   .cursor, .cursor-dot { display: none; }
   body, button, a { cursor: auto; }
@@ -170,6 +206,22 @@ h2 em {
   background: transparent;
 }
 .btn--dark:hover { background: var(--color-ink); color: #f7f3ec; }
+
+/* Magnetic CTAs — toggled by cursor.ts (`.is-magnetic` class). The button
+ * leans toward the pointer when the pointer is within MAGNETIC_RADIUS of
+ * its centre, then springs back on pointerleave. We use the standalone
+ * CSS `translate` property (NOT `transform: translate(...)`) so the offset
+ * composes cleanly with any existing `transform:` on the same element —
+ * e.g. `.shop-handle` carries `transform: translateY(-50%)` for vertical
+ * centring, and `.hero__btn:hover` adds a 2px lift; both stack on top of
+ * the magnetic offset without override. Modern browsers (Chrome 104+,
+ * Safari 14.1+, Firefox 72+) support `translate` as an independent
+ * property. Transition is on `translate` only so other transforms keep
+ * their original timing. */
+.is-magnetic {
+  translate: var(--magnet-x, 0px) var(--magnet-y, 0px);
+  transition: translate 0.4s var(--ease-soft);
+}
 
 /* ========== REVEAL ========== */
 .reveal {

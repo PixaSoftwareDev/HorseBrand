@@ -1,0 +1,136 @@
+---
+import { type Lang } from "@/i18n/ui";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+
+/*
+ * Section marker — fixed vertical indicator on the left edge that tells
+ * the user which "chapter" of the editorial flow they're reading. The
+ * hero portada has no marker because the brand identity itself is the
+ * orientation cue at scrollY 0; markers begin from the Manifesto.
+ *
+ * Pairs with `sectionMarker.ts` which:
+ *   · reads the `data-sections` payload below (already locale-resolved
+ *     server-side, so the marker says "El Caballo" in ES and "The Horse"
+ *     in EN without re-fetching anything client-side),
+ *   · finds which section is currently sitting under the viewport
+ *     vertical midline on every scroll tick,
+ *   · animates the number + name into a new value when the active
+ *     section changes (no anim mid-scroll inside the same section).
+ */
+const sections = [
+  { id: "manifiesto",  num: "01", label: lang === "es" ? "Manifiesto"  : "Manifesto" },
+  { id: "origen",      num: "02", label: lang === "es" ? "Origen"      : "Origin"    },
+  { id: "caballo",     num: "03", label: lang === "es" ? "El Caballo"  : "The Horse" },
+  { id: "universo",    num: "04", label: lang === "es" ? "Universos"   : "Universes" },
+  { id: "polo",        num: "05", label: lang === "es" ? "Deporte"     : "Sport"     },
+  { id: "coleccion",   num: "06", label: lang === "es" ? "Colección"   : "Collection"},
+  { id: "galeria",     num: "07", label: lang === "es" ? "Galería"     : "Gallery"   },
+  { id: "artesania",   num: "08", label: lang === "es" ? "Artesanía"   : "Craft"     },
+  { id: "patrimonio",  num: "09", label: lang === "es" ? "Patrimonio"  : "Heritage"  },
+  { id: "contacto",    num: "10", label: lang === "es" ? "Contacto"    : "Contact"   },
+];
+---
+
+<aside
+  class="section-marker"
+  id="sectionMarker"
+  aria-hidden="true"
+  data-sections={JSON.stringify(sections)}
+>
+  <span class="section-marker__num" id="sectionMarkerNum"></span>
+  <span class="section-marker__rule" aria-hidden="true"></span>
+  <span class="section-marker__name" id="sectionMarkerName"></span>
+</aside>
+
+<style>
+  /*
+   * Layout: anchored to the left edge, vertically centred. The
+   * `writing-mode: vertical-rl` + `rotate(180deg)` combo turns the
+   * marker so text reads bottom-to-top — same convention as editorial
+   * print margins (Aesop, Cereal magazine). Without the rotate it
+   * would read top-to-bottom which looks like an Asian-language column.
+   *
+   * z-index is below the nav (100) and the cursor (9999) but above all
+   * sections, so it always sits over content as a quiet overlay.
+   */
+  .section-marker {
+    position: fixed;
+    top: 50%;
+    left: 22px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    writing-mode: vertical-rl;
+    transform: translateY(-50%) rotate(180deg);
+    transform-origin: center;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+    pointer-events: none;
+    user-select: none;
+    /* Two coordinated transitions:
+     *   - opacity: hide/show as a whole when the user enters/leaves
+     *     the marker-eligible scroll range (i.e. not at Hero).
+     *   - the children fade individually when the section CHANGES
+     *     so the swap reads as a soft "page turn" not a hard cut. */
+    opacity: 0;
+    transition: opacity 0.6s var(--ease-editorial);
+  }
+  .section-marker.is-visible {
+    opacity: 1;
+  }
+
+  .section-marker__num {
+    font-weight: 500;
+    color: var(--color-cognac);
+    /* The number swaps in via a brief fade keyed by `.is-swapping`.
+     * Slight scale for breath. */
+    transition: opacity 0.35s var(--ease-soft), transform 0.35s var(--ease-soft);
+  }
+  .section-marker.is-swapping .section-marker__num,
+  .section-marker.is-swapping .section-marker__name {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  /* A 1-px gold hairline that visually separates the number from the
+   * name. Rendered horizontally in document space, so after the
+   * writing-mode rotation it appears as a thin vertical bar between
+   * "01" and "Manifiesto" — the editorial spine of the marker. */
+  .section-marker__rule {
+    display: block;
+    width: 14px;
+    height: 1px;
+    background: var(--color-gold);
+    opacity: 0.55;
+  }
+
+  .section-marker__name {
+    color: rgba(21, 17, 13, 0.6);
+    transition: opacity 0.35s var(--ease-soft), transform 0.35s var(--ease-soft);
+  }
+
+  /* Dark-background sections (Heritage at minimum, future ones) get a
+   * lighter palette. The hook is `body.section-marker--dark`, set by
+   * sectionMarker.ts when the active section's CSS background sits in
+   * the dark family. */
+  :global(body.section-marker--dark) .section-marker {
+    color: var(--color-ivory);
+  }
+  :global(body.section-marker--dark) .section-marker__num {
+    color: var(--color-gold);
+  }
+  :global(body.section-marker--dark) .section-marker__name {
+    color: rgba(247, 243, 236, 0.75);
+  }
+
+  /* Hide on touch / phones — the chapter cue lives in the nav there. */
+  @media (hover: none), (max-width: 900px) {
+    .section-marker { display: none; }
+  }
+</style>

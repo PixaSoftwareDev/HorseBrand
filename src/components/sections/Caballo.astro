@@ -24,15 +24,24 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
     <span class="caballo__eyebrow" data-cab-rev>{t("caballo.eyebrow")}</span>
 
     <!-- Type lockup — the image lives INSIDE the letters via background-clip: text.
-         A screen-reader-only span carries the readable copy for a11y. -->
-    <h2
-      class="caballo__mega"
-      style={`background-image: url('${horseImg}')`}
-      aria-label={`${t("caballo.eyebrow")} · ${t("caballo.title_1")} ${t("caballo.title_2")}`}
-      data-cab-rev
-    >
-      <span aria-hidden="true">{megaWord}</span>
-    </h2>
+         A screen-reader-only span carries the readable copy for a11y.
+
+         IMPORTANT: the IntersectionObserver hook (`data-cab-rev`) lives on the
+         WRAPPER, not the <h2>. The wrapper has no clip-path, so its bounding
+         box intersects the viewport normally. The h2's clip-path reveal is then
+         driven via CSS cascade (`.caballo__mega-wrap.is-revealed .caballo__mega`).
+         Earlier the data-cab-rev was on the h2 itself and the `clip-path:
+         inset(100%)` initial state made Chrome report ratio 0 to the IO — the
+         mega-word would never reveal even though it was fully inside viewport. -->
+    <div class="caballo__mega-wrap" data-cab-rev>
+      <h2
+        class="caballo__mega"
+        style={`background-image: url('${horseImg}')`}
+        aria-label={`${t("caballo.eyebrow")} · ${t("caballo.title_1")} ${t("caballo.title_2")}`}
+      >
+        <span aria-hidden="true">{megaWord}</span>
+      </h2>
+    </div>
 
     <p class="caballo__phrase" data-cab-rev>
       <span>{t("caballo.title_1")}</span>
@@ -116,7 +125,7 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
   .caballo__eyebrow {
     font-family: var(--font-sans);
     font-size: 11px;
-    letter-spacing: 0.5em;
+    letter-spacing: 0.4em;
     text-transform: uppercase;
     color: var(--color-cognac);
     opacity: 0;
@@ -125,6 +134,17 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
     margin-bottom: 32px;
   }
   .caballo__eyebrow.is-revealed { opacity: 1; transform: translateY(0); }
+
+  /* ---- MEGA word wrapper ----
+   * The wrapper is what the IO observes (see Caballo.astro markup comment).
+   * It carries no clip-path so its bounding box intersects normally; only
+   * its <h2> child carries the clip-path mask that the reveal animates. */
+  .caballo__mega-wrap {
+    width: 100%;
+    line-height: 0.86;
+    /* Reserve the same vertical space the h2 would, so the layout doesn't
+       jump when the mask animates open. */
+  }
 
   /* ---- MEGA word with the image inside the letters ----
    * `background-clip: text` makes the image visible only inside the glyphs.
@@ -141,22 +161,38 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
     color: var(--color-ink);
     /* Image fill — falls through to color above if unsupported. */
     background-size: cover;
-    background-position: center 35%;
+    background-position: 40% 38%;
     background-repeat: no-repeat;
     -webkit-background-clip: text;
     background-clip: text;
-    /* Reveal mask — letters rise into view */
+    /* Reveal mask — letters rise into view. Initial state hides the ink;
+       the IO toggles `.is-revealed` on the WRAPPER, not here. */
     clip-path: inset(100% 0 0 0);
     -webkit-clip-path: inset(100% 0 0 0);
     transition: clip-path 1.6s var(--ease-editorial);
     will-change: clip-path, background-position;
+  }
+  /* Ken Burns INSIDE the letters. The photo of the horse drifts inside
+   * each glyph instead of staying frozen — a 16s alternate cycle moves
+   * the background through three frames (warm coat, eye/bridle area,
+   * shoulder muscle), so the still typography breathes. Only kicks in
+   * AFTER the mega wrapper reveals so the drift never visibly starts
+   * while the clip-path mask is still opening. Pauses during reduced
+   * motion (handled by the global rule further down in this file). */
+  .caballo__mega-wrap.is-revealed .caballo__mega {
+    animation: caballoMegaDrift 16s var(--ease-soft) infinite alternate 1.6s;
+  }
+  @keyframes caballoMegaDrift {
+    0%   { background-position: 40% 38%; }
+    50%  { background-position: 55% 48%; }
+    100% { background-position: 35% 55%; }
   }
   @supports (-webkit-background-clip: text) or (background-clip: text) {
     .caballo__mega {
       -webkit-text-fill-color: transparent;
     }
   }
-  .caballo__mega.is-revealed {
+  .caballo__mega-wrap.is-revealed .caballo__mega {
     clip-path: inset(0 0 0 0);
     -webkit-clip-path: inset(0 0 0 0);
   }
@@ -235,6 +271,7 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
   /* ---- Reduced motion ---- */
   @media (prefers-reduced-motion: reduce) {
     .caballo__eyebrow,
+    .caballo__mega-wrap,
     .caballo__mega,
     .caballo__phrase,
     .caballo__keywords,
@@ -245,19 +282,29 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
       -webkit-clip-path: inset(0 0 0 0) !important;
       transition: none !important;
     }
+    /* Freeze the photo drift inside the letters for reduced-motion. */
+    .caballo__mega-wrap.is-revealed .caballo__mega {
+      animation: none !important;
+    }
   }
 
-  /* ---- Mobile · tighter padding, slightly smaller mega ---- */
+  /* ---- Mobile · tighter padding, mega sized to fit one line ----
+   * The previous values (26vw at 800px, 28vw at 400px) made "CABALLO"
+   * overflow the viewport on phones — invisible until the clip-path
+   * bug was fixed, but now exposed. The new ratios keep the word
+   * dominant while guaranteeing it fits on a single line at every
+   * viewport from 320 → 800px, with letter-spacing tightened a touch
+   * to give the photo-inside-letters effect more density. */
   @media (max-width: 800px) {
     .caballo { padding: 110px 5vw 90px; min-height: auto; }
-    .caballo__mega { font-size: clamp(72px, 26vw, 180px); letter-spacing: -0.02em; }
+    .caballo__mega { font-size: clamp(64px, 20vw, 160px); letter-spacing: -0.035em; }
     .caballo__phrase { margin-top: 28px; }
     .caballo__keywords { gap: 12px 20px; font-size: 10px; letter-spacing: 0.32em; }
     .caballo__keywords li::before { margin-right: 8px; }
     .caballo__closer { margin-top: 36px; font-size: 14px; }
   }
   @media (max-width: 400px) {
-    .caballo__mega { font-size: clamp(56px, 28vw, 130px); }
+    .caballo__mega { font-size: clamp(48px, 19vw, 100px); letter-spacing: -0.04em; }
     .caballo__phrase { font-size: 17px; }
   }
 </style>

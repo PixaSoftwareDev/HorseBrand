@@ -13,6 +13,7 @@
   "hero.cta_1": "Discover the collection",
   "hero.cta_2": "View gallery",
   "hero.scroll": "Scroll",
+  "hero.story_opener": "It begins with a horse.",
 
   "badge.atelier": "Atelier",
   "badge.handmade": "Hand-crafted",
@@ -138,6 +139,9 @@
   "footer.policy_terms": "Terms",
   "footer.visit_shop": "Visit the shop",
   "footer.links_label": "Links",
+  "footer.closing_motto": "Silent luxury, handcrafted.",
+  "footer.closing_motto_italic": "It whispers.",
+  "footer.closing_origin": "Atelier · Buenos Aires",
 
   "splash.skip": "click to continue",
 

@@ -13,6 +13,7 @@
   "hero.cta_1": "Descubrir la colección",
   "hero.cta_2": "Ver galería",
   "hero.scroll": "Scroll",
+  "hero.story_opener": "Comienza con un caballo.",
 
   "badge.atelier": "Atelier",
   "badge.handmade": "Hecho a mano",
@@ -138,6 +139,9 @@
   "footer.policy_terms": "Términos",
   "footer.visit_shop": "Visitar la tienda",
   "footer.links_label": "Enlaces",
+  "footer.closing_motto": "Lujo silencioso, hecho a mano.",
+  "footer.closing_motto_italic": "Susurra.",
+  "footer.closing_origin": "Atelier · Buenos Aires",
 
   "splash.skip": "click para continuar",
 

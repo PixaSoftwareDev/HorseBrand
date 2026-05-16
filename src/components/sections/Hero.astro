@@ -10,14 +10,22 @@ const t = useTranslations(lang);
 const home = localizedPath(lang, "/");
 
 // Hero slideshow — 5 editorial shots from the book.
-// Order is intentional: principal → emocional → moderno → elegante → lifestyle.
-// pos is the background-position for the ambient blur layer.
+//
+// The first frame the visitor sees is determined by two indices:
+//   · LEFT half starts at index 0
+//   · RIGHT half starts at RIGHT_INITIAL (2)
+//
+// Per the brand brief, the opening diptych is IMG_3104 (left) paired with
+// IMG_3092 (right). The other three shots cycle behind them — the array
+// order from index 1 onward just controls the rotation sequence; what
+// matters most is the FIRST PAIR. `pos` is the background-position used
+// for the ambient blur layer behind each slide.
 const slides = [
-  { src: cldImage(CLD_IDS.IMG_3017, 2400), pos: "center 50%" }, // 01 · principal
-  { src: cldImage(CLD_IDS.IMG_3092, 2400), pos: "55% 45%" },    // 02 · emocional
-  { src: cldImage(CLD_IDS.IMG_3104, 2400), pos: "62% 38%" },    // 03 · moderno
-  { src: cldImage(CLD_IDS.IMG_2955, 2400), pos: "center 50%" }, // 04 · elegante
-  { src: cldImage(CLD_IDS.IMG_3041, 2400), pos: "65% 50%" },    // 05 · lifestyle
+  { src: cldImage(CLD_IDS.IMG_3104, 2400), pos: "62% 38%" },    // 01 · LEFT opening
+  { src: cldImage(CLD_IDS.IMG_3017, 2400), pos: "center 50%" }, // 02 · left rotates here next
+  { src: cldImage(CLD_IDS.IMG_3092, 2400), pos: "55% 45%" },    // 03 · RIGHT opening (RIGHT_INITIAL)
+  { src: cldImage(CLD_IDS.IMG_2955, 2400), pos: "center 50%" }, // 04 · cycle
+  { src: cldImage(CLD_IDS.IMG_3041, 2400), pos: "65% 50%" },    // 05 · cycle
 ];
 
 // Right half starts offset from the left, so the two halves never show the
@@ -82,6 +90,50 @@ const RIGHT_INITIAL = 2;
     <span class="hero__scroll-text">{t("hero.scroll")}</span>
     <span class="hero__scroll-line" aria-hidden="true"></span>
   </a>
+
+  <!-- Brand moment · the story opener.
+       Hidden by default; heroExit.ts fades it in at the climax of the
+       pin (after the shrunken halves have settled and the bg is paper)
+       and dispatches `hb:hero-story-cue` once — that event triggers
+       the typewriter below to start writing the opening line of the
+       Horse Brand narrative, character by character.
+
+       Why a typewriter here:
+         · The user explicitly asked for "una frase que se escriba
+           como la primera portada, como el cuento o la historia que
+           comienza" — a sentence that writes itself, the story
+           beginning.
+         · Earlier iterations placed the brand logo or a chapter
+           marker here; both read as a static title plate. A line that
+           types itself feels actively narrative — the brand finishing
+           its introduction and starting its story right before the
+           Manifesto develops it.
+         · Mirrors the typewriter device the Craft section uses for
+           its closing line, so the brand language is consistent:
+           "the page writes the words you're about to read".
+
+       The text content is left empty in markup; the script at the
+       bottom of this file reads it from `data-text` and types it
+       into `[data-hero-story-target]` letter by letter. A blinking
+       caret signals the act of writing; it stops blinking + fades
+       once the line is complete.
+
+       The shrunken diptych sits ABOVE this row (Phase 4 of heroExit
+       only lifts it yPercent -10, so it stays clearly visible). The
+       photo plate is the visual; this line is the voice. z-index 4
+       keeps the moment above the halves. -->
+  <div class="hero__brand-moment" data-hero-brand aria-hidden="true">
+    <p
+      class="hero__story"
+      data-hero-story
+      data-text={t("hero.story_opener")}
+    >
+      <span class="hero__story-text" data-hero-story-target></span><span
+        class="hero__story-caret"
+        aria-hidden="true"
+      ></span>
+    </p>
+  </div>
 </section>
 
 <script>
@@ -112,16 +164,34 @@ const RIGHT_INITIAL = 2;
       progress.classList.add("run");
     }
 
+    // Cinema-cut crossfade. The previous slide KEEPS .active during the
+    // fade-out so its Ken Burns animation continues drifting (instead of
+    // snapping back to the keyframe-0 scale on class removal). After the
+    // fade duration we strip both classes so the slide returns to its
+    // base hidden pose and is ready for its next cycle as the incoming.
+    const FADE_MS = 1600;
     function switchSlide(
       collection: NodeListOf<HTMLElement>,
       prev: number,
       next: number
     ): void {
       if (prev === next) return;
-      collection[prev].classList.remove("active");
-      collection[prev].classList.add("leaving");
-      collection[next].classList.remove("leaving");
-      collection[next].classList.add("active");
+      const prevEl = collection[prev];
+      const nextEl = collection[next];
+      // Add .leaving (opacity → 0) while keeping .active so the Ken Burns
+      // animation keeps running through the fade-out.
+      prevEl.classList.add("leaving");
+      // Activate the next slide — its CSS animation starts from scale 1.06,
+      // settles to 1, then drifts to 1.05 over the slide hold.
+      nextEl.classList.remove("leaving");
+      nextEl.classList.add("active");
+      // Strip .active + .leaving from the previous slide once its fade
+      // completes. Use a captured ref so a fast re-cycle doesn't strip
+      // the wrong slide.
+      window.setTimeout(() => {
+        prevEl.classList.remove("active");
+        prevEl.classList.remove("leaving");
+      }, FADE_MS);
     }
 
     function go(n: number): void {
@@ -141,6 +211,27 @@ const RIGHT_INITIAL = 2;
       slideId = window.setInterval(() => go(idxL + 1), SLIDE_MS);
     }
 
+    // Pause / resume the slideshow during the Hero→Manifesto pin so the
+    // photo the user "engaged with" stays the one they see all the way
+    // through the diptych close. heroExit.ts dispatches these events when
+    // pin progress crosses ~5% (in either direction). Without the pause,
+    // the slideshow could cycle to a different photo mid-transition and
+    // the visual continuity of the gesture breaks.
+    function pauseSlideshow(): void {
+      if (slideId !== null) {
+        window.clearInterval(slideId);
+        slideId = null;
+      }
+    }
+    function resumeSlideshow(): void {
+      if (slideId === null && started) {
+        slideId = window.setInterval(() => go(idxL + 1), SLIDE_MS);
+        startProgress();
+      }
+    }
+    document.addEventListener("hb:hero-leaving", pauseSlideshow);
+    document.addEventListener("hb:hero-arrived", resumeSlideshow);
+
     function whenIntroDone(cb: () => void): void {
       if (document.body.classList.contains("intro-done")) cb();
       else window.addEventListener("hb:intro-done", cb, { once: true });
@@ -151,69 +242,39 @@ const RIGHT_INITIAL = 2;
     });
 
     // ---- cursor parallax (desktop only) ----
-    // Each half drifts independently — only the half UNDER the cursor moves.
-    // The other half rests at origin. Content drifts subtly in the same
-    // direction as the cursor so the text feels "alive". The lerp at 0.08
-    // per frame produces the soft easing without CSS transitions.
+    // Only the CONTENT block drifts subtly with the cursor. The image
+    // halves stay still — the previous version moved them per-half and
+    // it felt heavy / read as a glitch. The lerp at 0.08 per frame
+    // produces the soft easing without CSS transitions.
     let raf: number | null = null;
     const noHover = window.matchMedia("(hover: none)").matches;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const leftHalf = document.querySelector<HTMLElement>(".hero__half--left");
-    const rightHalf = document.querySelector<HTMLElement>(".hero__half--right");
 
-    if (!noHover && !reduced && content && leftHalf && rightHalf) {
-      const MEDIA_RANGE = 10;
+    if (!noHover && !reduced && content) {
       const CONTENT_RANGE = 5;
-      // Target offsets (set by pointermove), current offsets (animated by tick)
-      let lxT = 0, lyT = 0, rxT = 0, ryT = 0, cxT = 0, cyT = 0;
-      let lx = 0, ly = 0, rx = 0, ry = 0, cx = 0, cy = 0;
+      let cxT = 0, cyT = 0;
+      let cx = 0, cy = 0;
 
       function tick(): void {
-        lx += (lxT - lx) * 0.08;
-        ly += (lyT - ly) * 0.08;
-        rx += (rxT - rx) * 0.08;
-        ry += (ryT - ry) * 0.08;
         cx += (cxT - cx) * 0.08;
         cy += (cyT - cy) * 0.08;
-        leftHalf!.style.transform = `translate3d(${lx.toFixed(2)}px, ${ly.toFixed(2)}px, 0)`;
-        rightHalf!.style.transform = `translate3d(${rx.toFixed(2)}px, ${ry.toFixed(2)}px, 0)`;
         content!.style.setProperty("--ptx", `${cx.toFixed(2)}px`);
         content!.style.setProperty("--pty", `${cy.toFixed(2)}px`);
         const moving =
-          Math.abs(lxT - lx) > 0.1 || Math.abs(lyT - ly) > 0.1 ||
-          Math.abs(rxT - rx) > 0.1 || Math.abs(ryT - ry) > 0.1 ||
           Math.abs(cxT - cx) > 0.1 || Math.abs(cyT - cy) > 0.1;
         raf = moving ? requestAnimationFrame(tick) : null;
       }
 
       function onMove(e: PointerEvent): void {
         const rect = hero!.getBoundingClientRect();
-        const localX = e.clientX - rect.left;
-        const px = localX / rect.width - 0.5;
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
         const py = (e.clientY - rect.top) / rect.height - 0.5;
-
-        // Which half is the cursor over?
-        const onLeft = localX < rect.width / 2;
-        const drift = -px * MEDIA_RANGE * 2;
-        const driftY = -py * MEDIA_RANGE * 2;
-
-        if (onLeft) {
-          lxT = drift;
-          lyT = driftY;
-          rxT = 0;
-          ryT = 0;
-        } else {
-          rxT = drift;
-          ryT = driftY;
-          lxT = 0;
-          lyT = 0;
-        }
         cxT = px * CONTENT_RANGE * 2;
         cyT = py * CONTENT_RANGE * 2;
         if (raf === null) raf = requestAnimationFrame(tick);
       }
       function onLeave(): void {
-        lxT = lyT = rxT = ryT = cxT = cyT = 0;
+        cxT = cyT = 0;
         if (raf === null) raf = requestAnimationFrame(tick);
       }
 
@@ -221,11 +282,82 @@ const RIGHT_INITIAL = 2;
       hero.addEventListener("pointerleave", onLeave);
     }
 
+    /* ---- Story-opener typewriter ----
+     * heroExit.ts dispatches `hb:hero-story-cue` once when the pin's
+     * progress crosses ~78% — that's the moment the shrunken diptych
+     * has settled and the brand moment is fading in. We then write
+     * the localized opener phrase character by character into the
+     * `[data-hero-story-target]` span.
+     *
+     * The caret blink + post-typing fade are CSS-driven via the
+     * `.is-typing` / `.is-typed` modifiers on the brand-moment.
+     *
+     * Reduced-motion path: paint the whole line immediately, no
+     * per-char interval, no caret animation — the CSS already hides
+     * the caret in that mode.
+     *
+     * Idempotency: the routine self-guards via the `data-typed`
+     * attribute so a duplicate cue (e.g. user scrolls back and
+     * forward across the threshold) doesn't restart the typing
+     * mid-render. */
+    const STORY_SPEED_MS = 55;   // per character — feels deliberate, not slow
+    const STORY_START_DELAY = 350; // small beat before the line begins
+    function runStoryTypewriter(): void {
+      const brandMoment = document.querySelector<HTMLElement>(
+        "[data-hero-brand]"
+      );
+      const target = document.querySelector<HTMLElement>(
+        "[data-hero-story-target]"
+      );
+      const source = document.querySelector<HTMLElement>("[data-hero-story]");
+      if (!brandMoment || !target || !source) return;
+      if (brandMoment.dataset.typed === "1") return;
+      brandMoment.dataset.typed = "1";
+
+      const text = source.dataset.text ?? "";
+      if (!text) return;
+
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      if (reduced) {
+        target.textContent = text;
+        brandMoment.classList.add("is-typed");
+        return;
+      }
+
+      brandMoment.classList.add("is-typing");
+      let i = 0;
+      const id = window.setTimeout(function step(): void {
+        if (i < text.length) {
+          target.textContent = text.substring(0, i + 1);
+          i += 1;
+          window.setTimeout(step, STORY_SPEED_MS);
+        } else {
+          brandMoment.classList.remove("is-typing");
+          brandMoment.classList.add("is-typed");
+        }
+      }, STORY_START_DELAY);
+
+      // Stop the chain on SPA navigation to avoid orphan timers.
+      document.addEventListener(
+        "astro:before-swap",
+        () => window.clearTimeout(id),
+        { once: true }
+      );
+    }
+    document.addEventListener("hb:hero-story-cue", runStoryTypewriter, {
+      once: true,
+    });
+
     document.addEventListener(
       "astro:before-swap",
       () => {
         if (slideId !== null) window.clearInterval(slideId);
         if (raf !== null) cancelAnimationFrame(raf);
+        document.removeEventListener("hb:hero-leaving", pauseSlideshow);
+        document.removeEventListener("hb:hero-arrived", resumeSlideshow);
+        document.removeEventListener("hb:hero-story-cue", runStoryTypewriter);
       },
       { once: true }
     );
@@ -245,17 +377,20 @@ const RIGHT_INITIAL = 2;
   }
 
   /* ---- Split layout · 50/50 diptych ---- */
+  /* heroExit.ts animates THIS wrapper (scale + opacity) as a single unit
+     during the Hero→Manifesto close, so it gets the will-change. Inner
+     halves no longer carry a will-change — they're passive containers. */
   .hero__split {
     position: absolute;
     inset: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
+    will-change: transform, opacity;
   }
 
   .hero__half {
     position: relative;
     overflow: hidden;
-    will-change: transform;
   }
 
   /* Hairline divider between halves — subtle gold accent at the seam */
@@ -274,67 +409,107 @@ const RIGHT_INITIAL = 2;
     pointer-events: none;
   }
 
-  /* ---- Slides · cover the half cleanly ----
+  /* ---- Slides · Cinema Cut + Ken Burns ----
    * Each half is 50vw × 100vh on desktop — already a portrait container.
-   * No breathing zoom: photos stay STILL during the hold (more architectural,
-   * less commercial). The reveal is handled by clip-path, anchored to the
-   * central divider: each new photo emerges FROM the divider toward the
-   * outer edge of its half — like a double page spreading open.
+   *
+   * Two-phase motion, separated cleanly so they don't fight each other:
+   *   PHASE A · "Settle"  (CSS transition, 1.6s)
+   *     Triggered by toggling .active. Opacity 0 → 1 and scale 1.06 → 1
+   *     run together — the new slide arrives slightly oversized and
+   *     eases inward into its rest pose. This gives the cinematic
+   *     "camera adjust" feel without a separate keyframe fighting the
+   *     fade.
+   *
+   *   PHASE B · "Drift"  (CSS animation, 5.9s linear, starts 1.6s after
+   *     the active class lands)
+   *     Once the slide has settled at scale 1, a continuous slow drift
+   *     to scale 1.05 runs over the remainder of the slide hold. This is
+   *     the Ken Burns "breath" that keeps the still frame alive between
+   *     transitions.
+   *
+   * Total: 1.6s (settle) + 5.9s (drift) = 7.5s, matches SLIDE_HOLD_MS so
+   * the next slide enters exactly at peak scale — cleanest possible
+   * "camera between shots" handoff.
+   *
+   * Exit: .leaving is added (KEEPING .active so the drift animation keeps
+   * the scale where it was), opacity 1 → 0 fades over 1.6s, then JS
+   * strips both classes for the next cycle.
+   *
+   * The drift animation is GATED by `body.intro-done` so it doesn't start
+   * during the IntroSplash (when the Hero is hidden anyway). Without the
+   * gate, the first slide would visibly drift behind the splash and arrive
+   * at scale ~1.02 when the splash dismissed.
    */
   .hero__slide {
     position: absolute;
     inset: 0;
     background-size: cover;
     background-repeat: no-repeat;
-    will-change: clip-path;
-    /* Left and right have mirrored anchor states (see below). */
+    filter: saturate(0.94) contrast(1.04);
+    /* Hidden base pose — slightly oversized so the entry settles inward */
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 1.6s var(--ease-soft),
+      transform 1.6s var(--ease-soft);
+    will-change: opacity, transform;
+  }
+  .hero__slide.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  /* Drift only kicks in once intro-done is set so the first slide doesn't
+     animate behind the splash. Animation goes from current scale (1) to
+     1.05 over 5.9s, starting 1.6s after the class change so the "settle"
+     transition completes first and the two motions don't overlap. */
+  :global(body.intro-done) .hero__slide.active {
+    animation: heroKenBurns 5.9s linear 1.6s forwards;
+  }
+  .hero__slide.leaving {
+    /* .active still present → the drift animation keeps running and the
+       scale stays at its current point. Only opacity fades out. */
+    opacity: 0;
+  }
+  @keyframes heroKenBurns {
+    to { transform: scale(1.05); }
   }
 
-  /* LEFT half · slide anchored at the divider (right edge of its container).
-   * 1.8s soft easing — quiet, slow, deliberate. Marks elegance, not energy. */
-  .hero__slide--left {
-    clip-path: inset(0 0 0 100%);
-    -webkit-clip-path: inset(0 0 0 100%);
-    transition: clip-path 1.8s var(--ease-soft);
-  }
-  .hero__slide--left.active {
-    clip-path: inset(0 0 0 0);
-    -webkit-clip-path: inset(0 0 0 0);
-  }
-  .hero__slide--left.leaving {
-    clip-path: inset(0 0 0 100%);
-    -webkit-clip-path: inset(0 0 0 100%);
+  /* Pin-freeze · while the Hero→Manifesto pin is active, freeze every
+     motion inside the slides (Ken Burns animation AND the settle/leave
+     transitions). The half wrapper is being scaled per-tick by GSAP, and
+     compositing a parent-scale change with an in-flight child animation
+     was the visible "shimmer/flicker". Pausing the inner animations
+     leaves the GSAP transform on the half as the SOLE animator, so the
+     image moves as a single rigid layer with its parent. The .active
+     slide stays visible (Ken Burns is paused, not removed) so the photo
+     the user engaged with travels with the close. */
+  .hero.is-pinning .hero__slide {
+    animation-play-state: paused !important;
+    transition: none !important;
   }
 
-  /* RIGHT half · mirrored. The right also runs 0.35s LATER on entry only,
-   * so the eye reads: left opens, then right cascades from the divider. */
+  /* RIGHT half · cascades 0.35s after the LEFT on entry, so the eye reads
+   * "left arrives, then right arrives". Leave runs immediately (no delay)
+   * so both halves vacate together. */
   .hero__slide--right {
-    clip-path: inset(0 100% 0 0);
-    -webkit-clip-path: inset(0 100% 0 0);
-    transition: clip-path 1.8s var(--ease-soft) 0.35s;
+    transition: opacity 1.6s var(--ease-soft) 0.35s,
+      transform 1.6s var(--ease-soft) 0.35s;
   }
-  .hero__slide--right.active {
-    clip-path: inset(0 0 0 0);
-    -webkit-clip-path: inset(0 0 0 0);
+  :global(body.intro-done) .hero__slide--right.active {
+    /* 1.6s settle (delayed 0.35s for cascade) + tiny gap before drift */
+    animation-delay: 1.95s;
   }
   .hero__slide--right.leaving {
-    clip-path: inset(0 100% 0 0);
-    -webkit-clip-path: inset(0 100% 0 0);
     transition-delay: 0s;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero__slide,
-    .hero__slide--left,
-    .hero__slide--right,
-    .hero__slide--left.active,
-    .hero__slide--right.active,
-    .hero__slide--left.leaving,
-    .hero__slide--right.leaving {
-      clip-path: inset(0 0 0 0);
-      -webkit-clip-path: inset(0 0 0 0);
-      opacity: 1;
+    .hero__slide {
+      transform: none;
       transition: opacity 0.5s linear;
+    }
+    .hero__slide.active {
+      animation: none;
+      transform: none;
     }
     .hero__slide:not(.active) { opacity: 0; }
   }
@@ -623,6 +798,106 @@ const RIGHT_INITIAL = 2;
   }
   @media (prefers-reduced-motion: reduce) {
     .hero__scroll-line::after { animation: none; opacity: 0.5; }
+  }
+
+  /* ---------- BRAND MOMENT ----------
+   * The punctuation that lands at the climax of the diptych close.
+   * heroExit.ts drives:
+   *   opacity 0 → 1 across [0.80, 0.88] of pin progress (fades in)
+   *   y      0 → -120vh across [0.88, 1.00]              (pushes up off-screen)
+   * The opacity NEVER fades back to 0 — instead the wordmark is
+   * translated upward so it reads as "the Manifesto coming up from
+   * below pushed it out": brand leaves UP just as Manifesto enters
+   * from BELOW.
+   *
+   * CENTERING via flex (NOT via transform): the wrapper fills the
+   * entire pinned Hero (`inset: 0`) and centres its children with
+   * align/justify-content. This way GSAP only ever writes a SINGLE
+   * transform value (translateY for the push) — no combined
+   * xPercent/yPercent + y composition that was causing sub-pixel
+   * flicker per tick in the previous version.
+   */
+  /* The brand moment fills the hero (inset: 0) but anchors its child
+   * marker to the lower portion via flex column + flex-end. The
+   * shrunken diptych (scale 0.42, yPercent -12) sits in the upper
+   * portion; this marker reads UNDER it as the editorial bridge to
+   * Manifesto. No frame, no logo, no extra geometry. */
+  .hero__brand-moment {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 6vw clamp(80px, 14vh, 160px);
+    z-index: 4;
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity;
+  }
+  /* Story opener — italic Fraunces line that types itself in.
+   * Populated by the typewriter routine at the bottom of this file.
+   * Sized like a small section title (clamp 22→36 px) so the line
+   * has the weight of a chapter opener without competing with the
+   * shrunken diptych above. Centered, single line on desktop,
+   * wraps gracefully on phones. */
+  .hero__story {
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(22px, 2.6vw, 36px);
+    letter-spacing: 0.005em;
+    line-height: 1.25;
+    color: var(--color-ink);
+    text-align: center;
+    max-width: min(82vw, 720px);
+    margin: 0;
+    /* `min-height: 1em` reserves the line height even when the text
+     * span is empty (before the typewriter has run), so the parent
+     * flex container doesn't shift as characters appear. */
+    min-height: 1.25em;
+  }
+
+  /* The text node the typewriter fills, character by character.
+   * `display: inline` so it flows naturally with the caret on the
+   * same line. */
+  .hero__story-text {
+    display: inline;
+  }
+
+  /* Blinking caret — a thin vertical bar in cognac that signals
+   * "this line is being written". 1 px wide, ~0.9em tall, sits to
+   * the right of whatever has been typed so far. Blinks while the
+   * typewriter is active (`.is-typing` on the parent moment) and
+   * fades cleanly once typing completes (`.is-typed`). */
+  .hero__story-caret {
+    display: inline-block;
+    width: 1px;
+    height: 0.9em;
+    margin-left: 4px;
+    background: var(--color-cognac);
+    vertical-align: -0.05em;
+    opacity: 0;
+    transition: opacity 0.4s var(--ease-soft);
+  }
+  .hero__brand-moment.is-typing .hero__story-caret {
+    opacity: 0.85;
+    animation: heroStoryCaret 0.9s steps(1) infinite;
+  }
+  .hero__brand-moment.is-typed .hero__story-caret {
+    opacity: 0;
+    animation: none;
+  }
+  @keyframes heroStoryCaret {
+    0%, 50%   { opacity: 0.85; }
+    50.01%, 100% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* For users who reject motion: paint the full line immediately
+     * (handled by the script — it checks the media query and skips
+     * the per-character interval). Hide the caret. */
+    .hero__story-caret { display: none; }
   }
 
   /* ---------- MOBILE (≤700px) ----------

@@ -1,1 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Jost:wght@200;300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,300;1,400&display=swap");
+/* The previous Cormorant Garamond / Jost import was removed in favour of
+ * Fraunces + Inter. The new <link rel="stylesheet"> lives in Base.astro
+ * <head> so the browser can start the font request before this stylesheet
+ * imports — same effect as @import here, but lets the preconnect actually
+ * help (Google Fonts requires the request to be issued from the document,
+ * not from inside a CSS @import chain). Tenor Sans was never referenced
+ * elsewhere in the codebase, so it's gone too.
+ *
+ * Keeping this file (rather than deleting it) so the existing import
+ * graph in global.css doesn't have to change. */

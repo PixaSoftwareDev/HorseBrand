@@ -1,5 +1,11 @@
-import { useScroll, useTransform, motion, type MotionValue } from "framer-motion";
-import { useRef } from "react";
+import {
+  useScroll,
+  useSpring,
+  useTransform,
+  motion,
+  type MotionValue,
+} from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 export interface ZoomImage {
   src: string;
@@ -52,9 +58,58 @@ const TILES: { top: number; left: number; w: number; h: number; max: number }[] 
 
 export default function ZoomParallax({ images }: Props) {
   const container = useRef<HTMLDivElement>(null);
+
+  /*
+   * Reduced-motion detection.
+   *
+   * Cannot use framer-motion's `useReducedMotion` because it reads the
+   * matchMedia value synchronously on first render — during SSR that's
+   * always `null`, but during hydration on a reduced-motion client it
+   * returns `true`, which causes the React tree to render a different
+   * structure than the server emitted (the static `.zp-reduced` variant
+   * vs the absolute parallax variant). React then logs a hydration
+   * mismatch and gives up patching.
+   *
+   * The fix: start with `reduceMotion = false` (matches SSR), then
+   * upgrade to the real value in `useEffect` AFTER hydration. The first
+   * client render uses the motion variant just long enough for React
+   * to reconcile the tree, then a second render swaps to the static
+   * grid. Reduced-motion users see a one-frame flash of the parallax
+   * before it settles — unavoidable trade-off, but the alternative
+   * (`client:only`) would leave the section empty until JS loads.
+   */
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(mql.matches);
+    const onChange = (e: MediaQueryListEvent): void => setReduceMotion(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: container,
     offset: ["start start", "end end"],
+  });
+
+  /*
+   * Spring damping on scrollYProgress.
+   *
+   * Without this the scale transforms map 1:1 to raw scroll position —
+   * even with Lenis amortiguando the scroll value itself, the tiles
+   * jump exactly with each wheel tick. Wrapping the progress in
+   * `useSpring` adds a tiny "trailing" lag (the images keep moving for
+   * a beat after you stop scrolling), which is the hallmark of the
+   * Floema / Aesop / Studio.bridge feel. Values picked to match the
+   * Hero pin's `scrub: 0.6` perceptually — quick enough to feel
+   * responsive on a flick, slow enough to read as "the parallax is
+   * following me", not "the parallax is glued to my wheel".
+   */
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 220,
+    damping: 36,
+    mass: 0.4,
+    restDelta: 0.001,
   });
 
   // Each item interpolates transform-scale from 1/max → 1.
@@ -62,8 +117,40 @@ export default function ZoomParallax({ images }: Props) {
   // same visual size curve as the naive approach (base → peak), but with
   // a high-resolution texture rasterized from frame 0.
   const scales: MotionValue<number>[] = TILES.map((tile) =>
-    useTransform(scrollYProgress, [0, 1], [1 / tile.max, 1])
+    useTransform(smoothProgress, [0, 1], [1 / tile.max, 1])
   );
+
+  /*
+   * Reduced-motion bypass.
+   *
+   * When the OS asks for reduced motion, render the static grid that
+   * the CSS already produces on touch / ≤900px — no motion.divs, no
+   * spring, no scroll-coupled transforms. Saves a continuous rAF
+   * subscription and removes any vestibular motion entirely.
+   * The grid layout itself is handled by the `.zp-reduced` class hook
+   * in Gallery.astro CSS so we don't duplicate flex/grid rules here.
+   */
+  if (reduceMotion) {
+    return (
+      <div ref={container} className="zoom-parallax zp-reduced">
+        <div className="zp-sticky">
+          {images.slice(0, 7).map(({ src, srcSet, sizes, alt }, i) => (
+            <div key={i} className="zp-item">
+              <div className="zp-inner">
+                <img
+                  src={src}
+                  alt={alt ?? ""}
+                  loading="lazy"
+                  decoding="async"
+                  {...({ srcset: srcSet, sizes } as Record<string, string>)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={container} className="zoom-parallax">

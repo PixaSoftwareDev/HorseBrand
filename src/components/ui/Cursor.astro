@@ -1,4 +1,14 @@
 ---
 ---
+<!--
+  Custom cursor — two layers driven by `initCursor` in cursor.ts:
+   · `#cursor` — the ring that lags behind the pointer at lerp 0.18, and
+     gains `.hover` when over any link / button (slight grow + cognac edge).
+   · `#cursorDot` — the precise dot, snaps to the pointer 1:1 with no lag.
+
+  Hidden on touch / mobile via the global rule in global.css. Magnetic
+  CTA pull lives separately on the button elements themselves (`.is-magnetic`
+  + the `--magnet-x/--magnet-y` custom props), not on the cursor.
+-->
 <div class="cursor" id="cursor" aria-hidden="true"></div>
 <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>

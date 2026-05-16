@@ -66,11 +66,7 @@ const t = useTranslations(lang);
     <footer class="drawer__foot">
       <a class="drawer__shop-all" href={SHOP_BASE_URL} target="_blank" rel="noopener">
         <span>{t("shop.view_all")}</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
-          <path d="M5 12h14M13 5l7 7-7 7"/>
-        </svg>
       </a>
-      <p class="drawer__legend">horse-brand.com · pago seguro</p>
     </footer>
   </div>
 </aside>
@@ -100,6 +96,7 @@ const t = useTranslations(lang);
     top: 0;
     right: 0;
     height: 100%;
+    height: 100dvh;
     width: min(480px, 92vw);
     background: var(--color-ivory);
     color: var(--color-ink);
@@ -112,7 +109,7 @@ const t = useTranslations(lang);
   .drawer.open .drawer__panel { transform: translateX(0); }
 
   .drawer__head {
-    padding: 30px 32px 24px;
+    padding: 24px 32px 20px;
     border-bottom: 1px solid var(--line);
     display: flex;
     justify-content: space-between;
@@ -184,10 +181,10 @@ const t = useTranslations(lang);
 
   .drawer-cat__link {
     display: grid;
-    grid-template-columns: 92px 1fr auto;
+    grid-template-columns: 78px 1fr auto;
     align-items: center;
-    gap: 20px;
-    padding: 18px 32px;
+    gap: 18px;
+    padding: 14px 32px;
     cursor: none;
     color: var(--color-ink);
     transition: background 0.4s var(--ease-editorial);
@@ -195,8 +192,8 @@ const t = useTranslations(lang);
   .drawer-cat__link:hover { background: var(--color-paper); }
 
   .drawer-cat__media {
-    width: 92px;
-    aspect-ratio: 1 / 1.15;
+    width: 78px;
+    aspect-ratio: 1 / 1;
     overflow: hidden;
     background: var(--color-bone);
   }
@@ -247,7 +244,7 @@ const t = useTranslations(lang);
   /* ---- Footer ---- */
   .drawer__foot {
     border-top: 1px solid var(--line);
-    padding: 22px 32px 28px;
+    padding: 22px 32px calc(32px + env(safe-area-inset-bottom));
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -255,8 +252,7 @@ const t = useTranslations(lang);
   .drawer__shop-all {
     display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 14px;
+    justify-content: center;
     background: var(--color-ink);
     color: var(--color-ivory);
     padding: 18px 22px;
@@ -268,21 +264,6 @@ const t = useTranslations(lang);
     cursor: none;
   }
   .drawer__shop-all:hover { background: var(--color-leather); }
-  .drawer__shop-all svg {
-    width: 16px;
-    height: 16px;
-    transition: transform 0.45s var(--ease-editorial);
-  }
-  .drawer__shop-all:hover svg { transform: translateX(5px); }
-
-  .drawer__legend {
-    text-align: center;
-    font-family: var(--font-sans);
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--color-stone);
-  }
 
   @media (max-width: 540px) {
     .drawer__head { padding: 24px 22px 18px; }
@@ -294,7 +275,7 @@ const t = useTranslations(lang);
     }
     .drawer-cat__media { width: 76px; }
     .drawer-cat__label { font-size: 17px; }
-    .drawer__foot { padding: 18px 22px 24px; }
+    .drawer__foot { padding: 18px 22px calc(28px + env(safe-area-inset-bottom)); }
   }
 </style>
 

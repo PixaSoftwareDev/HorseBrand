@@ -11,9 +11,25 @@
   --color-cognac: #8b5a2b;
   --color-gold: #b08552;
 
-  --font-display: "Cormorant Garamond", serif;
-  --font-sans: "Jost", sans-serif;
-  --font-italic: "Cormorant Garamond", serif;
+  /* ---- Typography ----
+   * Display + italic: Fraunces (Undercase Type, OFL). Variable across opsz,
+   * wght, SOFT. We drove the choice via brief: "editorial moderno contrastado
+   * con italic con swashes" + 100% open source. Fraunces escapes the overused
+   * Cormorant/Playfair luxe-template trap because:
+   *   - opsz axis: display sizes get crisp high-contrast strokes, body sizes
+   *     warmen automatically (font-optical-sizing: auto, set in global.css);
+   *   - SOFT axis: dialled to 30 by default for restrained warmth — keeps the
+   *     "campo refinado" tone without going rustic;
+   *   - italic with real swashes (Q tail, g loop, & swirl) — pairs with the
+   *     gold-italic moments the design language already uses.
+   *
+   * Sans: Inter (Rasmus Andersson, OFL). Variable wght. Replaces Jost (a
+   * geometric Futura clone that read "free template sans"). Inter is the
+   * modern UI sans of the 2020s — Vercel, Linear, Notion, Mozilla — and is
+   * neutral enough to let Fraunces carry the editorial voice. */
+  --font-display: "Fraunces", serif;
+  --font-sans: "Inter", sans-serif;
+  --font-italic: "Fraunces", serif;
 
   --ease-editorial: cubic-bezier(0.77, 0, 0.18, 1);
   --ease-soft: cubic-bezier(0.2, 0.85, 0.3, 1);

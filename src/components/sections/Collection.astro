@@ -2,7 +2,6 @@
 import { getCollection } from "astro:content";
 import { type Lang, useTranslations } from "@/i18n/ui";
 import Reveal from "@/components/shared/Reveal.astro";
-import { SHOP_BASE_URL } from "@/lib/shop";
 import { cldImage } from "@/lib/cloudinary";
 import { CLD_IDS, type CldKey } from "@/lib/cloudinaryAssets";
 
@@ -46,33 +45,10 @@ const products = (await getCollection("products")).sort(
               {product.data.badge === "atelier" ? t("badge.atelier") : t("badge.handmade")}
             </span>
           )}
-          <a
-            class="card__buy"
-            href={product.data.tiendanubeUrl ?? SHOP_BASE_URL}
-            target="_blank"
-            rel="noopener"
-            aria-label={`${t("collection.buy")} ${product.data.name[lang]}`}
-          >
-            <span>{t("collection.buy")}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-              <path d="M5 12h14M13 5l7 7-7 7" />
-            </svg>
-          </a>
         </div>
         <div class="card__body">
           <h3 class="card__name">{product.data.name[lang]}</h3>
           <p class="card__tag">{product.data.tagline[lang]}</p>
-          <a
-            class="card__cta"
-            href={product.data.tiendanubeUrl ?? SHOP_BASE_URL}
-            target="_blank"
-            rel="noopener"
-          >
-            {t("collection.buy")}
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-              <path d="M5 12h14M13 5l7 7-7 7" />
-            </svg>
-          </a>
         </div>
       </article>
     ))}
@@ -165,6 +141,7 @@ const products = (await getCollection("products")).sort(
 
   /* ---------- Section head ---------- */
   .collection__title {
+    font-family: var(--font-display);
     font-size: clamp(36px, 4.5vw, 72px);
     line-height: 1.05;
     font-weight: 400;
@@ -321,38 +298,9 @@ const products = (await getCollection("products")).sort(
     z-index: 2;
   }
 
-  .card__buy {
-    position: absolute;
-    right: 16px;
-    bottom: 16px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: var(--color-ivory);
-    color: var(--color-ink);
-    font-family: var(--font-sans);
-    font-size: 10.5px;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    border: 1px solid var(--color-ivory);
-    transform: translateY(8px);
-    opacity: 0;
-    transition: opacity 0.45s var(--ease-editorial),
-      transform 0.55s var(--ease-editorial),
-      background 0.4s, color 0.4s;
-    cursor: none;
-    z-index: 2;
-  }
-  .card__buy svg { width: 12px; height: 12px; transition: transform 0.4s; }
-  .card:hover .card__buy { opacity: 1; transform: translateY(0); }
-  .card__buy:hover { background: var(--color-ink); color: var(--color-ivory); border-color: var(--color-ink); }
-  .card__buy:hover svg { transform: translateX(3px); }
-
   /* ---------- Body — staggered reveal ---------- */
   .card__name,
-  .card__tag,
-  .card__cta {
+  .card__tag {
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.85s var(--ease-editorial),
@@ -368,11 +316,6 @@ const products = (await getCollection("products")).sort(
     transform: translateY(0);
     transition-delay: calc(var(--card-delay, 0ms) + 0.7s);
   }
-  .card.is-revealed .card__cta {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: calc(var(--card-delay, 0ms) + 0.85s);
-  }
 
   .card__name {
     font-size: 26px;
@@ -386,29 +329,6 @@ const products = (await getCollection("products")).sort(
     letter-spacing: 0.06em;
     margin-bottom: 14px;
   }
-  .card__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--font-sans);
-    font-size: 11px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--color-ink);
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--color-ink);
-    /* hover-only transitions live on a separate timing so they don't fight reveal */
-  }
-  .card__cta svg { width: 14px; height: 14px; transition: transform 0.4s; }
-  .card.is-revealed .card__cta:hover svg { transform: translateX(4px); }
-  .card.is-revealed .card__cta {
-    transition: opacity 0.85s var(--ease-editorial),
-      transform 0.85s var(--ease-editorial),
-      gap 0.4s var(--ease-editorial),
-      border-color 0.35s,
-      color 0.35s;
-  }
-  .card.is-revealed:hover .card__cta { gap: 16px; }
 
   /* ---------- Reduced motion ---------- */
   @media (prefers-reduced-motion: reduce) {
@@ -416,7 +336,6 @@ const products = (await getCollection("products")).sort(
     .card__media,
     .card__name,
     .card__tag,
-    .card__cta,
     .card__num,
     .collection__sub {
       clip-path: none;

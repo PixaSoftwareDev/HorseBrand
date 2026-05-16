@@ -1,6 +1,4 @@
 ---
-import { Image } from "astro:assets";
-import logoMain from "@/assets/logo/logo-main.png";
 import { type Lang, useTranslations } from "@/i18n/ui";
 import { localizedPath } from "@/i18n/utils";
 import LangSwitcher from "./LangSwitcher.astro";
@@ -10,12 +8,35 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const home = localizedPath(lang, "/");
+
+// Dos versiones del lockup. La negativa (blanca) vive sobre el Hero;
+// la positiva (marrón) toma el relevo cuando el nav entra en estado
+// scrolled (fondo crema). Las dos se overlay-ean y crossfadean por
+// opacity para que el swap sea instantáneo y sin recargas.
+const LOGO_WHITE =
+  "https://res.cloudinary.com/dukv3ov6t/image/upload/v1778936933/HB_lite_negativo_fondo_trasperante_dxsbk7.svg";
+const LOGO_DARK =
+  "https://res.cloudinary.com/dukv3ov6t/image/upload/v1778936977/HB_lite_positivo_nopab6.svg";
 ---
 
 <header class="nav" id="nav">
   <div class="nav__inner">
     <a href={`${home}#top`} class="nav__logo" aria-label="Horse Brand">
-      <Image src={logoMain} alt="Horse Brand" widths={[280, 560]} sizes="280px" loading="eager" />
+      <img
+        class="nav__logo-img nav__logo-img--white"
+        src={LOGO_WHITE}
+        alt="Horse Brand"
+        loading="eager"
+        decoding="async"
+      />
+      <img
+        class="nav__logo-img nav__logo-img--dark"
+        src={LOGO_DARK}
+        alt=""
+        aria-hidden="true"
+        loading="eager"
+        decoding="async"
+      />
     </a>
 
     <nav class="nav__links" aria-label="Primary">
@@ -97,7 +118,10 @@ const home = localizedPath(lang, "/");
     background: rgba(247, 243, 236, 0.92);
     backdrop-filter: saturate(180%) blur(14px);
     -webkit-backdrop-filter: saturate(180%) blur(14px);
-    padding: 8px 0;
+    /* Padding mínimo en estado scrolled — el contenido (logo + links)
+     * mantiene su tamaño; solo achicamos el "fondo" de la barra para
+     * que tape menos página. */
+    padding: 4px 0;
     border-bottom: 1px solid rgba(21, 17, 13, 0.06);
   }
   .nav__inner {
@@ -109,45 +133,69 @@ const home = localizedPath(lang, "/");
     align-items: center;
     gap: 40px;
   }
+  /* Logo · stacking de dos SVGs.
+   * La versión blanca vive en flujo normal y define el ancho real del
+   * ancla (height fija por breakpoint → width: auto siguiendo aspect
+   * ratio del SVG). La versión marrón se superpone en `absolute` con
+   * el mismo tamaño. Crossfade por opacity según .scrolled — swap
+   * instantáneo, sin reflow. */
   .nav__logo {
+    position: relative;
     display: inline-flex;
+    height: 96px;
     transform-origin: left center;
-    transition: transform 0.6s var(--ease-soft);
+    transition: transform 0.6s var(--ease-soft), height 0.4s;
   }
   .nav__logo:hover { transform: scale(1.06); }
-  .nav__logo :global(img) {
-    height: 96px;
+  .nav__logo-img {
+    display: block;
+    height: 100%;
     width: auto;
-    filter: brightness(0) invert(1);
-    transition: filter 0.5s, height 0.4s, drop-shadow 0.5s;
+    transition: opacity 0.5s var(--ease-editorial), filter 0.5s;
   }
-  .nav__logo:hover :global(img) {
-    filter: brightness(0) invert(1) drop-shadow(0 0 14px rgba(247, 243, 236, 0.55));
+  /* SVG negativo (blanco) sobre el Hero — drop-shadow para legibilidad
+   * sobre fotos claras / claroscuro. Vive en flujo, da el ancho. */
+  .nav__logo-img--white {
+    opacity: 1;
+    filter: drop-shadow(0 1px 10px rgba(0, 0, 0, 0.35));
   }
-  .nav.scrolled .nav__logo:hover :global(img) {
+  /* SVG positivo (marrón) se monta encima en absolute para crossfade. */
+  .nav__logo-img--dark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+  .nav.scrolled .nav__logo-img--white { opacity: 0; }
+  .nav.scrolled .nav__logo-img--dark { opacity: 1; }
+  .nav__logo:hover .nav__logo-img--white {
+    filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.45));
+  }
+  .nav.scrolled .nav__logo:hover .nav__logo-img--dark {
     filter: drop-shadow(0 3px 10px rgba(15, 11, 8, 0.18));
   }
-  .nav.scrolled .nav__logo :global(img) {
-    filter: none;
-    height: 76px;
-  }
+  /* Logo sobre el Hero al tamaño completo; post-Hero (scrolled) baja
+   * un punto para aliviar la masa visual del navbar con fondo crema.
+   * La diferencia es sutil (~12%): se percibe como "el navbar se
+   * asentó", no como "el logo se encogió". */
+  .nav.scrolled .nav__logo { height: 84px; }
   @media (max-width: 1200px) {
-    .nav__logo :global(img) { height: 80px; }
-    .nav.scrolled .nav__logo :global(img) { height: 64px; }
+    .nav__logo { height: 80px; }
+    .nav.scrolled .nav__logo { height: 70px; }
   }
   @media (max-width: 900px) {
-    .nav__logo :global(img) { height: 72px; }
-    .nav.scrolled .nav__logo :global(img) { height: 60px; }
+    .nav__logo { height: 72px; }
+    .nav.scrolled .nav__logo { height: 64px; }
   }
   @media (max-width: 700px) {
-    .nav__logo :global(img) { height: 56px; }
-    .nav.scrolled .nav__logo :global(img) { height: 48px; }
+    .nav__logo { height: 56px; }
+    .nav.scrolled .nav__logo { height: 50px; }
   }
   @media (max-width: 400px) {
     .nav { padding: 10px 0; }
     .nav.scrolled { padding: 6px 0; }
-    .nav__logo :global(img) { height: 44px; }
-    .nav.scrolled .nav__logo :global(img) { height: 38px; }
+    .nav__logo { height: 44px; }
+    .nav.scrolled .nav__logo { height: 40px; }
     .nav__inner { padding: 0 5vw; gap: 16px; }
     .nav__right { gap: 14px; }
   }
@@ -160,13 +208,19 @@ const home = localizedPath(lang, "/");
   .nav__links a {
     font-family: var(--font-sans);
     font-size: 12px;
+    font-weight: 500;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(247, 243, 236, 0.85);
-    transition: color 0.45s;
+    color: rgba(255, 255, 255, 0.96);
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+    transition: color 0.45s, text-shadow 0.45s, font-weight 0.45s;
   }
-  .nav__links a:hover { color: #f7f3ec; }
-  .nav.scrolled .nav__links a { color: rgba(21, 17, 13, 0.7); }
+  .nav__links a:hover { color: #fff; }
+  .nav.scrolled .nav__links a {
+    color: rgba(21, 17, 13, 0.72);
+    font-weight: 400;
+    text-shadow: none;
+  }
   .nav.scrolled .nav__links a:hover { color: var(--color-ink); }
 
   .nav__right {
@@ -183,14 +237,18 @@ const home = localizedPath(lang, "/");
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: rgba(247, 243, 236, 0.92);
+    color: #fff;
+    filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.35));
     background: transparent;
     border: 0;
     cursor: none;
-    transition: color 0.4s, transform 0.45s var(--ease-soft);
+    transition: color 0.4s, filter 0.4s, transform 0.45s var(--ease-soft);
   }
   .nav__cart:hover { transform: translateY(-2px); }
-  .nav.scrolled .nav__cart { color: var(--color-ink); }
+  .nav.scrolled .nav__cart {
+    color: var(--color-ink);
+    filter: none;
+  }
   .nav__cart svg { width: 19px; height: 19px; }
   .nav__cart-dot {
     position: absolute;
@@ -200,11 +258,8 @@ const home = localizedPath(lang, "/");
     height: 6px;
     border-radius: 50%;
     background: var(--color-gold);
-    box-shadow: 0 0 0 2px rgba(15, 11, 8, 0.35);
-    animation: cartPulse 2.6s ease-in-out infinite;
-  }
-  .nav.scrolled .nav__cart-dot {
     box-shadow: 0 0 0 2px rgba(247, 243, 236, 0.85);
+    animation: cartPulse 2.6s ease-in-out infinite;
   }
   @keyframes cartPulse {
     0%, 100% { transform: scale(1); opacity: 1; }
@@ -219,10 +274,14 @@ const home = localizedPath(lang, "/");
   }
   .nav__toggle span {
     height: 1px;
-    background: #f7f3ec;
+    background: #fff;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
     transition: all 0.45s;
   }
-  .nav.scrolled .nav__toggle span { background: var(--color-ink); }
+  .nav.scrolled .nav__toggle span {
+    background: var(--color-ink);
+    box-shadow: none;
+  }
   .nav__toggle.open span:first-child { transform: translateY(3px) rotate(45deg); }
   .nav__toggle.open span:last-child { transform: translateY(-3px) rotate(-45deg); }
 
@@ -230,5 +289,31 @@ const home = localizedPath(lang, "/");
     .nav__links { display: none; }
     .nav__toggle { display: flex; }
     .nav__inner { grid-template-columns: auto 1fr auto; }
+  }
+
+  /* Hero overlay: piso colores de child components con estilos scoped */
+  .nav:not(.scrolled) :global(.lang__btn) {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+  }
+  .nav:not(.scrolled) :global(.lang__btn.active) {
+    color: #fff;
+  }
+  .nav:not(.scrolled) :global(.lang span) {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .nav:not(.scrolled) :global(.nav__audio) {
+    border-color: rgba(255, 255, 255, 0.55);
+    filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.3));
+  }
+  .nav:not(.scrolled) :global(.nav__audio:hover) {
+    border-color: #fff;
+  }
+  .nav:not(.scrolled) :global(.nav__audio .cross) {
+    color: #fff;
+  }
+  .nav:not(.scrolled) :global(.nav__audio .bars span) {
+    background: #fff;
   }
 </style>

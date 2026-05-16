@@ -30,15 +30,13 @@ const t = useTranslations(lang);
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 1px solid rgba(247, 243, 236, 0.35);
+    border: 1px solid rgba(21, 17, 13, 0.25);
     transition: border-color 0.35s, background 0.35s, transform 0.35s;
   }
   .nav__audio:hover {
-    border-color: #f7f3ec;
+    border-color: var(--color-ink);
     transform: scale(1.05);
   }
-  :global(.nav.scrolled) .nav__audio { border-color: rgba(21, 17, 13, 0.25); }
-  :global(.nav.scrolled) .nav__audio:hover { border-color: var(--color-ink); }
 
   /* shared centering for both states */
   .nav__audio .bars,
@@ -76,9 +74,8 @@ const t = useTranslations(lang);
   .nav__audio .cross {
     width: 14px;
     height: 14px;
-    color: #f7f3ec;
+    color: var(--color-ink);
   }
-  :global(.nav.scrolled) .nav__audio .cross { color: var(--color-ink); }
 
   /* equalizer bars */
   .nav__audio .bars {
@@ -96,9 +93,8 @@ const t = useTranslations(lang);
     display: block;
     width: 2px;
     height: 3px;
-    background: #f7f3ec;
+    background: var(--color-ink);
   }
-  :global(.nav.scrolled) .nav__audio .bars span { background: var(--color-ink); }
 
   .nav__audio[aria-pressed="true"] .bars span {
     animation: eq 1.1s ease-in-out infinite;

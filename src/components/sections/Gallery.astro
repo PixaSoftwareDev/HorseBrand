@@ -70,7 +70,6 @@ const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
     box-shadow:
       0 1px 2px rgba(15, 11, 8, 0.06),
       0 22px 60px -12px rgba(15, 11, 8, 0.28);
-    outline: 1px solid rgba(247, 243, 236, 0.04);
   }
   :global(.zp-inner img) {
     width: 100%;
@@ -87,12 +86,17 @@ const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
     -webkit-backface-visibility: hidden;
   }
 
-  /* ---- Touch / mobile fallback ----
+  /* ---- Touch / mobile fallback + reduced-motion ----
    * The 7-image absolute parallax layout + framer-motion's inline transforms
    * collapse into a clean vertical grid on touch screens. Every override is
    * !important because framer-motion writes inline style="transform: scale(...)"
    * and the original component sets style="position: relative; top; left; ..."
-   * — both have higher specificity than scoped CSS without !important. */
+   * — both have higher specificity than scoped CSS without !important.
+   *
+   * `.zp-reduced` is added by ZoomParallax.tsx when the OS asks for
+   * reduced motion — it bypasses the motion.div / useSpring stack
+   * entirely and renders the same flat grid this CSS already produces
+   * for mobile/touch. Sharing the rules keeps both code paths consistent. */
   @media (hover: none), (max-width: 900px) {
     :global(.zoom-parallax) {
       height: auto !important;
@@ -125,5 +129,35 @@ const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
       filter: none;
       image-rendering: auto;
     }
+  }
+
+  /* Reduced-motion path (any viewport, any input). The component
+   * skips motion.divs and emits the same flat grid. The static
+   * branch doesn't have inline framer-motion styles to override,
+   * so we don't need !important here. */
+  :global(.zoom-parallax.zp-reduced) {
+    height: auto;
+  }
+  :global(.zp-reduced .zp-sticky) {
+    position: static;
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 0 5vw;
+  }
+  :global(.zp-reduced .zp-item) {
+    position: static;
+    inset: auto;
+    display: block;
+  }
+  :global(.zp-reduced .zp-inner) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+  :global(.zp-reduced .zp-inner img) {
+    filter: none;
+    image-rendering: auto;
   }
 </style>

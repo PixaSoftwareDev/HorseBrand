@@ -33,11 +33,10 @@ const t = useTranslations(lang);
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
     box-shadow: -2px 6px 28px rgba(15, 11, 8, 0.22);
-    transition: padding-right 0.5s var(--ease-editorial), background 0.45s,
-      transform 0.55s var(--ease-editorial), box-shadow 0.5s, opacity 0.5s;
+    transition: background 0.45s, transform 0.55s var(--ease-editorial),
+      box-shadow 0.5s, opacity 0.5s;
   }
   .shop-handle:hover {
-    padding-right: 18px;
     background: var(--color-leather);
     box-shadow: -2px 8px 36px rgba(91, 57, 36, 0.4);
   }
@@ -66,13 +65,22 @@ const t = useTranslations(lang);
     width: 14px;
     height: 14px;
     transform: rotate(90deg);
-    transition: transform 0.45s var(--ease-editorial);
   }
-  .shop-handle:hover svg { transform: rotate(90deg) translateX(-3px); }
 
   /* Hide while drawer is open */
   :global(body.shop-open) .shop-handle {
     transform: translateY(-50%) translateX(110%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Quiet mode during the Hero → Manifesto pin. heroExit.ts toggles
+   * `body.hero-quiet` once pin progress crosses ~8% (just after the
+   * slideshow pause threshold) and removes it on pin release. The chip
+   * slides out and fades together with the rest of the hero chrome so
+   * the brand moment lands on a fully editorial canvas. */
+  :global(body.hero-quiet) .shop-handle {
+    transform: translateY(-50%) translateX(60%);
     opacity: 0;
     pointer-events: none;
   }

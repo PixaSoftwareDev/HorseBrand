@@ -1,12 +1,12 @@
 ---
-import { Image } from "astro:assets";
-import logoMain from "@/assets/logo/logo-main.png";
+const LOADER_LOGO =
+  "https://res.cloudinary.com/dukv3ov6t/image/upload/v1778936974/HB_main_positivo_uohobt.svg";
 ---
 
 <div id="pageLoader" class="loader" aria-hidden="true" role="status">
   <div class="loader__inner">
     <div class="loader__logo">
-      <Image src={logoMain} alt="" widths={[240, 480]} sizes="240px" loading="eager" />
+      <img src={LOADER_LOGO} alt="" loading="eager" decoding="async" />
     </div>
     <div class="loader__bar"><span></span></div>
   </div>
@@ -17,7 +17,7 @@ import logoMain from "@/assets/logo/logo-main.png";
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: #000;
+    background: var(--color-paper);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -39,25 +39,25 @@ import logoMain from "@/assets/logo/logo-main.png";
   .loader__logo {
     animation: loaderPulse 2.4s var(--ease-soft) infinite;
   }
-  .loader__logo :global(img) {
+  .loader__logo img {
     height: 22vmin;
     max-height: 200px;
     width: auto;
-    filter: brightness(0) invert(1);
-    opacity: 0.92;
+    opacity: 0.95;
     user-select: none;
+    display: block;
   }
   .loader__bar {
     width: 88px;
     height: 1px;
-    background: rgba(247, 243, 236, 0.14);
+    background: rgba(21, 17, 13, 0.10);
     overflow: hidden;
     position: relative;
   }
   .loader__bar span {
     position: absolute;
     inset: 0;
-    background: rgba(247, 243, 236, 0.85);
+    background: rgba(21, 17, 13, 0.7);
     transform: scaleX(0);
     transform-origin: left center;
     animation: loaderBar 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
