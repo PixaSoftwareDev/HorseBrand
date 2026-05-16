@@ -21,7 +21,7 @@ interface Props {
 
 const { lang, title, description } = Astro.props;
 const t = useTranslations(lang);
-const finalTitle = title ?? "Horse Brand · Lifestyle Equestrian Atelier";
+const finalTitle = title ?? "Lifestyle Equestrian";
 const finalDesc = description ?? t("hero.sub");
 
 // Build canonical + alternate URLs from the configured site origin and the
