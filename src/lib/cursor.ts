@@ -46,11 +46,24 @@ export function initNavScrollState(): void {
   // This way the nav background never covers the Hero photo while the
   // user is still looking at the portada — it only kicks in once they're
   // visually inside the next section.
+  //
+  // EXCEPTION: while the Hero pin is active (`.is-pinning` on .hero, set
+  // by heroExit.ts when pin progress > 0.05), heroExit owns the nav
+  // state — it runs the ink→paper canvas swap and decides when the
+  // cream nav should land/leave with hysteresis. If we toggled here too,
+  // the IO would race heroExit on the way UP from the manifesto: hero
+  // re-enters viewport while p is still ~1, IO would yank `scrolled`
+  // off immediately, and the user would see white nav text on the
+  // (still paper-coloured) canvas during the whole diptych phase.
+  // Bailing out while the pin is active hands full control to heroExit
+  // for that window; outside the pin (top of page, post-hero pages,
+  // mobile) the IO continues to work exactly as before.
   const hero = document.querySelector<HTMLElement>(".hero");
 
   if (hero && "IntersectionObserver" in window) {
     const io = new IntersectionObserver(
       ([entry]) => {
+        if (hero.classList.contains("is-pinning")) return;
         if (entry.isIntersecting) nav.classList.remove("scrolled");
         else nav.classList.add("scrolled");
       },

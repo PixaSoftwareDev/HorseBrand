@@ -1,90 +1,189 @@
 ---
 import { type Lang, useTranslations } from "@/i18n/ui";
-import { cldImage } from "@/lib/cloudinary";
+import { cldVideo, cldVideoPoster } from "@/lib/cloudinary";
 import { CLD_IDS } from "@/lib/cloudinaryAssets";
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Close-up image clipped INSIDE the giant "CABALLO" lettering via
-// background-clip: text. We request a fairly wide rendering so the texture
-// reads sharp inside the letter masks at any viewport.
-const horseImg = cldImage(CLD_IDS.IMG_3106, 2800);
+/**
+ * Caballo · franja editorial de video + CABALLO limpio.
+ *
+ * Estructura editorial tipo magazine spread:
+ *
+ *   1. Una FRANJA cinemascope (21:9) arriba con el video del galope.
+ *      Bordeada por reglas oro 1px — la firma del "moment editorial".
+ *   2. Un caption italic chico debajo de la franja, tipo pie de foto
+ *      de revista: "Galope libre · Pampa argentina".
+ *   3. La palabra CABALLO grande en ink sobre paper, sin video adentro
+ *      (el video vive en su propia zona, no compite).
+ *   4. Eyebrow + phrase + keywords + closer debajo.
+ *
+ * Por qué este movimiento es más premium que la versión video-en-letras:
+ *
+ *   - Cada elemento tiene SU ZONA. No hay overlap visual, no hay
+ *     legibilidad pelea contra fondo dinámico. Las decisiones
+ *     editoriales son explícitas, no rescatadas.
+ *   - El ratio cinemascope (21:9) lee como "momento de cine" — más
+ *     próximo a una placa Hermès o Loro Piana que a un hero genérico.
+ *   - Las reglas oro de 1px arriba y abajo de la franja firman el
+ *     gesto editorial. Es el detalle que separa "video en una página"
+ *     de "video en una pieza editorial".
+ *   - Caption italic en oro: marker de pie de foto. Hermès, Vogue,
+ *     Loewe — todos lo usan. Pequeño, lo lee solo quien presta atención;
+ *     ese tipo de detalle es lujo silencioso.
+ */
+
+const horseVideoSrc = cldVideo(CLD_IDS.VID_HORSE_GALOPE, 2400);
+const horseVideoPoster = cldVideoPoster(CLD_IDS.VID_HORSE_GALOPE, 1600);
 
 const keywords = ["caballo.word_1", "caballo.word_2", "caballo.word_3", "caballo.word_4"] as const;
-
-// The mega word that gets the image-inside-text treatment. We keep it as
-// a single word for the strongest possible typographic anchor.
 const megaWord = lang === "es" ? "Caballo" : "Horse";
+const ariaTitle = `${t("caballo.eyebrow")} · ${t("caballo.title_1")} ${t("caballo.title_2")}`;
+const filmCaption = lang === "es"
+  ? "Galope libre · Pampa argentina"
+  : "Free gallop · Argentine pampa";
 ---
 
-<section class="caballo" id="caballo" aria-label={t("caballo.eyebrow")}>
-  <div class="caballo__inner">
-    <span class="caballo__eyebrow" data-cab-rev>{t("caballo.eyebrow")}</span>
+<section
+  class="caballo"
+  id="caballo"
+  aria-label={ariaTitle}
+>
+  <div class="caballo__container">
+    <div class="caballo__editorial">
+      <span class="caballo__eyebrow" data-cab-rev>{t("caballo.eyebrow")}</span>
 
-    <!-- Type lockup — the image lives INSIDE the letters via background-clip: text.
-         A screen-reader-only span carries the readable copy for a11y.
+      <!-- Video zone · UN solo video continuo que ocupa la franja
+           superior (visible completa) + el área del CABALLO (visible
+           solo por las letras). El paper del bottom zone se hace cargo
+           del cierre natural — sin fade artificial. El top tiene un
+           gradient mask suave que disuelve el inicio del video con el
+           paper canvas de arriba (donde está el eyebrow). -->
+      <div class="caballo__video-zone" data-cab-rev aria-label={ariaTitle}>
+        <video
+          class="caballo__zone-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          poster={horseVideoPoster}
+          aria-hidden="true"
+        >
+          <source src={horseVideoSrc} type="video/mp4" />
+        </video>
+        <svg
+          class="caballo__zone-mask"
+          viewBox="0 0 1500 540"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+        >
+          <defs>
+            <mask id="caballo-zone-mask">
+              <!-- Top zone (y 0-200) en NEGRO: paper invisible, video full. -->
+              <rect x="0" y="0" width="1500" height="200" fill="black" />
+              <!-- Bottom zone (y 200-540) en BLANCO: paper visible.
+                   Más corto que antes (340 en vez de 400) — menos paper
+                   vacío abajo, el CABALLO se acerca al video. -->
+              <rect x="0" y="200" width="1500" height="340" fill="white" />
+              <!-- CABALLO knockout · y bajado de 500 a 440 para que las
+                   letras casi toquen la franja arriba (gap de ~50 units
+                   en lugar de ~90). El bloque se siente más denso. -->
+              <text
+                class="caballo__zone-text"
+                x="750"
+                y="440"
+                text-anchor="middle"
+                fill="black"
+              >{megaWord.toUpperCase()}</text>
+            </mask>
+          </defs>
+          <rect width="1500" height="540" fill="#fbf8f2" mask="url(#caballo-zone-mask)" />
+        </svg>
+        <h2 class="caballo__sr-title">{ariaTitle}</h2>
+      </div>
 
-         IMPORTANT: the IntersectionObserver hook (`data-cab-rev`) lives on the
-         WRAPPER, not the <h2>. The wrapper has no clip-path, so its bounding
-         box intersects the viewport normally. The h2's clip-path reveal is then
-         driven via CSS cascade (`.caballo__mega-wrap.is-revealed .caballo__mega`).
-         Earlier the data-cab-rev was on the h2 itself and the `clip-path:
-         inset(100%)` initial state made Chrome report ratio 0 to the IO — the
-         mega-word would never reveal even though it was fully inside viewport. -->
-    <div class="caballo__mega-wrap" data-cab-rev>
-      <h2
-        class="caballo__mega"
-        style={`background-image: url('${horseImg}')`}
-        aria-label={`${t("caballo.eyebrow")} · ${t("caballo.title_1")} ${t("caballo.title_2")}`}
-      >
-        <span aria-hidden="true">{megaWord}</span>
-      </h2>
+      <p class="caballo__phrase" data-cab-rev>
+        <span>{t("caballo.title_1")}</span>
+        <em>{t("caballo.title_2")}</em>
+      </p>
+
+      <ul class="caballo__keywords" aria-hidden="true" data-cab-rev>
+        {keywords.map((k, i) => (
+          <li style={`--i:${i}`}>{t(k as any)}</li>
+        ))}
+      </ul>
+
+      <p class="caballo__closer" data-cab-rev>{t("caballo.closer")}</p>
     </div>
-
-    <p class="caballo__phrase" data-cab-rev>
-      <span>{t("caballo.title_1")}</span>
-      <em>{t("caballo.title_2")}</em>
-    </p>
-
-    <ul class="caballo__keywords" aria-hidden="true" data-cab-rev>
-      {keywords.map((k, i) => (
-        <li style={`--i:${i}`}>{t(k as any)}</li>
-      ))}
-    </ul>
-
-    <p class="caballo__closer" data-cab-rev>{t("caballo.closer")}</p>
   </div>
 </section>
 
 <script>
   import { onPageReady } from "@/lib/onPageReady";
 
-  /**
-   * Caballo — staggered reveal of every element marked [data-cab-rev].
-   * The CSS handles the starting state (clipped/opacity 0) and the
-   * .is-revealed state. We just toggle the class via IntersectionObserver.
-   */
   function wireCaballo(): void {
     const section = document.querySelector<HTMLElement>(".caballo");
-    if (!section || section.dataset.wired === "1") return;
-    section.dataset.wired = "1";
+    if (!section) return;
 
-    const targets = section.querySelectorAll<HTMLElement>("[data-cab-rev]");
+    // Reduced-motion · pausa el video (uno solo ahora, el del zone)
+    // y deja el poster como still.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const vid = section.querySelector<HTMLVideoElement>(".caballo__zone-video");
+      if (vid) {
+        vid.removeAttribute("autoplay");
+        vid.pause();
+      }
+    } else {
+      // Smooth loop · enmascara el corte abrupto del loop del MP4.
+      // El video `<video loop>` salta de duration a 0 instantáneamente,
+      // produciendo un visible "salto" cuando el último frame no matchea
+      // el primero. Sin tocar el archivo, el truco editorial es bajar
+      // sutilmente la opacidad del video en los últimos 0.25s antes
+      // del seam y mantenerla baja durante los primeros 0.25s del
+      // restart — el corte queda en el momento de menor visibilidad,
+      // leyendo como una "respiración" lenta en lugar de un jump cut.
+      //
+      // El threshold (0.25s) y la depth (opacity 0.7) son sweet spot:
+      // suficiente para mascar el corte sin que el dim se perciba
+      // como una pausa intencional. transition 0.35s con ease editorial
+      // suaviza la entrada y salida del fade.
+      const vid = section.querySelector<HTMLVideoElement>(".caballo__zone-video");
+      if (vid) {
+        const SEAM_WINDOW = 0.25;
+        const updateLoopState = (): void => {
+          if (!vid.duration || isNaN(vid.duration)) return;
+          const timeLeft = vid.duration - vid.currentTime;
+          const inSeam =
+            timeLeft < SEAM_WINDOW || vid.currentTime < SEAM_WINDOW;
+          vid.classList.toggle("is-looping", inSeam);
+        };
+        vid.addEventListener("timeupdate", updateLoopState);
+      }
+    }
+
+    const targets = section.querySelectorAll<HTMLElement>(
+      "[data-cab-rev]:not(.is-revealed)"
+    );
+    if (targets.length === 0) return;
+
+    const allTargets = section.querySelectorAll<HTMLElement>("[data-cab-rev]");
     const io = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e, i) => {
+        entries.forEach((e) => {
           if (e.isIntersecting) {
-            // Add staggered delay per element so reveals don't fire all at once
-            const idx = Array.from(targets).indexOf(e.target as HTMLElement);
-            (e.target as HTMLElement).style.transitionDelay = `${idx * 0.12}s`;
+            const idx = Array.from(allTargets).indexOf(e.target as HTMLElement);
+            const delay = `${idx * 0.14}s`;
+            (e.target as HTMLElement).style.transitionDelay = delay;
+            (e.target as HTMLElement).style.animationDelay = delay;
             e.target.classList.add("is-revealed");
             io.unobserve(e.target);
           }
         });
       },
-      { threshold: 0.25 }
+      { threshold: 0.15 }
     );
     targets.forEach((el) => io.observe(el));
 
@@ -98,110 +197,155 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
 </script>
 
 <style>
+  /* ============================================================
+   * Caballo · franja editorial 21:9 + lockup CABALLO sobre paper
+   * ============================================================ */
   .caballo {
     position: relative;
+    width: 100%;
     background: var(--color-paper);
-    color: var(--color-ink);
-    padding: 18vh 5vw 14vh;
-    min-height: 100vh;
-    min-height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 140px 0 120px;
     overflow: hidden;
   }
 
-  .caballo__inner {
-    width: 100%;
+  .caballo__container {
     max-width: 1500px;
+    margin: 0 auto;
+    padding: 0 5vw;
+  }
+
+  /* ---- Bloque editorial · texto sobre paper, centrado, con air ---- */
+  .caballo__editorial {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 0;
+    padding-top: 32px;
   }
 
-  /* ---- Eyebrow ---- */
+  /* ---- Video zone · franja video arriba + CABALLO knockout abajo.
+   *
+   * Structure híbrida: UN solo <video> playing detrás + SVG mask encima
+   * que define dos zonas por height (top 35% = franja con video visible,
+   * bottom 65% = paper con CABALLO knockout). El video se asoma por la
+   * franja Y por las letras al mismo tiempo.
+   *
+   * Gradient mask SOLO en el borde superior (top fade) para que el inicio
+   * del video se diluya orgánicamente con el paper-canvas donde está el
+   * eyebrow. El borde inferior NO tiene fade — el paper del bottom zone
+   * con CABALLO knockout cierra naturalmente la sección con borde nítido,
+   * sin pixelado raro.
+   *
+   * Aspect 1500/720 (2.08:1) — más alto que el wide-only, suficiente
+   * para que el CABALLO knockout abajo tenga presencia tipográfica. */
+  .caballo__video-zone {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    aspect-ratio: 1500 / 540;
+    margin-top: 48px;
+    margin-bottom: 0;
+    overflow: hidden;
+    isolation: isolate;
+    /* Background paper + buffer de 2px paper-colored al bottom · combate
+     * el hairline residual que aparece en algunos browsers en el borde
+     * inferior del SVG (subpixel anti-aliasing del paper rect contra
+     * el video transformado con scale 1.2). El border-bottom extiende
+     * 2px de paper sólido fuera del overflow, tapando cualquier pixel
+     * de video que se asome por el edge. */
+    background: var(--color-paper);
+    border-bottom: 2px solid var(--color-paper);
+    transform-origin: center;
+    will-change: transform, opacity;
+  }
+  /* Sin entrance animation — el video aparece tal cual, sin scaleY
+   * opening. El "se abre" leía como sci-fi cheap y el usuario lo
+   * descartó. */
+  .caballo__zone-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 1;
+    /* Scale 1.20 para cortar las bandas letterbox que Flow le horneó
+     * al video. 1.05 anterior dejaba ~40px negros visibles arriba; con
+     * 1.20 el contenido (los caballos) llena el cuadro sin asomar
+     * bandas negras. Si la foto definitiva no tiene letterbox baked-in,
+     * volvemos a 1.0 o 1.05. */
+    transform: scale(1.2);
+    /* Transition para el smooth-loop · suaviza la entrada y salida del
+     * dim que enmascara el corte abrupto del loop. JS toggle .is-looping
+     * en los últimos 0.25s antes del seam + primeros 0.25s del restart. */
+    transition: opacity 0.35s var(--ease-editorial);
+  }
+  /* Estado de seam · dim editorial sutil. Opacity 0.7 = baja lo
+   * suficiente para que el corte abrupto pase desapercibido, sin que
+   * el dim mismo se perciba como una intención. El usuario lee el
+   * conjunto como "el video respira lento", no como "el video se cortó". */
+  .caballo__zone-video.is-looping {
+    opacity: 0.7;
+  }
+
+  /* SVG mask · paper rect encima del video con dos zonas por height.
+   * z-2 encima del video (z-1). Las cutouts del mask son: top zone
+   * completa (negro = paper invisible → video visible) y CABALLO text
+   * (negro dentro del bottom zone blanco → letras transparentes →
+   * video visible por las letras). */
+  .caballo__zone-mask {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: block;
+  }
+
+  /* Texto del CABALLO dentro del mask · Fraunces, weight 400 (fino,
+   * editorial). Font-size 260 vs los 340 previos — más cercano al
+   * sizing original del lockup que tenía la sección con la foto
+   * adentro (clamp 22vw, max 340). letter-spacing -8 proporcional. */
+  .caballo__zone-text {
+    font-family: var(--font-display);
+    font-size: 260px;
+    font-weight: 400;
+    letter-spacing: -8px;
+  }
+  /* ---- Eyebrow · gold uppercase ---- */
   .caballo__eyebrow {
     font-family: var(--font-sans);
     font-size: 11px;
     letter-spacing: 0.4em;
     text-transform: uppercase;
     color: var(--color-cognac);
+    margin-bottom: 32px;
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 1s var(--ease-editorial), transform 1s var(--ease-editorial);
-    margin-bottom: 32px;
   }
   .caballo__eyebrow.is-revealed { opacity: 1; transform: translateY(0); }
 
-  /* ---- MEGA word wrapper ----
-   * The wrapper is what the IO observes (see Caballo.astro markup comment).
-   * It carries no clip-path so its bounding box intersects normally; only
-   * its <h2> child carries the clip-path mask that the reveal animates. */
-  .caballo__mega-wrap {
-    width: 100%;
-    line-height: 0.86;
-    /* Reserve the same vertical space the h2 would, so the layout doesn't
-       jump when the mask animates open. */
+
+  /* SR-only · h2 para screen-readers y SEO. */
+  .caballo__sr-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0 0 0 0);
+    overflow: hidden;
+    white-space: nowrap;
   }
 
-  /* ---- MEGA word with the image inside the letters ----
-   * `background-clip: text` makes the image visible only inside the glyphs.
-   * A fallback color is provided in case the browser doesn't support it.
-   * The letters are tightly tracked (-0.03em) so the photo reads cleanly. */
-  .caballo__mega {
-    font-family: var(--font-display);
-    font-size: clamp(96px, 22vw, 340px);
-    font-weight: 400;
-    line-height: 0.86;
-    letter-spacing: -0.03em;
-    margin: 0;
-    text-transform: uppercase;
-    color: var(--color-ink);
-    /* Image fill — falls through to color above if unsupported. */
-    background-size: cover;
-    background-position: 40% 38%;
-    background-repeat: no-repeat;
-    -webkit-background-clip: text;
-    background-clip: text;
-    /* Reveal mask — letters rise into view. Initial state hides the ink;
-       the IO toggles `.is-revealed` on the WRAPPER, not here. */
-    clip-path: inset(100% 0 0 0);
-    -webkit-clip-path: inset(100% 0 0 0);
-    transition: clip-path 1.6s var(--ease-editorial);
-    will-change: clip-path, background-position;
-  }
-  /* Ken Burns INSIDE the letters. The photo of the horse drifts inside
-   * each glyph instead of staying frozen — a 16s alternate cycle moves
-   * the background through three frames (warm coat, eye/bridle area,
-   * shoulder muscle), so the still typography breathes. Only kicks in
-   * AFTER the mega wrapper reveals so the drift never visibly starts
-   * while the clip-path mask is still opening. Pauses during reduced
-   * motion (handled by the global rule further down in this file). */
-  .caballo__mega-wrap.is-revealed .caballo__mega {
-    animation: caballoMegaDrift 16s var(--ease-soft) infinite alternate 1.6s;
-  }
-  @keyframes caballoMegaDrift {
-    0%   { background-position: 40% 38%; }
-    50%  { background-position: 55% 48%; }
-    100% { background-position: 35% 55%; }
-  }
-  @supports (-webkit-background-clip: text) or (background-clip: text) {
-    .caballo__mega {
-      -webkit-text-fill-color: transparent;
-    }
-  }
-  .caballo__mega-wrap.is-revealed .caballo__mega {
-    clip-path: inset(0 0 0 0);
-    -webkit-clip-path: inset(0 0 0 0);
-  }
-  /* Sub-pixel rendering quality */
-  .caballo__mega > span { display: inline-block; }
-
-  /* ---- Phrase under the lockup ---- */
+  /* ---- Phrase ---- · pegada al video-zone (gap mínimo de 8px para
+   * que el conjunto franja + CABALLO + frase se lea como UN bloque
+   * editorial denso, no como elementos sueltos). */
   .caballo__phrase {
-    margin: 38px 0 0;
+    margin: 8px 0 0;
     font-family: var(--font-display);
     font-size: clamp(20px, 2vw, 30px);
     line-height: 1.3;
@@ -219,7 +363,7 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
     color: var(--color-cognac);
   }
 
-  /* ---- Keywords · single horizontal line, dash separators in gold ---- */
+  /* ---- Keywords ---- */
   .caballo__keywords {
     margin: 40px 0 0;
     padding: 0;
@@ -254,7 +398,7 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
 
   /* ---- Closer ---- */
   .caballo__closer {
-    margin: 48px 0 0;
+    margin: 36px 0 0;
     font-family: var(--font-italic);
     font-style: italic;
     font-weight: 300;
@@ -271,8 +415,7 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
   /* ---- Reduced motion ---- */
   @media (prefers-reduced-motion: reduce) {
     .caballo__eyebrow,
-    .caballo__mega-wrap,
-    .caballo__mega,
+    .caballo__video-zone,
     .caballo__phrase,
     .caballo__keywords,
     .caballo__closer {
@@ -281,30 +424,32 @@ const megaWord = lang === "es" ? "Caballo" : "Horse";
       clip-path: inset(0 0 0 0) !important;
       -webkit-clip-path: inset(0 0 0 0) !important;
       transition: none !important;
-    }
-    /* Freeze the photo drift inside the letters for reduced-motion. */
-    .caballo__mega-wrap.is-revealed .caballo__mega {
       animation: none !important;
+    }
+    .caballo__zone-video {
+      transform: none !important;
     }
   }
 
-  /* ---- Mobile · tighter padding, mega sized to fit one line ----
-   * The previous values (26vw at 800px, 28vw at 400px) made "CABALLO"
-   * overflow the viewport on phones — invisible until the clip-path
-   * bug was fixed, but now exposed. The new ratios keep the word
-   * dominant while guaranteeing it fits on a single line at every
-   * viewport from 320 → 800px, with letter-spacing tightened a touch
-   * to give the photo-inside-letters effect more density. */
+  /* ---- Mobile ---- */
   @media (max-width: 800px) {
-    .caballo { padding: 110px 5vw 90px; min-height: auto; }
-    .caballo__mega { font-size: clamp(64px, 20vw, 160px); letter-spacing: -0.035em; }
-    .caballo__phrase { margin-top: 28px; }
-    .caballo__keywords { gap: 12px 20px; font-size: 10px; letter-spacing: 0.32em; }
+    .caballo { padding: 96px 0 80px; }
+    /* Video zone en mobile · 5:4 (más cuadrado) para que el CABALLO
+     * knockout se vea legible en pantalla angosta. */
+    .caballo__video-zone {
+      aspect-ratio: 5 / 4;
+    }
+    .caballo__zone-text { font-size: 200px; }
+    .caballo__keywords {
+      gap: 12px 20px;
+      font-size: 10px;
+      letter-spacing: 0.32em;
+    }
     .caballo__keywords li::before { margin-right: 8px; }
-    .caballo__closer { margin-top: 36px; font-size: 14px; }
+    .caballo__closer { margin-top: 28px; font-size: 14px; }
   }
   @media (max-width: 400px) {
-    .caballo__mega { font-size: clamp(48px, 19vw, 100px); letter-spacing: -0.04em; }
+    .caballo__video-zone { aspect-ratio: 4 / 3; }
     .caballo__phrase { font-size: 17px; }
   }
 </style>

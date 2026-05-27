@@ -200,11 +200,20 @@ function buildTimeline(t: Targets): void {
     let wasNavBlurred = false;
     const PAUSE_THRESHOLD = 0.05;
     const QUIET_THRESHOLD = 0.08;
-    // Nav blur arrives mid-bg-shift (ink → paper finishes at 0.55), so the
-    // cream+blur lands together with the paper canvas instead of waiting
-    // for the hero to fully leave the viewport (which is when cursor.ts'
-    // IntersectionObserver would normally toggle it).
-    const NAV_BLUR_THRESHOLD = 0.45;
+    // Nav blur uses asymmetric thresholds (hysteresis) so the swap reads
+    // clean in BOTH directions:
+    //
+    //   - ON  at p > 0.45 (going down): cream+blur lands mid-bg-shift, in
+    //     step with the ink→paper canvas swap. Same as before.
+    //   - OFF at p < 0.18 (going up): nav STAYS cream while scrolling
+    //     back up through the diptych phase, because the bg is still
+    //     mostly paper there — releasing scrolled at 0.45 would put white
+    //     nav text on a cream canvas (invisible). 0.18 is the start of
+    //     the bg-shift window: at that point the canvas is back to ink
+    //     and the hero photo is reasserting itself, so the white over-
+    //     photo state reads correctly again.
+    const NAV_BLUR_ON = 0.45;
+    const NAV_BLUR_OFF = 0.18;
     const setNavBlurred = (on: boolean): void => {
       if (on === wasNavBlurred) return;
       t.heroNav?.classList.toggle("scrolled", on);
@@ -308,9 +317,15 @@ function buildTimeline(t: Targets): void {
         // gives the user a beat of "all chrome present" before the page
         // visibly hides anything.
         setQuiet(p > QUIET_THRESHOLD);
-        // Nav cream+blur fades in around the ink→paper midpoint so the
-        // bar finishes its background change in step with the canvas.
-        setNavBlurred(p > NAV_BLUR_THRESHOLD);
+        // Nav cream+blur: asymmetric thresholds so it lands together with
+        // the paper canvas going down AND stays cream while scrolling
+        // back up through the diptych phase (avoids a white-on-cream
+        // flash). See NAV_BLUR_ON / NAV_BLUR_OFF above.
+        if (wasNavBlurred) {
+          if (p < NAV_BLUR_OFF) setNavBlurred(false);
+        } else {
+          if (p > NAV_BLUR_ON) setNavBlurred(true);
+        }
 
         // PHASE 1 · Silence (0 → 22%) — copy + chrome fade.
         // The whole .hero__content fades as one (eyebrow/title/CTAs share

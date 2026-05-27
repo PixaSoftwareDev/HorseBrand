@@ -96,7 +96,15 @@ h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: 400;
   letter-spacing: 0.005em;
-  color: var(--color-ink);
+  /* Ink al 78% en lugar del token pleno: deja respirar el papel debajo
+   * y baja la presión del negro editorial duro. Los títulos siguen
+   * leyendo como ink, pero el tono general gana el "silencio" del
+   * lujo silencioso (Hermès / La Martina) en lugar de la dureza de
+   * un periódico. El token `--color-ink` queda intocado para body,
+   * CTAs y bordes — donde el negro pleno sí pertenece.
+   * Overrides locales (Hero h1 blanco sobre foto, etc.) siguen
+   * mandando porque tienen mayor especificidad. */
+  color: rgba(21, 17, 13, 0.78);
 }
 
 /* ========== CURSOR ==========

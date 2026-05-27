@@ -103,3 +103,43 @@ export function cldImageSrcset(publicId: string): {
 export function cldOgImage(publicId: string): string {
   return cldTransform(publicId, "f_auto,q_auto:good,w_1200,h_630,c_fill");
 }
+
+/* ============================================================
+ * Video helpers
+ * ============================================================
+ *
+ * Cloudinary sirve video por `/video/upload/...` (mismo cloud, otra rama
+ * del path). Las transformaciones aceptan:
+ *   - f_auto: formato per-browser (mp4/webm/h265 según soporte)
+ *   - q_auto:good: bitrate adaptativo
+ *   - vc_auto: video codec automático
+ *   - w_NNNN: ancho máximo (Cloudinary mantiene aspect ratio)
+ *
+ * Para extraer un poster frame del video (Cloudinary genera un JPG a
+ * partir del clip), usamos el mismo endpoint `/video/upload/` con la
+ * extensión `.jpg` al final del public ID — Cloudinary detecta y
+ * extrae el frame 0 automáticamente. `so_2.0` ajustaría el segundo si
+ * necesitáramos un frame distinto.
+ */
+const VIDEO_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD}/video/upload`;
+
+export function cldVideoTransform(publicId: string, transforms: string): string {
+  return `${VIDEO_BASE}/${transforms}/${publicId}`;
+}
+
+/** Background/inline video — MP4 explícito (extensión + sin f_auto).
+ *
+ * Por qué NO usamos `f_auto` para video como sí lo hacemos en imágenes:
+ * Cloudinary devuelve UNA sola URL fija (no negocia tipo MIME por
+ * request como hace `<picture>` con images). Si dejamos `f_auto`,
+ * Chrome recibe WebM mientras el `<source type="video/mp4">` declara
+ * MP4 — el browser ignora el source y el video queda en blanco.
+ * Pedir `.mp4` explícito le da formato consistente cross-browser. */
+export function cldVideo(publicId: string, width = 1280): string {
+  return `${VIDEO_BASE}/q_auto:good,w_${width}/${publicId}.mp4`;
+}
+
+/** Poster JPG · primer frame del video para usar como fallback / preload. */
+export function cldVideoPoster(publicId: string, width = 1280): string {
+  return `${VIDEO_BASE}/f_auto,q_auto:good,w_${width}/${publicId}.jpg`;
+}

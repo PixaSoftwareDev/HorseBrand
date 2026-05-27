@@ -68,6 +68,11 @@ export const CLD_IDS = {
   IMG_3063: "v1778953557/IMG_3063_fsziul.jpg",
   IMG_2955_B: "v1778953868/IMG_2955_ssizkf.jpg",
   LIFE_INE_91: "v1778954155/2026.5.14HorseLifeStyle_IneSchiopetto-91_tz3teb.jpg",
+
+  // Caballo · video del galope libre que se monta debajo del lockup
+  // tipográfico. Generado en Flow, 16:9. Reproduce muteado/loop debajo
+  // de la palabra CABALLO — la palabra cobra vida.
+  VID_HORSE_GALOPE: "v1779904035/Horses_galloping_across_pampa_202605271426_hz7zow",
 } as const;
 
 export type CldKey = keyof typeof CLD_IDS;
