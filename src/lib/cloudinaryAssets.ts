@@ -72,6 +72,13 @@ export const CLD_IDS = {
   // "Del deporte ecuestre al estilo de vida". Imagen real del cliente.
   SPORT_HERO: "v1779988186/WhatsApp_Image_2026-05-27_at_19.33.08_r4lhsv",
 
+  // Contact · foto editorial del panel "Hablemos de tu próxima pieza".
+  CONTACT_HERO: "v1779991462/2026.5.14HorseLifeStyle_IneSchiopetto-78_phf4hl",
+
+  // Craft · primera foto del horizontal scroll (slide title)
+  // "El gesto del oficio". Imagen real del cliente.
+  CRAFT_HERO: "v1779991225/DSC03702_tt99bi",
+
   // Caballo · video del galope libre que se monta debajo del lockup
   // tipográfico. Generado en Flow, 16:9. Reproduce muteado/loop debajo
   // de la palabra CABALLO — la palabra cobra vida.

@@ -8,7 +8,7 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const photos = [
-  { src: cldImage(CLD_IDS.IMG_3082, 1400), alt: "Pieza de cuero sobre el caballo" },
+  { src: cldImage(CLD_IDS.CRAFT_HERO, 1400), alt: "Pieza de cuero sobre el caballo" },
   { src: cldImage(CLD_IDS.IMG_3063, 1400), alt: "Detalle artesanal" },
   { src: cldImage(CLD_IDS.IMG_2955_B, 1400), alt: "Cartera con grabado" },
   { src: cldImage(CLD_IDS.LIFE_INE_82, 1600), alt: "Atelier" },
@@ -32,9 +32,11 @@ const stats = [
   },
 ];
 
-const closingTitle = lang === "es" ? "El tiempo no es" : "Time is not";
-const closingTitleItalic = lang === "es" ? "nuestro enemigo." : "our enemy.";
-const closingTitleEnd = lang === "es" ? "Es nuestro material." : "It is our material.";
+// Signature en inglés para todos los idiomas — el brand statement
+// "Crafted with character" como cierre poético del módulo Craft.
+const closingTitle = "Crafted";
+const closingTitleItalic = "with";
+const closingTitleEnd = "character.";
 ---
 
 <section class="craft" id="artesania">

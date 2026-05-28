@@ -16,7 +16,7 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const hours = lang === "es" ? ATELIER_HOURS_ES : ATELIER_HOURS_EN;
-const heroImage = cldImage(CLD_IDS.IMG_3116, 1800);
+const heroImage = cldImage(CLD_IDS.CONTACT_HERO, 1800);
 ---
 
 <section class="contact" id="contacto">
