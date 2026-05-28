@@ -71,8 +71,11 @@ const heroImage = cldImage(CLD_IDS.CONTACT_HERO, 1800);
     grid-template-columns: 1fr 1fr;
     background: var(--color-paper);
     color: var(--color-ink);
-    min-height: 100vh;
-    min-height: 100dvh;
+    /* Sin min-height: 100vh · el align-items center dentro del panel
+     * dejaba ~150-200px de paper vacío entre el contenido y el footer.
+     * Quitando el 100vh, la sección toma la altura natural del
+     * contenido + sus paddings, y el gap con el footer pasa a ser
+     * editorial (~90px) en lugar de voidy. */
   }
 
   /* ---- Image side · contained image inside the column ---- */
@@ -106,7 +109,7 @@ const heroImage = cldImage(CLD_IDS.CONTACT_HERO, 1800);
   .contact__panel {
     display: flex;
     align-items: center;
-    padding: 110px 7vw;
+    padding: 100px 7vw 50px;
     background: var(--color-paper);
   }
   .contact__panel-inner {

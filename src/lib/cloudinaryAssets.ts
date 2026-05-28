@@ -67,6 +67,7 @@ export const CLD_IDS = {
   IMG_3063: "v1778953557/IMG_3063_fsziul.jpg",
   IMG_2955_B: "v1778953868/IMG_2955_ssizkf.jpg",
   LIFE_INE_91: "v1778954155/2026.5.14HorseLifeStyle_IneSchiopetto-91_tz3teb.jpg",
+  LIFE_INE_50: "v1780000658/2026.5.14HorseLifeStyle_IneSchiopetto-50_vnlldv.jpg",
 
   // Sport · foto editorial del jinete/deporte ecuestre para la sección
   // "Del deporte ecuestre al estilo de vida". Imagen real del cliente.

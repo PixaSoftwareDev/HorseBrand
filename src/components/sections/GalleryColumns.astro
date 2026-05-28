@@ -1,0 +1,198 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import { cldTransform } from "@/lib/cloudinary";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// 15 imágenes total · mayoría portrait (13) + 2 landscape como break
+// editorial. Mezcla las 7 originales del Gallery + 8 IDs adicionales
+// del banco de fotos que no están usadas en otras secciones.
+const IMAGE_IDS = [
+  "v1778360938/IMG_3096_efos1q.jpg",
+  "v1778360946/IMG_2976_eebayx.jpg",
+  "v1778360899/IMG_3137_xr9jtc.jpg",
+  "v1778360892/IMG_3141_kokhl6.jpg",
+  "v1778360901/IMG_3140_td7uw8.jpg",
+  "v1778360902/IMG_3119_cliy4v.jpg",
+  "v1778360915/IMG_3115_qvcecp.jpg",
+  "v1778360932/IMG_3085_lebep3.jpg",
+  "v1778360936/IMG_3084_rtibam.jpg",
+  "v1778360923/IMG_3092_lzvmym.jpg",
+  "v1778360923/IMG_3104_t4ylou.jpg",
+  "v1778360933/IMG_3110_bryc5p.jpg",
+  "v1778360941/IMG_3081_qhisip.jpg",
+  "v1778360923/IMG_3105_p1bq2y.jpg",
+  "v1778360941/IMG_3113_jk1p36.jpg",
+];
+
+// Aspects · 13 portrait + 2 landscape posicionados deliberadamente
+// (posiciones 4 y 11) para break editorial dentro de col 2 y col 3.
+const ASPECTS = [
+  "3:4", "3:4", "3:4", "3:4", "4:3", "3:4", "3:4",
+  "3:4", "3:4", "3:4", "3:4", "4:3", "3:4", "3:4", "3:4",
+];
+
+const items = IMAGE_IDS.map((id, i) => ({
+  src: cldTransform(id, `f_auto,q_auto:good,c_fill,g_auto,ar_${ASPECTS[i]},w_900`),
+  aspect: ASPECTS[i],
+}));
+
+// Distribución interleaved · 5 imágenes por columna (5×3 = 15).
+// Index module 3 reparte: col 1 = [0,3,6,9,12], col 2 = [1,4,7,10,13],
+// col 3 = [2,5,8,11,14]. Las landscapes (idx 4 y 11) caen en col 2 y
+// col 3 respectivamente — col 1 queda 100% portrait, las otras dos
+// tienen un break editorial cada una.
+const columns: typeof items[] = [[], [], []];
+items.forEach((item, i) => columns[i % 3].push(item));
+---
+
+<section class="gallery-columns" id="galeria-columnas">
+  <div class="section__head">
+    <Reveal class="eyebrow">La galería · variante columnas</Reveal>
+    <Reveal as="h2">
+      <span>{t("gallery.title_1")}</span> <em>{t("gallery.title_2")}</em> <span>{t("gallery.title_3")}</span>
+    </Reveal>
+  </div>
+
+  <div class="gallery-columns__grid">
+    {columns.map((col, colIdx) => (
+      <div class="gallery-columns__col">
+        {col.map((item, itemIdx) => (
+          <figure
+            class="gc-item"
+            data-gc-reveal
+            style={`--gc-aspect: ${item.aspect.replace(":", " / ")}; --gc-delay: ${(colIdx * 0.08 + itemIdx * 0.12).toFixed(2)}s`}
+          >
+            <img src={item.src} alt="" loading="lazy" decoding="async" />
+          </figure>
+        ))}
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { onPageReady } from "@/lib/onPageReady";
+
+  function wireColumns(): void {
+    const items = document.querySelectorAll<HTMLElement>("[data-gc-reveal]");
+    if (items.length === 0) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    items.forEach((el) => io.observe(el));
+
+    document.addEventListener("astro:before-swap", () => io.disconnect(), {
+      once: true,
+    });
+  }
+
+  onPageReady(wireColumns);
+</script>
+
+<style>
+  /* Sección · paper canvas, padding editorial · respeta el ritmo de las
+   * otras secciones del home. */
+  .gallery-columns {
+    background: var(--color-paper);
+    padding: 110px 0 130px;
+  }
+
+  .gallery-columns__grid {
+    max-width: 1500px;
+    margin: 40px auto 0;
+    padding: 0 5vw;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+
+  .gallery-columns__col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Cada figura · usa la aspect-ratio que viene en --gc-aspect (set
+   * inline per-item desde el markup). Inicia oculta y se revela cuando
+   * IntersectionObserver le agrega .is-visible. Stagger via --gc-delay
+   * para que las imágenes entren en cascada, no de golpe. */
+  .gc-item {
+    margin: 0;
+    width: 100%;
+    aspect-ratio: var(--gc-aspect, 1 / 1);
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--color-bone);
+    opacity: 0;
+    transform: translateY(28px);
+    filter: blur(8px);
+    transition:
+      opacity 1.1s var(--ease-editorial) var(--gc-delay, 0s),
+      transform 1.1s var(--ease-editorial) var(--gc-delay, 0s),
+      filter 1.1s var(--ease-editorial) var(--gc-delay, 0s);
+    box-shadow:
+      0 1px 2px rgba(15, 11, 8, 0.05),
+      0 14px 40px -10px rgba(15, 11, 8, 0.18);
+  }
+  .gc-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+
+  .gc-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 1.2s var(--ease-soft);
+  }
+  .gc-item:hover img {
+    transform: scale(1.04);
+  }
+
+  /* Tablet · 2 columnas. Redistribuye las 3 columnas en 2 manteniendo
+   * el orden de las imágenes. */
+  @media (max-width: 1100px) {
+    .gallery-columns__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Mobile · 1 columna · gap más chico. */
+  @media (max-width: 700px) {
+    .gallery-columns { padding: 80px 0 90px; }
+    .gallery-columns__grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .gallery-columns__col {
+      gap: 14px;
+    }
+  }
+
+  /* Reduced motion · aterrizan en estado final sin animar. */
+  @media (prefers-reduced-motion: reduce) {
+    .gc-item {
+      opacity: 1;
+      transform: none;
+      filter: none;
+      transition: none;
+    }
+    .gc-item:hover img { transform: none; }
+  }
+</style>

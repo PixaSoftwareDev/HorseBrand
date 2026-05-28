@@ -19,7 +19,12 @@ const t = useTranslations(lang);
     position: fixed;
     top: 50%;
     right: 0;
-    transform: translateY(-50%);
+    /* Default hidden · la chip arranca fuera del viewport y solo aparece
+     * una vez que el Hero queda atrás (body.past-hero). Antes era siempre
+     * visible — competía visualmente con el lockup del Hero. */
+    transform: translateY(-50%) translateX(60%);
+    opacity: 0;
+    pointer-events: none;
     z-index: 90;
     /* Marrón del logo (HB_main_positivo) — matchea exacto la firma de
      * la marca. Antes era ink genérico; ahora la chip lee como "parte
@@ -38,6 +43,13 @@ const t = useTranslations(lang);
     box-shadow: -2px 6px 28px rgba(94, 66, 52, 0.28);
     transition: background 0.45s, transform 0.55s var(--ease-editorial),
       box-shadow 0.5s, opacity 0.5s;
+  }
+  /* Revealed once the Hero leaves the viewport · script abajo dispara la
+   * clase. Slide-in desde la derecha + fade. */
+  :global(body.past-hero) .shop-handle {
+    transform: translateY(-50%) translateX(0);
+    opacity: 1;
+    pointer-events: auto;
   }
   .shop-handle:hover {
     background: var(--color-ink);
@@ -70,20 +82,10 @@ const t = useTranslations(lang);
     transform: rotate(90deg);
   }
 
-  /* Hide while drawer is open */
+  /* Hide while drawer is open · igual fuerza la salida aunque past-hero
+   * esté activa (la clase shop-open viene después en orden de cascada). */
   :global(body.shop-open) .shop-handle {
     transform: translateY(-50%) translateX(110%);
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Quiet mode during the Hero → Manifesto pin. heroExit.ts toggles
-   * `body.hero-quiet` once pin progress crosses ~8% (just after the
-   * slideshow pause threshold) and removes it on pin release. The chip
-   * slides out and fades together with the rest of the hero chrome so
-   * the brand moment lands on a fully editorial canvas. */
-  :global(body.hero-quiet) .shop-handle {
-    transform: translateY(-50%) translateX(60%);
     opacity: 0;
     pointer-events: none;
   }
@@ -110,6 +112,36 @@ const t = useTranslations(lang);
     handle.addEventListener("click", () => {
       window.dispatchEvent(new CustomEvent("shop:open"));
     });
+
+    /* Reveal logic · la chip arranca oculta y se muestra recién cuando
+     * el Hero deja el viewport. IntersectionObserver mira `.hero` con
+     * threshold 0 — `isIntersecting` es false en cuanto el Hero queda
+     * completamente arriba del fold. Al volver al Hero (scroll-up), se
+     * vuelve a ocultar. Si no encuentra el Hero (rutas internas sin
+     * landing), revela inmediatamente para no dejar la chip oculta. */
+    const hero = document.querySelector<HTMLElement>(".hero");
+    if (!hero) {
+      document.body.classList.add("past-hero");
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          document.body.classList.toggle("past-hero", !e.isIntersecting);
+        });
+      },
+      { threshold: 0 }
+    );
+    io.observe(hero);
+
+    document.addEventListener(
+      "astro:before-swap",
+      () => {
+        io.disconnect();
+        document.body.classList.remove("past-hero");
+      },
+      { once: true }
+    );
   }
   onPageReady(wireShopHandle);
 </script>

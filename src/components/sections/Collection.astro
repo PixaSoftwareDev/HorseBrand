@@ -277,23 +277,8 @@ const products = (await getCollection("products")).sort(
   }
   .card:hover .card__media-inner :global(img) { filter: saturate(1.02); }
 
-  .card__badge {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    background: rgba(247, 243, 236, 0.92);
-    padding: 7px 14px;
-    font-family: var(--font-sans);
-    font-size: 10px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--color-ink);
-    z-index: 2;
-  }
-
   /* ---------- Body — staggered reveal ---------- */
-  .card__name,
-  .card__tag {
+  .card__name {
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.85s var(--ease-editorial),
@@ -304,11 +289,6 @@ const products = (await getCollection("products")).sort(
     transform: translateY(0);
     transition-delay: calc(var(--card-delay, 0ms) + 0.55s);
   }
-  .card.is-revealed .card__tag {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: calc(var(--card-delay, 0ms) + 0.7s);
-  }
 
   .card__name {
     font-size: 26px;
@@ -316,19 +296,12 @@ const products = (await getCollection("products")).sort(
     font-weight: 400;
     margin-bottom: 8px;
   }
-  .card__tag {
-    color: var(--color-stone);
-    font-size: 13px;
-    letter-spacing: 0.06em;
-    margin-bottom: 14px;
-  }
 
   /* ---------- Reduced motion ---------- */
   @media (prefers-reduced-motion: reduce) {
     .collection__title .line,
     .card__media,
     .card__name,
-    .card__tag,
     .card__num,
     .collection__sub {
       clip-path: none;

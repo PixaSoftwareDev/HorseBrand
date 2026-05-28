@@ -37,7 +37,12 @@ export interface ResponsiveSrc {
  * gives enough resolution without any upscale risk.
  */
 export function cldZoomImage(publicId: string): ResponsiveSrc {
-  const base = "f_auto,q_auto:good,c_fill,ar_16:9";
+  // `c_limit` en lugar de `c_fill,ar_16:9` · respeta el aspect natural
+  // de cada foto. Antes Cloudinary forzaba todo a 16:9 landscape, que
+  // cortaba portraits brutalmente. Con c_limit, la foto se entrega a
+  // su proporción original y el tile la muestra completa (vía object-fit
+  // contain inline en el render). */
+  const base = "f_auto,q_auto:good,c_limit";
   const make = (w: number): string => cldTransform(publicId, `${base},w_${w}`);
   return {
     src: make(1600),

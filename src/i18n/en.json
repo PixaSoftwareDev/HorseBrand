@@ -1,5 +1,4 @@
 {
-  "nav.manifesto": "Manifesto",
   "nav.horse": "The Horse",
   "nav.universes": "Universes",
   "nav.collection": "Collection",
@@ -14,11 +13,7 @@
   "hero.sub": "A silent-luxury equestrian atelier. Leather goods, saddles and home born from the craft. Buenos Aires · present in 30+ countries.",
   "hero.cta_1": "Discover the collection",
   "hero.cta_2": "View gallery",
-  "hero.scroll": "Scroll",
   "hero.story_opener": "Born in Argentina, as a premium saddle house.",
-
-  "badge.atelier": "Atelier",
-  "badge.handmade": "Hand-crafted",
 
   "manifesto.title_1": "A brand that breathes",
   "manifesto.title_2": "equestrian identity, leather, character.",
@@ -52,9 +47,6 @@
   "universe.sub": "Our identity breathes through our products and our spaces.",
   "universe.atelier_title": "Atelier",
   "universe.atelier_text": "The craft of leather. The saddle as origin.",
-  "universe.cta_visit": "Visit",
-  "universe.cta_book": "Book",
-  "universe.cta_explore": "Discover",
   "universe.restaurant_title": "Restaurant",
   "universe.restaurant_text": "Table for those who live it or feel it.",
   "universe.home_title": "Home & Deco",
@@ -68,13 +60,6 @@
   "collection.sub": "A curated selection of our most iconic silhouettes.",
   "collection.see_piece": "View piece",
   "collection.buy": "Shop",
-
-  "split.eyebrow": "Editorial AW",
-  "split.title_1": "Between the",
-  "split.title_2": "stable",
-  "split.title_3": "and the city.",
-  "split.p": "A universe where leather breathes, sunlight filters through trees, and each piece finds its place between the everyday and the extraordinary.",
-  "split.cta": "Explore gallery",
 
   "gallery.eyebrow": "The gallery",
   "gallery.title_1": "The",
@@ -112,12 +97,10 @@
   "contact.eyebrow": "Contact",
   "contact.title_1": "Let's talk",
   "contact.title_2": "about your next piece.",
-  "contact.p": "Private atelier · Visits by appointment · Bespoke orders.",
   "contact.cta": "Write to the atelier",
 
   "contact.atelier_title": "Atelier",
   "contact.atelier_hours_label": "Hours",
-  "contact.direct_title": "Let's talk",
   "contact.direct_whatsapp": "Message on WhatsApp",
   "contact.direct_email_label": "Or by email",
 
@@ -128,8 +111,6 @@
   "footer.closing_motto": "Quiet luxury, equestrian soul.",
   "footer.closing_motto_italic": "Hecho a mano.",
   "footer.closing_origin": "Atelier · Buenos Aires",
-
-  "splash.skip": "click to continue",
 
   "audio.label": "Toggle ambient music",
 

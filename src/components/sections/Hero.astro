@@ -9,49 +9,53 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 const home = localizedPath(lang, "/");
 
-// Hero slideshow — 5 editorial shots from the book.
+// Hero slideshow · 3 PARES CURADOS · cada par es una composición
+// editorial intencional, no random offset. Ambas mitades del diptych
+// avanzan en sincronía (mismo índice), así el ojo lee "este par
+// pertenece junto" en lugar de combinaciones que emergen del azar.
 //
-// The first frame the visitor sees is determined by two indices:
-//   · LEFT half starts at index 0
-//   · RIGHT half starts at RIGHT_INITIAL (2)
-//
-// Per the brand brief, the opening diptych is IMG_3104 (left) paired with
-// IMG_3092 (right). The other three shots cycle behind them — the array
-// order from index 1 onward just controls the rotation sequence; what
-// matters most is the FIRST PAIR. `pos` is the background-position used
-// for the ambient blur layer behind each slide.
-const slides = [
-  { src: cldImage(CLD_IDS.IMG_3104, 2400), pos: "62% 38%" },    // 01 · LEFT opening
-  { src: cldImage(CLD_IDS.IMG_3017, 2400), pos: "center 50%" }, // 02 · left rotates here next
-  { src: cldImage(CLD_IDS.IMG_3092, 2400), pos: "55% 45%" },    // 03 · RIGHT opening (RIGHT_INITIAL)
-  { src: cldImage(CLD_IDS.IMG_2955, 2400), pos: "center 50%" }, // 04 · cycle
-  { src: cldImage(CLD_IDS.IMG_3041, 2400), pos: "65% 50%" },    // 05 · cycle
+// `pos` es el background-position para el ambient blur layer atrás
+// de cada slide.
+const pairs = [
+  // Par 1
+  {
+    left:  { src: cldImage(CLD_IDS.IMG_3041, 2400), pos: "center 50%" },
+    right: { src: cldImage(CLD_IDS.IMG_3116, 2400), pos: "center 50%" },
+  },
+  // Par 2
+  {
+    left:  { src: cldImage(CLD_IDS.LIFE_INE_50, 2400), pos: "center 50%" },
+    right: { src: cldImage(CLD_IDS.IMG_3115, 2400), pos: "center 50%" },
+  },
+  // Par 3
+  {
+    left:  { src: cldImage(CLD_IDS.IMG_3017, 2400), pos: "center 50%" },
+    right: { src: cldImage(CLD_IDS.IMG_3051, 2400), pos: "center 50%" },
+  },
 ];
-
-// Right half starts offset from the left, so the two halves never show the
-// same image and cycle through all 5 without collisions.
-const RIGHT_INITIAL = 2;
 ---
 
 <section class="hero" id="top">
   <div class="hero__split">
-    <!-- LEFT half slideshow -->
+    <!-- LEFT half slideshow · renderiza el `left` de cada par. -->
     <div class="hero__half hero__half--left">
-      {slides.map((s, i) => (
+      {pairs.map((p, i) => (
         <div
           class:list={["hero__slide", "hero__slide--left", i === 0 && "active"]}
-          style={`background-image:url('${s.src}'); background-position:${s.pos}`}
+          style={`background-image:url('${p.left.src}'); background-position:${p.left.pos}`}
           data-slide={i}
         />
       ))}
     </div>
 
-    <!-- RIGHT half slideshow (only renders on desktop ≥701px via CSS) -->
+    <!-- RIGHT half slideshow · renderiza el `right` de cada par.
+         Ambas mitades arrancan en index 0 (Par 1 inicial) y avanzan
+         sincronizadas — no hay offset. -->
     <div class="hero__half hero__half--right" aria-hidden="true">
-      {slides.map((s, i) => (
+      {pairs.map((p, i) => (
         <div
-          class:list={["hero__slide", "hero__slide--right", i === RIGHT_INITIAL && "active"]}
-          style={`background-image:url('${s.src}'); background-position:${s.pos}`}
+          class:list={["hero__slide", "hero__slide--right", i === 0 && "active"]}
+          style={`background-image:url('${p.right.src}'); background-position:${p.right.pos}`}
           data-slide={i}
         />
       ))}
@@ -85,11 +89,6 @@ const RIGHT_INITIAL = 2;
       </a>
     </div>
   </div>
-
-  <a href="#manifiesto" class="hero__scroll" aria-label={t("hero.scroll")}>
-    <span class="hero__scroll-text">{t("hero.scroll")}</span>
-    <span class="hero__scroll-line" aria-hidden="true"></span>
-  </a>
 
   <!-- Brand moment · the story opener.
        Hidden by default; heroExit.ts fades it in at the climax of the
@@ -147,13 +146,14 @@ const RIGHT_INITIAL = 2;
     if (!hero || !leftSlides.length) return;
 
     const N = leftSlides.length;
-    const RIGHT_OFFSET = 2;
     const SLIDE_MS = 7500;
     const POST_INTRO_BUFFER_MS = 3400;
     const progress = document.getElementById("heroProgress");
 
+    // Pares curados · ambos lados avanzan al mismo índice (sin offset).
+    // Cada cambio muestra el siguiente par como una unidad editorial.
     let idxL = 0;
-    let idxR = RIGHT_OFFSET % N;
+    let idxR = 0;
     let slideId: number | null = null;
     let started = false;
 
@@ -197,8 +197,11 @@ const RIGHT_INITIAL = 2;
     function go(n: number): void {
       const prevL = idxL;
       const prevR = idxR;
-      idxL = (n + N) % N;
-      idxR = (n + RIGHT_OFFSET + N) % N;
+      // Ambas mitades avanzan al mismo índice — los pares quedan
+      // sincronizados (Par 1 → Par 2 → Par 3 → loop).
+      const next = (n + N) % N;
+      idxL = next;
+      idxR = next;
       switchSlide(leftSlides, prevL, idxL);
       switchSlide(rightSlides, prevR, idxR);
       startProgress();
@@ -739,71 +742,6 @@ const RIGHT_INITIAL = 2;
     border-color: #f7f3ec;
   }
 
-  /* ---- Scroll indicator · bottom-right vertical ---- */
-  .hero__scroll {
-    position: absolute;
-    bottom: 36px;
-    right: 5vw;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    opacity: 0;
-    transform: translateY(10px);
-    color: rgba(247, 243, 236, 0.55);
-    transition: color 0.4s, transform 0.4s var(--ease-soft);
-  }
-  :global(body.intro-done) .hero__scroll {
-    animation: heroScrollIn 0.8s var(--ease-editorial) 1.75s forwards;
-  }
-  @keyframes heroScrollIn {
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .hero__scroll:hover {
-    color: rgba(247, 243, 236, 0.95);
-    transform: translateY(-2px);
-  }
-  .hero__scroll-text {
-    font-family: var(--font-sans);
-    font-size: 9.5px;
-    letter-spacing: 0.5em;
-    text-transform: uppercase;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-  }
-  .hero__scroll-line {
-    position: relative;
-    width: 1px;
-    height: 44px;
-    background: linear-gradient(to bottom,
-      rgba(247, 243, 236, 0.5),
-      rgba(247, 243, 236, 0));
-    overflow: hidden;
-  }
-  .hero__scroll-line::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 14px;
-    background: linear-gradient(to bottom,
-      transparent,
-      rgba(247, 243, 236, 0.95),
-      transparent);
-    animation: heroScrollPulse 1.9s var(--ease-soft) infinite;
-  }
-  @keyframes heroScrollPulse {
-    0%   { transform: translateY(-14px); opacity: 0; }
-    25%  { opacity: 1; }
-    75%  { opacity: 1; }
-    100% { transform: translateY(44px); opacity: 0; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero__scroll-line::after { animation: none; opacity: 0.5; }
-  }
-
   /* ---------- BRAND MOMENT ----------
    * The punctuation that lands at the climax of the diptych close.
    * heroExit.ts drives:
@@ -931,8 +869,6 @@ const RIGHT_INITIAL = 2;
     .hero__eyebrow { font-size: 9.5px; letter-spacing: 0.42em; margin-bottom: 22px; }
     .hero__cta { margin-top: 32px; gap: 10px; justify-content: flex-start; }
     .hero__btn { padding: 14px 22px; font-size: 10.5px; letter-spacing: 0.24em; }
-
-    .hero__scroll { display: none; }
 
     /* Mobile only has left slides — they wipe horizontally from the right
      * edge inward (since there's no divider, the anchor is the visual edge). */

@@ -1,0 +1,127 @@
+---
+import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
+import { cldTransform } from "@/lib/cloudinary";
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Mismas 7 imágenes que el Gallery actual · queremos comparar las
+// dos versiones (zoom-parallax vs expansive cards) usando idéntico
+// material visual para que la decisión sea sobre layout, no contenido.
+const IMAGE_IDS = [
+  "v1778360938/IMG_3096_efos1q.jpg",
+  "v1778360946/IMG_2976_eebayx.jpg",
+  "v1778360899/IMG_3137_xr9jtc.jpg",
+  "v1778360892/IMG_3141_kokhl6.jpg",
+  "v1778360901/IMG_3140_td7uw8.jpg",
+  "v1778360902/IMG_3119_cliy4v.jpg",
+  "v1778360915/IMG_3115_qvcecp.jpg",
+];
+
+// Smart-crop a portrait 3:4 (aspect natural de las fotos verticales del
+// cliente) · `g_auto` mantiene al sujeto centrado en cada card sin
+// importar la orientación del source.
+const expandImages = IMAGE_IDS.map((id) =>
+  cldTransform(id, "f_auto,q_auto:good,c_fill,g_auto,ar_3:4,w_800")
+);
+---
+
+<section class="gallery-expand">
+  <div class="section__head">
+    <Reveal class="eyebrow">La galería · variante expansiva</Reveal>
+    <Reveal as="h2">
+      <span>{t("gallery.title_1")}</span> <em>{t("gallery.title_2")}</em> <span>{t("gallery.title_3")}</span>
+    </Reveal>
+  </div>
+
+  <div class="gallery-expand__row">
+    {expandImages.map((src) => (
+      <div class="gallery-expand__item">
+        <img src={src} alt="" loading="lazy" decoding="async" />
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .gallery-expand {
+    background: var(--color-paper);
+    padding: 110px 0 130px;
+  }
+
+  /* Row · todas las cards comparten altura. Al rest cada una toma una
+   * porción equitativa del flex (flex: 1). Al hover una crece (flex
+   * grow: 5) y las demás se contraen para darle espacio — efecto
+   * "card cinematográfico" suave. */
+  .gallery-expand__row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    height: 520px;
+    width: 100%;
+    max-width: 1500px;
+    margin: 40px auto 0;
+    padding: 0 5vw;
+  }
+
+  .gallery-expand__item {
+    flex: 1 1 0;
+    height: 100%;
+    min-width: 0; /* permite shrink real cuando otra card crece */
+    overflow: hidden;
+    border-radius: 4px;
+    cursor: none;
+    box-shadow:
+      0 1px 2px rgba(15, 11, 8, 0.06),
+      0 12px 32px -8px rgba(15, 11, 8, 0.18);
+    transition: flex-grow 0.7s var(--ease-editorial);
+  }
+  .gallery-expand__item:hover {
+    flex-grow: 5;
+  }
+
+  .gallery-expand__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.96) contrast(1.02);
+    transition: transform 0.7s var(--ease-editorial),
+      filter 0.6s var(--ease-editorial);
+  }
+  .gallery-expand__item:hover img {
+    transform: scale(1.03);
+    filter: saturate(1.02) contrast(1.04);
+  }
+
+  /* Mobile · 2 cards visibles, scroll horizontal · el efecto expand
+   * on hover no tiene sentido en touch, así que en mobile mostramos
+   * un carousel horizontal scrollable. */
+  @media (max-width: 800px) {
+    .gallery-expand { padding: 80px 0 90px; }
+    .gallery-expand__row {
+      height: 380px;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .gallery-expand__item {
+      flex: 0 0 70vw;
+      scroll-snap-align: center;
+      transition: none;
+    }
+    .gallery-expand__item:hover { flex-grow: 0; }
+    .gallery-expand__item:hover img { transform: none; }
+  }
+
+  /* Reduced motion · sin escala ni transition, solo el flex-grow on
+   * hover queda (gesto editorial intencional, no animación). */
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-expand__item img { transition: none; }
+    .gallery-expand__item:hover img { transform: none; filter: none; }
+  }
+</style>

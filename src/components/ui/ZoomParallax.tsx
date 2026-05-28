@@ -162,6 +162,22 @@ export default function ZoomParallax({ images }: Props) {
           const peakLeft = `${tile.left * tile.max}vw`;
           const peakW = `${tile.w * tile.max}vw`;
           const peakH = `${tile.h * tile.max}vh`;
+          /* Smart crop per-tile · reescribimos el URL de Cloudinary
+           * para que cada tile pida la foto en SU aspect ratio
+           * exacto. `g_auto` activa detección de sujeto/cara — la
+           * foto vertical original se entrega cropeada a la forma
+           * del tile (square, landscape, portrait, lo que sea) PERO
+           * con el sujeto centrado en el frame. Cada tile llena
+           * completo, ninguna parte importante de la foto se pierde. */
+          const tileAspect = `${Math.round(tile.w * 10)}:${Math.round(tile.h * 10)}`;
+          const smartSrc = src.replace(
+            /\/c_limit,/,
+            `/c_fill,g_auto,ar_${tileAspect},`
+          );
+          const smartSrcSet = srcSet.replace(
+            /\/c_limit,/g,
+            `/c_fill,g_auto,ar_${tileAspect},`
+          );
           return (
             <motion.div key={i} style={{ scale: scales[i] }} className="zp-item">
               <div
@@ -190,11 +206,11 @@ export default function ZoomParallax({ images }: Props) {
                   AND waste bandwidth on every page-load.
                 */}
                 <img
-                  src={src}
+                  src={smartSrc}
                   alt={alt ?? ""}
                   loading="lazy"
                   decoding="async"
-                  {...({ srcset: srcSet, sizes } as Record<string, string>)}
+                  {...({ srcset: smartSrcSet, sizes } as Record<string, string>)}
                 />
               </div>
             </motion.div>
