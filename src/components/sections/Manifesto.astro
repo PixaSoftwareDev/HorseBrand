@@ -7,8 +7,9 @@ import { CLD_IDS } from "@/lib/cloudinaryAssets";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-// Montura vintage — símbolo del oficio que da origen al manifiesto.
-const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
+// Pieza editorial elegida por el cliente — acompaña la línea
+// "Una marca que respira identidad ecuestre, cuero, carácter."
+const manifestoImg = cldImage(CLD_IDS.IMG_3082, 1600);
 ---
 
 <section class="manifesto" id="manifiesto">
@@ -56,9 +57,11 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
     margin: 0 auto;
     padding: 0 5vw;
     display: grid;
-    /* Asimetría sutil (1.05 / 0.95) · jerarquía editorial: texto manda,
-     * imagen apoya. Un toque, pero declara qué es el protagonista. */
-    grid-template-columns: 1.05fr 0.95fr;
+    /* 1fr 1fr · grid simétrico. Antes era 1.05/0.95 (texto ligeramente
+     * más ancho) y la imagen se sentía angosta vs el peso del texto.
+     * Con 50/50 la imagen recupera presencia editorial sin invertir
+     * la jerarquía. */
+    grid-template-columns: 1fr 1fr;
     gap: 80px;
     align-items: center;
   }
@@ -200,9 +203,13 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
   }
   .manifesto__media :global(img) {
     width: 100%;
-    /* 600px · 17% más chico que los 720 anteriores. Sigue siendo
-     * imponente como pieza editorial, deja de dominar el viewport. */
-    height: 600px;
+    /* Aspect 1:1 · ratio cuadrado moderno. Reemplaza la altura fija
+     * 600px que dejaba la imagen en una proporción ambigua (~1.18:1).
+     * Con 1:1, el alto matchea automáticamente el ancho del column —
+     * a ~710px en desktop. Visualmente decide: "esto es un cuadrado",
+     * no "esto es un rectángulo entre tamaños". */
+    aspect-ratio: 1 / 1;
+    height: auto;
     object-fit: cover;
     /* Slow contemplative Ken Burns — scales from 1.02 to 1.07 with a tiny
      * translate over 22s, alternating. Marks elegance without distracting. */
@@ -221,18 +228,19 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
   @media (max-width: 1280px) {
     .manifesto { padding: 90px 0; }
     .manifesto__grid { gap: 56px; }
-    .manifesto__media :global(img) { height: 500px; }
   }
   @media (max-width: 900px) {
     .manifesto { padding: 80px 0; }
     .manifesto__grid { grid-template-columns: 1fr; gap: 50px; }
-    .manifesto__media :global(img) { height: 420px; }
+    /* En mobile el column es full-width — un 1:1 a 100vw sería
+     * imponente de más. Mantenemos aspect-ratio pero un toque más
+     * landscape (5:4) para que no abuse del scroll. */
+    .manifesto__media :global(img) { aspect-ratio: 5 / 4; }
   }
   @media (max-width: 500px) {
     .manifesto { padding: 64px 0; }
     .manifesto__grid { gap: 36px; }
     .manifesto__list { margin-top: 28px; }
     .manifesto__list li { font-size: 12px; gap: 14px; padding: 14px 0; }
-    .manifesto__media :global(img) { height: 340px; }
   }
 </style>
