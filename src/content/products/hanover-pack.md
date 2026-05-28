@@ -1,13 +1,13 @@
 ---
 order: 4
 name:
-  es: Hanover Pack
-  en: Hanover Pack
+  es: Carteras moda
+  en: Fashion bags
 tagline:
-  es: Algarrobo curado · Forrado en cuero
-  en: Cured carob wood · Leather-bound
+  es: Cuero pleno flor · Costura a mano
+  en: Full-grain leather · Hand-stitched
 badge: handmade
-image: LIFE_INE_63
-alt: Mate Sierra — algarrobo y cuero
+image: IMG_2945
+alt: Carteras moda — cuero pleno flor
 tiendanubeUrl: https://www.horse-brand.com/productos/mates
 ---

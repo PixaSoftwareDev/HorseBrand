@@ -1,12 +1,12 @@
 ---
 order: 5
 name:
-  es: Stirrup Belt
-  en: Stirrup Belt
+  es: Bolsos exclusivos
+  en: Exclusive bags
 tagline:
-  es: Cognac · Costura a mano
-  en: Cognac · Hand-stitched
+  es: Cuero pleno flor · Costura a mano
+  en: Full-grain leather · Hand-stitched
 image: IMG_2978
-alt: Cartera Estancia — cognac
+alt: Bolsos exclusivos — cuero pleno flor
 tiendanubeUrl: https://www.horse-brand.com/productos/bolsos
 ---

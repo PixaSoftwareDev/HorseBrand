@@ -8,10 +8,8 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// PLACEHOLDER · cambiar a la foto de polo/salto definitiva cuando aterrice
-// en Cloudinary. Cuando subas la foto buena, agregás el ID a
-// `cloudinaryAssets.ts` y reemplazás acá.
-const sportImg = cldImage(CLD_IDS.LIFE_INE_91, 1400);
+// Foto editorial del jinete · imagen real del cliente.
+const sportImg = cldImage(CLD_IDS.SPORT_HERO, 1400);
 ---
 
 <section class="sport" id="deporte">

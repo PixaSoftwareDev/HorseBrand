@@ -1,12 +1,12 @@
 ---
 order: 2
 name:
-  es: Matera Criollo
-  en: Criollo Mate Holder
+  es: Materas de diseño
+  en: Designer mate holders
 tagline:
-  es: Lana merino · Ribete de cuero
-  en: Merino wool · Leather trim
+  es: Cuero pleno flor · Hechas a mano
+  en: Full-grain leather · Handmade
 image: IMG_2971
-alt: Manta Pampa — lana merino y cuero
+alt: Materas de diseño — cuero pleno flor
 tiendanubeUrl: https://www.horse-brand.com/productos/home
 ---
