@@ -1,8 +1,8 @@
 ---
 order: 2
 name:
-  es: Manta Pampa
-  en: Pampa Throw
+  es: Matera Criollo
+  en: Criollo Mate Holder
 tagline:
   es: Lana merino · Ribete de cuero
   en: Merino wool · Leather trim

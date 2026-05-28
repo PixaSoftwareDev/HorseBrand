@@ -1,8 +1,8 @@
 ---
 order: 5
 name:
-  es: Cartera Estancia
-  en: Estancia Bag
+  es: Stirrup Belt
+  en: Stirrup Belt
 tagline:
   es: Cognac · Costura a mano
   en: Cognac · Hand-stitched

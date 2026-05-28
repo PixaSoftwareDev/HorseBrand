@@ -1,8 +1,8 @@
 ---
 order: 3
 name:
-  es: Bandeja Riada
-  en: Riada Tray
+  es: Cavalière Bag
+  en: Cavalière Bag
 tagline:
   es: Cuero repujado · Latón antiguo
   en: Tooled leather · Antiqued brass

@@ -134,9 +134,14 @@ export function cldVideoTransform(publicId: string, transforms: string): string 
  * request como hace `<picture>` con images). Si dejamos `f_auto`,
  * Chrome recibe WebM mientras el `<source type="video/mp4">` declara
  * MP4 — el browser ignora el source y el video queda en blanco.
- * Pedir `.mp4` explícito le da formato consistente cross-browser. */
+ * Pedir `.mp4` explícito le da formato consistente cross-browser.
+ *
+ * `q_auto:best` en lugar de `q_auto:good` — Cloudinary preserva la
+ * máxima calidad visual. Para videos editoriales en hero/full-bleed
+ * el costo en peso vale el bump de definición (un q_good agresivo
+ * lee como video pixelado, especialmente en displays retina). */
 export function cldVideo(publicId: string, width = 1280): string {
-  return `${VIDEO_BASE}/q_auto:good,w_${width}/${publicId}.mp4`;
+  return `${VIDEO_BASE}/q_auto:best,w_${width}/${publicId}.mp4`;
 }
 
 /** Poster JPG · primer frame del video para usar como fallback / preload. */

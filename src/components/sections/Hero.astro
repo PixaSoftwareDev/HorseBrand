@@ -621,7 +621,11 @@ const RIGHT_INITIAL = 2;
   .hero__title {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: clamp(36px, 4.8vw, 76px);
+    /* Antes 4.8vw cap 76 · las nuevas frases ("El caballo nos inspira."
+     * y "Más que objetos: una actitud.") son más largas que las
+     * anteriores y a 76px ocupaban demasiado en la portada. 3.5vw cap
+     * 56 baja el peso visual ~25% manteniendo presencia editorial. */
+    font-size: clamp(32px, 3.5vw, 56px);
     line-height: 1.05;
     letter-spacing: 0.005em;
     color: #f7f3ec;
@@ -848,7 +852,10 @@ const RIGHT_INITIAL = 2;
     font-size: clamp(22px, 2.6vw, 36px);
     letter-spacing: 0.005em;
     line-height: 1.25;
-    color: var(--color-ink);
+    /* Ink al 78% · matchea el color del título del Manifesto ("Una
+     * marca que respira identidad ecuestre, cuero, carácter.") — tono
+     * de lujo silencioso suave, no el negro pleno editorial duro. */
+    color: rgba(21, 17, 13, 0.78);
     text-align: center;
     max-width: min(82vw, 720px);
     margin: 0;
@@ -920,7 +927,7 @@ const RIGHT_INITIAL = 2;
       text-align: left;
       align-items: flex-start;
     }
-    .hero__title { font-size: clamp(38px, 9vw, 64px); }
+    .hero__title { font-size: clamp(28px, 7vw, 48px); }
     .hero__eyebrow { font-size: 9.5px; letter-spacing: 0.42em; margin-bottom: 22px; }
     .hero__cta { margin-top: 32px; gap: 10px; justify-content: flex-start; }
     .hero__btn { padding: 14px 22px; font-size: 10.5px; letter-spacing: 0.24em; }
@@ -945,7 +952,7 @@ const RIGHT_INITIAL = 2;
 
   @media (max-width: 400px) {
     .hero__content { width: 88vw; }
-    .hero__title { font-size: clamp(32px, 10vw, 48px); }
+    .hero__title { font-size: clamp(24px, 8vw, 36px); }
     .hero__cta {
       flex-direction: column;
       align-items: stretch;

@@ -21,7 +21,10 @@ const t = useTranslations(lang);
     right: 0;
     transform: translateY(-50%);
     z-index: 90;
-    background: var(--color-ink);
+    /* Marrón del logo (HB_main_positivo) — matchea exacto la firma de
+     * la marca. Antes era ink genérico; ahora la chip lee como "parte
+     * del lockup" en lugar de "elemento accesorio". */
+    background: #5e4234;
     color: var(--color-ivory);
     border: 0;
     cursor: none;
@@ -32,13 +35,13 @@ const t = useTranslations(lang);
     gap: 14px;
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
-    box-shadow: -2px 6px 28px rgba(15, 11, 8, 0.22);
+    box-shadow: -2px 6px 28px rgba(94, 66, 52, 0.28);
     transition: background 0.45s, transform 0.55s var(--ease-editorial),
       box-shadow 0.5s, opacity 0.5s;
   }
   .shop-handle:hover {
-    background: var(--color-leather);
-    box-shadow: -2px 8px 36px rgba(91, 57, 36, 0.4);
+    background: var(--color-ink);
+    box-shadow: -2px 8px 36px rgba(15, 11, 8, 0.32);
   }
   .shop-handle__dot {
     width: 6px;

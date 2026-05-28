@@ -6,13 +6,11 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-const cities = [
-  { name: t("heritage.city_1"), year: t("heritage.city_1_year") },
-  { name: t("heritage.city_2"), year: t("heritage.city_2_year") },
-  { name: t("heritage.city_3"), year: t("heritage.city_3_year") },
-  { name: t("heritage.city_4"), year: t("heritage.city_4_year") },
-  { name: t("heritage.city_5"), year: t("heritage.city_5_year") },
-  { name: t("heritage.city_6"), year: t("heritage.city_6_year") },
+// Stats genéricos (no cronología, no capitales específicas).
+const stats = [
+  { value: t("heritage.stat_1_value"), label: t("heritage.stat_1_label") },
+  { value: t("heritage.stat_2_value"), label: t("heritage.stat_2_label") },
+  { value: t("heritage.stat_3_value"), label: t("heritage.stat_3_label") },
 ];
 ---
 
@@ -27,14 +25,14 @@ const cities = [
       <Reveal as="p" class="heritage__intro" delay={120}>{t("heritage.intro")}</Reveal>
     </div>
 
-    <Reveal as="div" class="heritage__cities-wrap" delay={200}>
-      <span class="heritage__cities-label">{t("heritage.cities_label")}</span>
+    <Reveal as="div" class="heritage__stats-wrap" delay={200}>
+      <span class="heritage__stats-label">{t("heritage.stats_label")}</span>
 
-      <ul class="heritage__cities" data-heritage-cities>
-        {cities.map((c, i) => (
-          <li class="heritage-city" style={`--i:${i}`}>
-            <span class="heritage-city__year">{c.year}</span>
-            <span class="heritage-city__name">{c.name}</span>
+      <ul class="heritage__stats" data-heritage-stats>
+        {stats.map((s, i) => (
+          <li class="heritage-stat" style={`--i:${i}`}>
+            <span class="heritage-stat__value">{s.value}</span>
+            <span class="heritage-stat__label">{s.label}</span>
           </li>
         ))}
       </ul>
@@ -48,14 +46,19 @@ const cities = [
 </section>
 
 <style>
+  /* Heritage · editorial sobre paper canvas (matchea el resto del home).
+   * Antes era dark ink con grilla de ciudades cronológicas — ahora es
+   * un cierre editorial paper-light con tres stats genéricos (países,
+   * continentes, años) sin nombres ni fechas específicas que puedan
+   * envejecer. */
   .heritage {
-    background: var(--color-ink);
-    color: #f7f3ec;
+    background: var(--color-paper);
+    color: var(--color-ink);
     padding: 130px 5vw 120px;
     position: relative;
     overflow: hidden;
   }
-  /* Subtle gold glow, kept from previous version */
+  /* Glow gold sutil en una esquina · le da calor sin sacarlo del paper. */
   .heritage::before {
     content: "";
     position: absolute;
@@ -65,7 +68,7 @@ const cities = [
     height: 100%;
     background: radial-gradient(
       circle at 30% 70%,
-      rgba(176, 133, 82, 0.18) 0%,
+      rgba(176, 133, 82, 0.08) 0%,
       transparent 60%
     );
     pointer-events: none;
@@ -89,125 +92,107 @@ const cities = [
     flex-direction: column;
     align-items: center;
     gap: 22px;
-    max-width: 700px;
+    max-width: 720px;
   }
   :global(.heritage__eyebrow) {
     font-family: var(--font-sans);
     font-size: 11px;
     letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: var(--color-gold);
+    color: var(--color-cognac);
     font-weight: 400;
   }
-  .heritage__head h2 {
-    color: #f7f3ec;
-    font-size: clamp(36px, 4.4vw, 64px);
+  .heritage__head :global(h2) {
+    font-size: clamp(36px, 4.4vw, 60px);
     line-height: 1.05;
     font-weight: 400;
     letter-spacing: 0;
   }
-  .heritage__head h2 em {
+  .heritage__head :global(h2) span {
+    display: inline;
+  }
+  .heritage__head :global(h2) em {
     font-family: var(--font-italic);
     font-style: italic;
-    font-weight: 300;
-    color: var(--color-gold);
+    font-weight: 400;
     display: block;
   }
   .heritage__intro {
     font-family: var(--font-italic);
     font-style: italic;
     font-weight: 300;
-    font-size: clamp(16px, 1.4vw, 20px);
-    line-height: 1.55;
-    color: rgba(247, 243, 236, 0.78);
-    max-width: 580px;
+    font-size: clamp(16px, 1.3vw, 19px);
+    line-height: 1.6;
+    color: rgba(21, 17, 13, 0.7);
+    max-width: 620px;
   }
 
-  /* ---- Cities · the real "presence" map ---- */
-  :global(.heritage__cities-wrap) {
+  /* ---- Stats · 3 números genéricos en row ---- */
+  :global(.heritage__stats-wrap) {
     width: 100%;
-    max-width: 1100px;
+    max-width: 900px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 28px;
   }
-  .heritage__cities-label {
+  .heritage__stats-label {
     font-family: var(--font-sans);
     font-size: 10px;
     letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: rgba(247, 243, 236, 0.45);
+    color: var(--color-stone);
   }
 
-  .heritage__cities {
+  .heritage__stats {
     list-style: none;
     margin: 0;
     padding: 0;
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 0;
-    border-top: 1px solid rgba(247, 243, 236, 0.14);
-    border-bottom: 1px solid rgba(247, 243, 236, 0.14);
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid rgba(21, 17, 13, 0.12);
+    border-bottom: 1px solid rgba(21, 17, 13, 0.12);
   }
-  .heritage-city {
+  .heritage-stat {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    padding: 32px 14px;
-    border-left: 1px solid rgba(247, 243, 236, 0.10);
-    position: relative;
+    gap: 14px;
+    padding: 44px 16px;
+    border-left: 1px solid rgba(21, 17, 13, 0.08);
     transition: background 0.5s var(--ease-editorial);
-    /* Stagger the city entrance with a small delay per index */
     opacity: 0;
     transform: translateY(10px);
-    animation: cityRise 0.9s var(--ease-editorial) forwards;
-    animation-delay: calc(var(--i) * 0.1s + 0.4s);
+    animation: heritageStatRise 0.9s var(--ease-editorial) forwards;
+    animation-delay: calc(var(--i) * 0.12s + 0.4s);
   }
-  .heritage-city:first-child { border-left: 0; }
-  .heritage-city:hover { background: rgba(247, 243, 236, 0.03); }
-  /* Subtle pulsing dot above each city — like a place marker on a map */
-  .heritage-city::before {
-    content: "";
-    position: absolute;
-    top: -3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--color-gold);
-    box-shadow: 0 0 0 3px rgba(176, 133, 82, 0.15);
-    animation: cityPulse 3.2s ease-in-out infinite;
-    animation-delay: calc(var(--i) * 0.4s);
-  }
-  @keyframes cityRise {
+  .heritage-stat:first-child { border-left: 0; }
+  .heritage-stat:hover { background: rgba(21, 17, 13, 0.02); }
+  @keyframes heritageStatRise {
     to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes cityPulse {
-    0%, 100% { box-shadow: 0 0 0 3px rgba(176, 133, 82, 0.15); }
-    50% { box-shadow: 0 0 0 7px rgba(176, 133, 82, 0); }
-  }
 
-  .heritage-city__year {
+  .heritage-stat__value {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 4.4vw, 64px);
+    font-weight: 400;
+    color: var(--color-ink);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  .heritage-stat__label {
     font-family: var(--font-sans);
-    font-size: 10px;
+    font-size: 10.5px;
     letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: var(--color-gold);
+    color: var(--color-stone);
     font-weight: 400;
-  }
-  .heritage-city__name {
-    font-family: var(--font-display);
-    font-size: clamp(15px, 1.2vw, 19px);
-    color: #f7f3ec;
-    letter-spacing: 0.02em;
-    line-height: 1.2;
+    max-width: 180px;
+    line-height: 1.4;
   }
 
-  /* ---- Tagline ---- */
+  /* ---- Tagline · cierre ---- */
   :global(.heritage__tagline) {
     display: flex;
     flex-direction: column;
@@ -220,47 +205,39 @@ const cities = [
     font-style: italic;
     font-weight: 300;
     font-size: clamp(18px, 1.6vw, 24px);
-    color: var(--color-gold);
+    color: var(--color-cognac);
     letter-spacing: 0.005em;
   }
   .heritage__line-2 {
     font-family: var(--font-sans);
-    font-size: 12px;
-    letter-spacing: 0.32em;
+    font-size: 11px;
+    letter-spacing: 0.34em;
     text-transform: uppercase;
-    color: rgba(247, 243, 236, 0.65);
+    color: rgba(21, 17, 13, 0.55);
   }
 
   /* ---- Responsive ---- */
-  @media (max-width: 1024px) {
-    .heritage__cities { grid-template-columns: repeat(3, 1fr); }
-    .heritage-city:nth-child(4) { border-left: 0; }
-    .heritage-city:nth-child(n+4) {
-      border-top: 1px solid rgba(247, 243, 236, 0.10);
+  @media (max-width: 900px) {
+    .heritage { padding: 100px 5vw 100px; }
+    .heritage__inner { gap: 56px; }
+    .heritage__stats { grid-template-columns: 1fr; }
+    .heritage-stat {
+      border-left: 0;
+      border-top: 1px solid rgba(21, 17, 13, 0.08);
+      padding: 32px 16px;
     }
+    .heritage-stat:first-child { border-top: 0; }
   }
-  @media (max-width: 600px) {
-    .heritage { padding: 90px 5vw 90px; }
-    .heritage__inner { gap: 50px; }
-    .heritage__cities { grid-template-columns: repeat(2, 1fr); }
-    .heritage-city:nth-child(odd) { border-left: 0; }
-    .heritage-city:nth-child(n+3) {
-      border-top: 1px solid rgba(247, 243, 236, 0.10);
-    }
-    .heritage-city { padding: 22px 10px; }
-  }
-  @media (max-width: 400px) {
-    .heritage__head h2 { font-size: clamp(28px, 9vw, 40px); }
-    .heritage-city__name { font-size: 14px; }
+  @media (max-width: 500px) {
+    .heritage { padding: 80px 5vw 84px; }
+    .heritage__head :global(h2) { font-size: clamp(28px, 9vw, 40px); }
+    .heritage-stat__value { font-size: clamp(36px, 12vw, 48px); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .heritage-city {
+    .heritage-stat {
       opacity: 1;
       transform: none;
-      animation: none;
-    }
-    .heritage-city::before {
       animation: none;
     }
   }

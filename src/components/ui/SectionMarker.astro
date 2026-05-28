@@ -19,17 +19,20 @@ const { lang } = Astro.props;
  *   · animates the number + name into a new value when the active
  *     section changes (no anim mid-scroll inside the same section).
  */
+// Lista alineada con lo que renderiza el home (index.astro). Si una
+// sección del array no existe como id en el DOM, el marker la "salta"
+// y los números pierden secuencia — por eso hay que mantener este
+// array sincronizado con el flow real de la página.
 const sections = [
-  { id: "manifiesto",  num: "01", label: lang === "es" ? "Manifiesto"  : "Manifesto" },
-  { id: "origen",      num: "02", label: lang === "es" ? "Origen"      : "Origin"    },
-  { id: "caballo",     num: "03", label: lang === "es" ? "El Caballo"  : "The Horse" },
-  { id: "universo",    num: "04", label: lang === "es" ? "Universos"   : "Universes" },
-  { id: "polo",        num: "05", label: lang === "es" ? "Deporte"     : "Sport"     },
-  { id: "coleccion",   num: "06", label: lang === "es" ? "Colección"   : "Collection"},
-  { id: "galeria",     num: "07", label: lang === "es" ? "Galería"     : "Gallery"   },
-  { id: "artesania",   num: "08", label: lang === "es" ? "Artesanía"   : "Craft"     },
-  { id: "patrimonio",  num: "09", label: lang === "es" ? "Patrimonio"  : "Heritage"  },
-  { id: "contacto",    num: "10", label: lang === "es" ? "Contacto"    : "Contact"   },
+  { id: "manifiesto", num: "01", label: lang === "es" ? "Manifiesto" : "Manifesto"  },
+  { id: "deporte",    num: "02", label: lang === "es" ? "Deporte"    : "Sport"      },
+  { id: "caballo",    num: "03", label: lang === "es" ? "El Caballo" : "The Horse"  },
+  { id: "universo",   num: "04", label: lang === "es" ? "Universos"  : "Universes"  },
+  { id: "coleccion",  num: "05", label: lang === "es" ? "Colección"  : "Collection" },
+  { id: "galeria",    num: "06", label: lang === "es" ? "Galería"    : "Gallery"    },
+  { id: "artesania",  num: "07", label: lang === "es" ? "Artesanía"  : "Craft"      },
+  { id: "patrimonio", num: "08", label: lang === "es" ? "Patrimonio" : "Heritage"   },
+  { id: "contacto",   num: "09", label: lang === "es" ? "Contacto"   : "Contact"    },
 ];
 ---
 

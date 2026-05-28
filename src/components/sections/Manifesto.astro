@@ -14,7 +14,6 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
 <section class="manifesto" id="manifiesto">
   <div class="manifesto__grid">
     <div class="manifesto__text">
-      <Reveal class="eyebrow">{t("manifesto.eyebrow")}</Reveal>
       <Reveal as="h2">
         <span>{t("manifesto.title_1")}</span>
         <em>{t("manifesto.title_2")}</em>
@@ -47,30 +46,58 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
 <style>
   .manifesto {
     background: var(--color-paper);
-    padding: 140px 0;
+    /* Padding 110 (era 140) · la sección deja de tomar autoridad con
+     * peso vertical y se vuelve un capítulo editorial que pide su
+     * scroll sin abusarlo. */
+    padding: 110px 0;
   }
   .manifesto__grid {
     max-width: 1500px;
     margin: 0 auto;
     padding: 0 5vw;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* Asimetría sutil (1.05 / 0.95) · jerarquía editorial: texto manda,
+     * imagen apoya. Un toque, pero declara qué es el protagonista. */
+    grid-template-columns: 1.05fr 0.95fr;
     gap: 80px;
     align-items: center;
   }
-  .manifesto__text { max-width: 560px; }
-  .manifesto__text h2 {
+  /* Column ensanchada a 820px · suficiente para que "Una marca que
+   * respira" entre en 1 línea al tamaño grande del título original.
+   * Antes en 760 todavía wrappeaba a "Una marca que" + "respira". */
+  .manifesto__text { max-width: 820px; }
+  .manifesto__text :global(h2) {
     margin: 22px 0 64px;
-    /* Slightly looser line-height so italic descenders ("y", "c", "p") don't
-     * crowd the line below within the title block itself. */
+    /* Tamaño cap 64 (era 4.5vw cap 72 en el global, pero a 72 no
+     * entraba). 64 es lo más grande que garantiza "Una marca que
+     * respira" en 1 línea sobre una column de 820px. */
+    font-size: clamp(36px, 4.2vw, 64px);
     line-height: 1.08;
-    /* Make the box reserve room for the italic descender of the last line so
-     * it doesn't crash into the paragraph below (the line-box clips the ink
-     * but the next element sits on the box, not the ink). */
+    letter-spacing: -0.005em;
     padding-bottom: 0.18em;
+    /* Sin color override · hereda el ink-78% del global h1-h4 (el
+     * tono "lujo silencioso" suave). Ponerle var(--color-ink) directo
+     * lo volvía negro duro, perdía la respiración editorial. */
   }
-  .manifesto__text h2 span { display: inline; }
-  .manifesto__text h2 em { display: block; }
+  /* Span y em respetan el font-size del h2 (no lo overrideamos) · la
+   * jerarquía se mantiene como en el diseño original: mismo peso,
+   * mismo color, italic en el em.
+   *
+   * `white-space: nowrap` en el span garantiza que "Una marca que
+   * respira" nunca rompe a 2 líneas, ni en viewports más chicos
+   * (el clamp ya baja el font-size cuando el viewport es 1280 o
+   * menos para que entre cómodo). */
+  .manifesto__text :global(h2) span {
+    display: inline;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .manifesto__text :global(h2) em {
+    display: block;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 400;
+  }
   :global(.manifesto__body) {
     margin-top: 8px;
   }
@@ -173,7 +200,9 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
   }
   .manifesto__media :global(img) {
     width: 100%;
-    height: 720px;
+    /* 600px · 17% más chico que los 720 anteriores. Sigue siendo
+     * imponente como pieza editorial, deja de dominar el viewport. */
+    height: 600px;
     object-fit: cover;
     /* Slow contemplative Ken Burns — scales from 1.02 to 1.07 with a tiny
      * translate over 22s, alternating. Marks elegance without distracting. */
@@ -190,20 +219,20 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3044, 1600);
   }
 
   @media (max-width: 1280px) {
-    .manifesto { padding: 110px 0; }
+    .manifesto { padding: 90px 0; }
     .manifesto__grid { gap: 56px; }
-    .manifesto__media :global(img) { height: 580px; }
+    .manifesto__media :global(img) { height: 500px; }
   }
   @media (max-width: 900px) {
-    .manifesto { padding: 90px 0; }
+    .manifesto { padding: 80px 0; }
     .manifesto__grid { grid-template-columns: 1fr; gap: 50px; }
-    .manifesto__media :global(img) { height: 460px; }
+    .manifesto__media :global(img) { height: 420px; }
   }
   @media (max-width: 500px) {
-    .manifesto { padding: 70px 0; }
+    .manifesto { padding: 64px 0; }
     .manifesto__grid { gap: 36px; }
     .manifesto__list { margin-top: 28px; }
     .manifesto__list li { font-size: 12px; gap: 14px; padding: 14px 0; }
-    .manifesto__media :global(img) { height: 360px; }
+    .manifesto__media :global(img) { height: 340px; }
   }
 </style>

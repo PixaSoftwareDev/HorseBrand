@@ -1,5 +1,6 @@
 ---
 import { type Lang, useTranslations } from "@/i18n/ui";
+import Reveal from "@/components/shared/Reveal.astro";
 import { cldImage } from "@/lib/cloudinary";
 import { CLD_IDS } from "@/lib/cloudinaryAssets";
 
@@ -8,214 +9,144 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 // PLACEHOLDER · cambiar a la foto de polo/salto definitiva cuando aterrice
-// en Cloudinary. Por ahora usa una de las LifeStyle existentes para que la
-// sección no se vea vacía mientras tanto. Cuando subas la foto buena, solo
-// agregás el ID a `cloudinaryAssets.ts` y lo importás acá.
-const sportImg = cldImage(CLD_IDS.LIFE_INE_91, 2400);
+// en Cloudinary. Cuando subas la foto buena, agregás el ID a
+// `cloudinaryAssets.ts` y reemplazás acá.
+const sportImg = cldImage(CLD_IDS.LIFE_INE_91, 1400);
 ---
 
-<section class="sport" id="deporte" aria-label={t("polo.eyebrow")}>
-  <div class="sport__bg" aria-hidden="true">
-    <img src={sportImg} alt="" loading="lazy" decoding="async" />
-  </div>
-  <div class="sport__scrim" aria-hidden="true"></div>
+<section class="sport" id="deporte">
+  <div class="sport__grid">
+    <!-- IMAGEN a la izquierda · invierte el flow de Manifesto
+         (que tiene texto-izq, imagen-der) para crear variación
+         editorial tipo flip-page. -->
+    <Reveal class="sport__media">
+      <div data-scroll-reveal>
+        <img src={sportImg} alt={t("sport.eyebrow")} loading="lazy" decoding="async" />
+      </div>
+      <figcaption class="sport__caption">{t("sport.caption")}</figcaption>
+    </Reveal>
 
-  <div class="sport__content">
-    <span class="sport__eyebrow" data-sport-rev>{t("polo.eyebrow")}</span>
-    <h2 class="sport__title">
-      <span class="sport__line" data-sport-rev>{t("polo.title_1")}</span>
-      <span class="sport__line sport__line--italic" data-sport-rev>{t("polo.title_2")}</span>
-    </h2>
-    <p class="sport__sub" data-sport-rev>{t("polo.sub")}</p>
+    <div class="sport__text">
+      <Reveal class="eyebrow">{t("sport.eyebrow")}</Reveal>
+      <Reveal as="h2">
+        <span>{t("sport.title_1")}</span>
+        <em>{t("sport.title_2")}</em>
+      </Reveal>
+      <Reveal as="div" class="sport__body">
+        <p>{t("sport.body_1")}</p>
+        <p>{t("sport.body_2")}</p>
+      </Reveal>
+    </div>
   </div>
 </section>
 
-<script>
-  import { onPageReady } from "@/lib/onPageReady";
-
-  function wireSport(): void {
-    const section = document.querySelector<HTMLElement>(".sport");
-    if (!section || section.dataset.wired === "1") return;
-    section.dataset.wired = "1";
-
-    const targets = section.querySelectorAll<HTMLElement>("[data-sport-rev]");
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            const idx = Array.from(targets).indexOf(e.target as HTMLElement);
-            (e.target as HTMLElement).style.transitionDelay = `${idx * 0.16}s`;
-            e.target.classList.add("is-revealed");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.35 }
-    );
-    targets.forEach((el) => io.observe(el));
-
-    document.addEventListener(
-      "astro:before-swap",
-      () => io.disconnect(),
-      { once: true }
-    );
-  }
-  onPageReady(wireSport);
-</script>
-
 <style>
-  /* Sport · beat cinemático entre Manifesto (papel quieto) y Caballo
-   * (tipografía monumental). Una sola foto full-bleed, scrim oscuro,
-   * tipografía blanca encima. Sin CTAs — esta sección es contemplativa,
-   * no transaccional. La acción está abajo, en Collection. */
+  /* Sport · editorial sobre paper, layout 2-col (foto izq / texto der).
+   * Coherente con Manifesto que está arriba (mismo paper, mismo grid
+   * pattern) pero con la imagen invertida — variación tipo flip-page
+   * que evita que dos secciones consecutivas se sientan iguales.
+   * Caballo abajo cierra el díptico con su full-bleed cinematográfico. */
   .sport {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    min-height: 620px;
-    overflow: hidden;
-    background: var(--color-ink);
-    isolation: isolate;
+    background: var(--color-paper);
+    padding: 110px 0;
   }
 
-  /* Fondo: foto full-bleed con Ken Burns muy suave. Misma lógica que
-   * los slides del Hero (escala 1.06 → 1, después drift hasta 1.05).
-   * Animación arranca en cuanto la sección monta — no esperamos al
-   * IO porque la foto vive detrás del scrim, no compite con nada.
-   * `aspect-ratio` no se setea: la img cubre por object-fit cover. */
-  .sport__bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-  .sport__bg img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 40%;
-    transform: scale(1.04);
-    animation: sportDrift 22s var(--ease-soft) infinite alternate;
-  }
-  @keyframes sportDrift {
-    0%   { transform: scale(1.04) translate3d(0, 0, 0); }
-    100% { transform: scale(1.08) translate3d(0, -1.2%, 0); }
-  }
-
-  /* Scrim · gradiente vertical doble. Arriba transparente para que la
-   * foto respire, abajo más denso para apoyar el sub. El eyebrow + título
-   * caen en el centro, donde el scrim tiene densidad media. Mix-blend
-   * multiply lo afina sin matar la saturación de la foto. */
-  .sport__scrim {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background:
-      linear-gradient(
-        180deg,
-        rgba(15, 11, 8, 0.25) 0%,
-        rgba(15, 11, 8, 0.42) 45%,
-        rgba(15, 11, 8, 0.58) 100%
-      );
-  }
-
-  .sport__content {
-    position: relative;
-    z-index: 2;
-    height: 100%;
+  .sport__grid {
     max-width: 1500px;
     margin: 0 auto;
     padding: 0 5vw;
+    display: grid;
+    /* Imagen primero (izq), texto segundo (der) · invierte Manifesto. */
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  /* ---- Media · imagen contenida, mismo tratamiento que Manifesto ---- */
+  :global(.sport__media) {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    color: #f7f3ec;
   }
-
-  /* Eyebrow · oro sobre foto. Mismo tracking de los eyebrows del sitio
-   * pero con drop-shadow para legibilidad sobre cualquier foto. */
-  .sport__eyebrow {
+  .sport__media :global([data-scroll-reveal]) {
+    overflow: hidden;
+  }
+  .sport__media :global(img) {
+    width: 100%;
+    height: 600px;
+    object-fit: cover;
+    object-position: center 40%;
+    animation: sportKenBurns 22s var(--ease-soft) infinite alternate;
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  @keyframes sportKenBurns {
+    0%   { transform: scale(1.02) translate(0%, 0%); }
+    100% { transform: scale(1.06) translate(0.8%, -0.5%); }
+  }
+  .sport__caption {
+    margin-top: 18px;
     font-family: var(--font-sans);
-    font-size: 11px;
-    letter-spacing: 0.4em;
+    font-size: 10.5px;
+    letter-spacing: 0.34em;
     text-transform: uppercase;
-    color: var(--color-gold);
-    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 1s var(--ease-editorial), transform 1s var(--ease-editorial);
-    margin-bottom: 28px;
+    color: var(--color-stone);
+    align-self: flex-start;
   }
-  .sport__eyebrow.is-revealed { opacity: 1; transform: translateY(0); }
 
-  /* Título · dos líneas, la segunda en italic con swashes (Fraunces).
-   * Cada `.sport__line` revela por su cuenta con stagger via JS — da el
-   * gesto "una línea entra, después la otra" en lugar de bloque entero. */
-  .sport__title {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(48px, 7vw, 112px);
-    line-height: 1.04;
+  /* ---- Texto · columna derecha ---- */
+  .sport__text { max-width: 560px; }
+  .sport__text :global(h2) {
+    margin: 22px 0 48px;
+    font-size: clamp(36px, 4.2vw, 60px);
+    line-height: 1.08;
     letter-spacing: -0.005em;
-    margin: 0;
-    color: #f7f3ec;
-    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.3);
+    padding-bottom: 0.18em;
   }
-  .sport__line {
+  .sport__text :global(h2) span {
+    display: inline;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .sport__text :global(h2) em {
     display: block;
-    opacity: 0;
-    transform: translateY(18px);
-    transition: opacity 1.1s var(--ease-editorial), transform 1.1s var(--ease-editorial);
-  }
-  .sport__line.is-revealed { opacity: 1; transform: translateY(0); }
-  .sport__line--italic {
     font-family: var(--font-italic);
     font-style: italic;
-    font-weight: 300;
-    color: rgba(247, 243, 236, 0.95);
+    font-weight: 400;
   }
 
-  /* Sub · una sola línea sans, susurro debajo del título. Color cream
-   * al 75% para que no compita con el título. */
-  .sport__sub {
-    margin: 36px 0 0;
-    max-width: 560px;
-    font-family: var(--font-sans);
-    font-size: clamp(13px, 0.95vw, 15px);
-    line-height: 1.6;
-    letter-spacing: 0.04em;
-    color: rgba(247, 243, 236, 0.78);
-    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 1s var(--ease-editorial), transform 1s var(--ease-editorial);
+  :global(.sport__body) {
+    margin-top: 8px;
   }
-  .sport__sub.is-revealed { opacity: 1; transform: translateY(0); }
+  .sport__body p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: rgba(21, 17, 13, 0.78);
+    margin-bottom: 18px;
+  }
+  .sport__body p:first-child { margin-top: 0; }
+  .sport__body p:last-child { margin-bottom: 0; }
 
-  /* Reduced motion · todo aterriza en el estado final sin transiciones
-   * ni Ken Burns. La foto queda quieta, el texto queda visible. */
+  /* ---- Responsive ---- */
   @media (prefers-reduced-motion: reduce) {
-    .sport__bg img { animation: none !important; transform: none !important; }
-    .sport__eyebrow,
-    .sport__line,
-    .sport__sub {
-      opacity: 1 !important;
-      transform: none !important;
-      transition: none !important;
-    }
+    .sport__media :global(img) { animation: none; transform: none; }
   }
 
-  /* Mobile · altura mínima un poco más generosa para que el contenido
-   * no quede aplastado contra el footer-del-viewport. Título escalado
-   * con clamp ya se cuida solo. */
-  @media (max-width: 800px) {
-    .sport { min-height: 560px; }
-    .sport__bg img { object-position: center 35%; }
-    .sport__sub { margin-top: 28px; max-width: 420px; }
+  @media (max-width: 1280px) {
+    .sport { padding: 90px 0; }
+    .sport__grid { gap: 56px; }
+    .sport__media :global(img) { height: 500px; }
   }
-  @media (max-width: 400px) {
-    .sport__eyebrow { margin-bottom: 22px; font-size: 10px; letter-spacing: 0.32em; }
-    .sport__sub { font-size: 12.5px; }
+  @media (max-width: 900px) {
+    .sport { padding: 80px 0; }
+    .sport__grid {
+      grid-template-columns: 1fr;
+      gap: 50px;
+    }
+    .sport__media :global(img) { height: 420px; }
+  }
+  @media (max-width: 500px) {
+    .sport { padding: 64px 0; }
+    .sport__grid { gap: 36px; }
+    .sport__media :global(img) { height: 340px; }
   }
 </style>

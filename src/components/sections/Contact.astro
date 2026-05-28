@@ -5,7 +5,6 @@ import { cldImage } from "@/lib/cloudinary";
 import { CLD_IDS } from "@/lib/cloudinaryAssets";
 import {
   WHATSAPP_URL,
-  WHATSAPP_NUMBER_DISPLAY,
   EMAIL,
   EMAIL_URL,
   ATELIER_ADDRESS,
@@ -58,7 +57,6 @@ const heroImage = cldImage(CLD_IDS.IMG_3116, 1800);
           </svg>
           <span>{t("contact.direct_whatsapp")}</span>
         </a>
-        <span class="contact__phone">{WHATSAPP_NUMBER_DISPLAY}</span>
 
         <span class="contact__label contact__label--soft contact__email-label">{t("contact.direct_email_label")}</span>
         <a href={EMAIL_URL} class="contact__email">{EMAIL}</a>
@@ -196,7 +194,9 @@ const heroImage = cldImage(CLD_IDS.IMG_3116, 1800);
     align-items: center;
     gap: 14px;
     padding: 16px 26px;
-    background: var(--color-cognac);
+    /* Marrón del logo (HB_main_positivo) — más oscuro y sobrio que el
+     * cognac genérico, matchea exacto la firma de la marca. */
+    background: #5e4234;
     color: #f7f3ec;
     font-family: var(--font-sans);
     font-size: 12px;
@@ -212,16 +212,6 @@ const heroImage = cldImage(CLD_IDS.IMG_3116, 1800);
     background: var(--color-ink);
     color: #f7f3ec;
   }
-  .contact__phone {
-    font-family: var(--font-italic);
-    font-style: italic;
-    font-weight: 300;
-    font-size: 15.5px;
-    color: rgba(21, 17, 13, 0.55);
-    margin-top: 12px;
-    letter-spacing: 0.02em;
-  }
-
   .contact__email-label { margin-top: 28px; }
   .contact__email {
     font-family: var(--font-display);

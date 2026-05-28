@@ -37,7 +37,12 @@ interface SectionEntry {
   label: string;
 }
 
-const DARK_SECTIONS = new Set<string>(["patrimonio"]);
+// Heritage solía ser dark (--color-ink bg) y el marker se invertía para
+// que se leyera en cream sobre el fondo oscuro. Ahora Heritage también
+// es paper canvas como el resto del home, así que ninguna sección
+// requiere el flip del marker. Si en el futuro vuelve alguna sección
+// dark (e.g. un hero secundario), agregás su id a este Set.
+const DARK_SECTIONS = new Set<string>([]);
 
 export function initSectionMarker(): void {
   if (window.matchMedia("(max-width: 900px)").matches) return;

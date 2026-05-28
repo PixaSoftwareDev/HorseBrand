@@ -1,8 +1,8 @@
 ---
 order: 6
 name:
-  es: Alfombra Llano
-  en: Llano Rug
+  es: Tordillo Heritage
+  en: Tordillo Heritage
 tagline:
   es: Lana virgen · Tejido a mano
   en: Virgin wool · Hand-loomed

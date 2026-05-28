@@ -1,8 +1,8 @@
 ---
 order: 1
 name:
-  es: Banco Hacienda
-  en: Hacienda Bench
+  es: Palermo Travel Bag
+  en: Palermo Travel Bag
 tagline:
   es: Roble curado · Cuero pleno flor
   en: Cured oak · Full-grain leather

@@ -35,8 +35,12 @@ const t = useTranslations(lang);
  *     ese tipo de detalle es lujo silencioso.
  */
 
-const horseVideoSrc = cldVideo(CLD_IDS.VID_HORSE_GALOPE, 2400);
-const horseVideoPoster = cldVideoPoster(CLD_IDS.VID_HORSE_GALOPE, 1600);
+// Pedimos el video a 3000px de ancho para que en displays retina (DPR 2
+// sobre desktops 1500-1920) el browser tenga píxeles extra para escalar
+// sin pixelado visible. Cloudinary devuelve el source si tiene menos
+// resolución, así que pedir alto es safe — no upscalea.
+const horseVideoSrc = cldVideo(CLD_IDS.VID_HORSE_GALOPE, 3000);
+const horseVideoPoster = cldVideoPoster(CLD_IDS.VID_HORSE_GALOPE, 2400);
 
 const keywords = ["caballo.word_1", "caballo.word_2", "caballo.word_3", "caballo.word_4"] as const;
 const megaWord = lang === "es" ? "Caballo" : "Horse";
@@ -270,12 +274,13 @@ const filmCaption = lang === "es"
     object-fit: cover;
     object-position: center;
     z-index: 1;
-    /* Scale 1.20 para cortar las bandas letterbox que Flow le horneó
-     * al video. 1.05 anterior dejaba ~40px negros visibles arriba; con
-     * 1.20 el contenido (los caballos) llena el cuadro sin asomar
-     * bandas negras. Si la foto definitiva no tiene letterbox baked-in,
-     * volvemos a 1.0 o 1.05. */
-    transform: scale(1.2);
+    /* Scale 1.0 · el video nuevo de Flow (Horses_galloping_across_pampa)
+     * no tiene letterbox bars horneadas como el anterior. El zoom del 1.2
+     * estaba dejando el render efectivo al 83% de la resolución source,
+     * leyéndose como pixelado. Sin scale, el video se ve a su nitidez
+     * nativa. Si en algún viewport aparece una banda negra, subimos
+     * progresivamente a 1.05 / 1.10 / 1.15. */
+    transform: scale(1);
     /* Transition para el smooth-loop · suaviza la entrada y salida del
      * dim que enmascara el corte abrupto del loop. JS toggle .is-looping
      * en los últimos 0.25s antes del seam + primeros 0.25s del restart. */

@@ -40,15 +40,9 @@ const products = (await getCollection("products")).sort(
               decoding="async"
             />
           </div>
-          {product.data.badge && (
-            <span class="card__badge">
-              {product.data.badge === "atelier" ? t("badge.atelier") : t("badge.handmade")}
-            </span>
-          )}
         </div>
         <div class="card__body">
           <h3 class="card__name">{product.data.name[lang]}</h3>
-          <p class="card__tag">{product.data.tagline[lang]}</p>
         </div>
       </article>
     ))}
@@ -146,7 +140,6 @@ const products = (await getCollection("products")).sort(
     line-height: 1.05;
     font-weight: 400;
     margin-top: 22px;
-    color: var(--color-ink);
   }
   .collection__title .line {
     display: inline-block;

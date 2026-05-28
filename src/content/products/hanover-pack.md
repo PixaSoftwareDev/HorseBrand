@@ -1,8 +1,8 @@
 ---
 order: 4
 name:
-  es: Mate Sierra
-  en: Sierra Mate Set
+  es: Hanover Pack
+  en: Hanover Pack
 tagline:
   es: Algarrobo curado · Forrado en cuero
   en: Cured carob wood · Leather-bound

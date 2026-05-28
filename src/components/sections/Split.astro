@@ -1,6 +1,5 @@
 ---
 import { type Lang, useTranslations } from "@/i18n/ui";
-import { localizedPath } from "@/i18n/utils";
 import Reveal from "@/components/shared/Reveal.astro";
 import { cldImage } from "@/lib/cloudinary";
 import { CLD_IDS } from "@/lib/cloudinaryAssets";
@@ -8,76 +7,261 @@ import { CLD_IDS } from "@/lib/cloudinaryAssets";
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const home = localizedPath(lang, "/");
-const splitImg = cldImage(CLD_IDS.IMG_3098, 1800);
+
+/**
+ * Split · puente narrativo "Entre el establo y la ciudad".
+ *
+ * Composición: foto full-bleed atmosférica con scrim paper + tipografía
+ * editorial centrada por encima. NO es el formato "foto al costado +
+ * párrafo" (que el usuario rechazó); la foto vive DETRÁS del texto
+ * como atmósfera, no al lado como ilustración.
+ *
+ * Por qué este movimiento:
+ *   · Una placa visual con peso · la sección ya no se ve "vacía".
+ *   · El scrim paper-tono garantiza legibilidad del texto en ink sin
+ *     oscurecer la foto (no es el dark-scrim de Sport — esto es claro,
+ *     veraniego, como un día de campo).
+ *   · La tipografía sigue siendo el protagonista narrativo — la foto
+ *     ambienta, no compite.
+ *   · Único en el sitio: ningún otro beat usa scrim paper-tono sobre
+ *     foto. Sport usa scrim oscuro; Manifesto usa foto al costado.
+ */
+
+// Foto del puente · placeholder con IMG_3098 (el que tenía originalmente
+// Split). Cuando aterrice una foto definitiva del establo o la pampa al
+// atardecer, basta con cambiar el CLD_IDS.* acá.
+const splitImg = cldImage(CLD_IDS.IMG_3098, 2400);
 ---
 
-<section class="split">
-  <Reveal class="split__media">
-    <div data-scroll-reveal>
-      <img src={splitImg} alt="Editorial AW" loading="lazy" decoding="async" />
-    </div>
-  </Reveal>
-  <div class="split__content">
-    <Reveal class="eyebrow">{t("split.eyebrow")}</Reveal>
-    <Reveal as="h2">
-      <span>{t("split.title_1")}</span> <em>{t("split.title_2")}</em><br />
-      <span>{t("split.title_3")}</span>
+<section
+  class="split"
+  aria-label={`${t("split.title_1")} ${t("split.title_2")} ${t("split.title_3")}`}
+>
+  <div class="split__bg" aria-hidden="true">
+    <img src={splitImg} alt="" loading="lazy" decoding="async" />
+  </div>
+  <div class="split__scrim" aria-hidden="true"></div>
+
+  <div class="split__inner">
+    <Reveal as="span" class="split__rule" aria-hidden="true">
+      <span class="split__rule-line"></span>
     </Reveal>
-    <Reveal as="p">{t("split.p")}</Reveal>
-    <Reveal>
-      <a href={`${home}#galeria`} class="btn btn--dark">
-        {t("split.cta")}
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-          <path d="M5 12h14M13 5l7 7-7 7" />
-        </svg>
-      </a>
+
+    <Reveal as="h2" class="split__title">
+      <span class="split__title-row">{t("split.title_1")} <strong>{t("split.title_2")}</strong></span>
+      <em class="split__title-italic">{t("split.title_3")}</em>
     </Reveal>
+
+    <Reveal as="p" class="split__p" delay={120}>{t("split.p")}</Reveal>
   </div>
 </section>
 
 <style>
+  /* Split · beat editorial cinemático.
+   * Altura controlada con min-height + padding (no full-viewport como
+   * Sport) — esto es respiración, no clímax. Foto atmosférica detrás. */
   .split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    background: var(--color-bone);
+    position: relative;
+    background: var(--color-paper);
+    padding: clamp(120px, 18vh, 200px) 0;
+    overflow: hidden;
+    isolation: isolate;
+    min-height: clamp(560px, 72vh, 760px);
+    display: flex;
+    align-items: center;
   }
-  .split__media :global(img) {
+
+  /* Foto full-bleed con Ken Burns suave · mismo idioma que Sport/Hero
+   * pero más lento (24s) porque acá el momento es contemplativo. */
+  .split__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .split__bg img {
     width: 100%;
     height: 100%;
-    min-height: 620px;
     object-fit: cover;
+    object-position: center 45%;
+    transform: scale(1.04);
+    animation: splitDrift 24s var(--ease-soft) infinite alternate;
+    /* Leve desaturación + warmth para que la foto se sienta sepia-paper
+     * en lugar de digital · firma de "campo argentino al atardecer". */
+    filter: saturate(0.82) contrast(0.96) brightness(1.02);
+    will-change: transform;
   }
-  .split__content {
-    padding: 110px 7vw;
+  @keyframes splitDrift {
+    0%   { transform: scale(1.04) translate3d(0, 0, 0); }
+    100% { transform: scale(1.08) translate3d(-0.8%, 0.5%, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .split__bg img { animation: none; transform: none; }
+  }
+
+  /* Scrim paper-tono · NO dark como Sport. Es un velo cremoso que sube
+   * el contraste del texto sin oscurecer la foto. Vignette suave:
+   * más denso arriba y abajo, abierto al centro para que la foto
+   * respire por los bordes. */
+  .split__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(251, 248, 242, 0.78) 0%,
+        rgba(251, 248, 242, 0.48) 28%,
+        rgba(251, 248, 242, 0.48) 72%,
+        rgba(251, 248, 242, 0.82) 100%
+      ),
+      radial-gradient(
+        ellipse 60% 70% at 50% 50%,
+        rgba(251, 248, 242, 0.55) 0%,
+        rgba(251, 248, 242, 0) 70%
+      );
+    pointer-events: none;
+  }
+
+  /* Inner · contenedor centrado por encima del scrim. */
+  .split__inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 6vw;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 26px;
-    max-width: 640px;
+    align-items: center;
+    text-align: center;
+    gap: 38px;
   }
-  .split__content h2 { line-height: 1.05; }
-  .split__content p {
-    color: rgba(21, 17, 13, 0.72);
-    font-size: 16px;
-    line-height: 1.7;
-    max-width: 460px;
-  }
-  .split__content .btn { align-self: flex-start; margin-top: 14px; }
 
-  @media (max-width: 1280px) {
-    .split__media :global(img) { min-height: 540px; }
-    .split__content { padding: 90px 7vw; }
+  /* Hairline oro · marker de capítulo, mismo lenguaje que el rule
+   * del pull-quote del Manifesto. Se dibuja al entrar (scaleX 0 → 1). */
+  :global(.split__rule) {
+    display: block;
+    width: 56px;
+    height: 1px;
   }
+  .split__rule-line {
+    display: block;
+    width: 100%;
+    height: 1px;
+    background: var(--color-gold);
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 1s var(--ease-editorial);
+  }
+  :global(.split__rule.is-revealed) .split__rule-line {
+    transform: scaleX(1);
+  }
+
+  /* Title · "ENTRE EL ESTABLO / y la ciudad."
+   *   Row 1: display uppercase ink, tracking suave.
+   *   Row 2: italic Fraunces cognac · voz interior.
+   * text-shadow leve para que el ink se despegue del fondo en zonas
+   * donde la foto se asome por la vignette. */
+  :global(.split__title) {
+    font-family: var(--font-display);
+    font-weight: 400;
+    margin: 0;
+    color: var(--color-ink);
+    line-height: 1.02;
+    letter-spacing: 0.01em;
+    padding-bottom: 0.18em;
+    text-shadow: 0 2px 18px rgba(251, 248, 242, 0.6);
+  }
+  :global(.split__title) .split__title-row {
+    display: block;
+    font-size: clamp(40px, 6vw, 84px);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  :global(.split__title) .split__title-row strong {
+    font-weight: 400;
+    letter-spacing: 0.045em;
+  }
+  :global(.split__title) .split__title-italic {
+    display: block;
+    margin-top: 14px;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(36px, 5.2vw, 72px);
+    letter-spacing: 0.005em;
+    color: var(--color-cognac);
+    text-transform: none;
+  }
+
+  /* Bajada italic chica centrada. Mismo text-shadow para mantenerse
+   * legible si la vignette deja pasar la foto por detrás. */
+  :global(.split__p) {
+    margin: 0;
+    max-width: 520px;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(16px, 1.3vw, 20px);
+    line-height: 1.65;
+    letter-spacing: 0.005em;
+    color: rgba(21, 17, 13, 0.78);
+    text-shadow: 0 1px 12px rgba(251, 248, 242, 0.6);
+  }
+
+  /* ---- Tablet ---- */
   @media (max-width: 900px) {
-    .split { grid-template-columns: 1fr; }
-    .split__media :global(img) { min-height: 420px; }
-    .split__content { padding: 80px 7vw; }
+    .split {
+      padding: 100px 0 110px;
+      min-height: clamp(520px, 68vh, 680px);
+    }
+    .split__inner { gap: 32px; max-width: 720px; }
+    :global(.split__title) .split__title-row { font-size: clamp(36px, 7vw, 56px); }
+    :global(.split__title) .split__title-italic { font-size: clamp(30px, 6vw, 48px); margin-top: 10px; }
   }
-  /* On phones, 420px image min-height + 80px section padding eats most of the
-   * viewport before the user even reaches the copy. Tighter on small screens. */
+
+  /* ---- Mobile · sigue siendo respiración, no parágrafo apretado.
+   *      Scrim más denso porque la foto ocupa proporcionalmente más
+   *      detrás del texto en pantallas chicas. ---- */
   @media (max-width: 600px) {
-    .split__media :global(img) { min-height: 320px; }
-    .split__content { padding: 60px 7vw 70px; }
+    .split {
+      padding: 80px 0 90px;
+      min-height: 540px;
+    }
+    .split__inner { gap: 26px; padding: 0 7vw; }
+    .split__scrim {
+      background:
+        linear-gradient(
+          180deg,
+          rgba(251, 248, 242, 0.82) 0%,
+          rgba(251, 248, 242, 0.62) 30%,
+          rgba(251, 248, 242, 0.62) 70%,
+          rgba(251, 248, 242, 0.86) 100%
+        ),
+        radial-gradient(
+          ellipse 70% 60% at 50% 50%,
+          rgba(251, 248, 242, 0.6) 0%,
+          rgba(251, 248, 242, 0) 70%
+        );
+    }
+    :global(.split__rule) { width: 40px; }
+    :global(.split__title) {
+      letter-spacing: 0.015em;
+      padding-bottom: 0.12em;
+    }
+    :global(.split__title) .split__title-row {
+      font-size: clamp(28px, 8.5vw, 40px);
+      letter-spacing: 0.02em;
+    }
+    :global(.split__title) .split__title-row strong { letter-spacing: 0.035em; }
+    :global(.split__title) .split__title-italic {
+      font-size: clamp(24px, 7.5vw, 34px);
+      margin-top: 8px;
+    }
+    :global(.split__p) { font-size: 15px; line-height: 1.6; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .split__rule-line { transition: none; transform: scaleX(1); }
   }
 </style>

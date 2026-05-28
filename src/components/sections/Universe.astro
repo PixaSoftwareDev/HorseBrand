@@ -8,19 +8,13 @@ interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Five worlds of the brand. The tiles are descriptive — no action CTAs.
+// Four worlds of the brand · Home, Restaurant, Atelier, Equestrian.
 const tiles = [
   {
     img: cldImage(CLD_IDS.LIFE_INE_41, 1600),
     title: t("universe.home_title"),
     text: t("universe.home_text"),
     span: "wide",
-  },
-  {
-    img: cldImage(CLD_IDS.LIFE_INE_17, 1200),
-    title: t("universe.stables_title"),
-    text: t("universe.stables_text"),
-    span: "tall",
   },
   {
     img: cldImage(CLD_IDS.IMG_2990, 1000),
@@ -89,18 +83,22 @@ const tiles = [
     color: var(--color-cognac);
     display: block;
   }
+  /* Sub · italic editorial debajo del título. Centrado, ink al 70% para
+   * mantener la jerarquía (h2 dominante, sub susurro). Sobre paper bg
+   * de la sección, no sobre dark. */
   .universe__sub {
-    font-family: var(--font-sans);
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 1.6;
-    color: rgba(247, 243, 236, 0.75);
-    max-width: 600px;
     margin: 26px auto 0;
+    max-width: 560px;
+    font-family: var(--font-italic);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(15px, 1.2vw, 18px);
+    line-height: 1.55;
+    color: rgba(21, 17, 13, 0.65);
   }
 
-  /* Bento: 3 columns, 2 rows. Atelier (1st) spans 2 cols. Caballerizas (2nd)
-   * spans 2 rows. Restaurant / Home / Equestrian fill the rest. */
+  /* Bento de 4 tiles · Row 1: Home como hero card (span 3 cols). Row 2:
+   * Restaurant, Atelier y Equestrian (1 col cada uno). */
   .universe__grid {
     max-width: 1500px;
     margin: 0 auto;
@@ -110,8 +108,7 @@ const tiles = [
     grid-template-rows: 1.2fr 1fr;
     gap: 14px;
   }
-  :global(.universe__tile--wide) { grid-column: span 2; grid-row: 1; }
-  :global(.universe__tile--tall) { grid-column: 3; grid-row: 1 / 3; }
+  :global(.universe__tile--wide) { grid-column: 1 / -1; grid-row: 1; }
   :global(.universe__tile--normal) { grid-row: 2; }
 
   :global(.universe__tile) {
@@ -206,16 +203,13 @@ const tiles = [
 
   /* ---- Aspect ratios per span — desktop ---- */
   :global(.universe__tile--wide) { aspect-ratio: auto; }
-  :global(.universe__tile--tall) { aspect-ratio: auto; }
   :global(.universe__tile--normal) { aspect-ratio: auto; }
   /* Aspect is governed by grid-template-rows on desktop. We only enforce
    * a min-height so cards don't collapse if content is short. */
   :global(.universe__tile) { min-height: 280px; }
   :global(.universe__tile--wide) { min-height: 420px; }
-  :global(.universe__tile--tall) { min-height: 700px; }
 
   @media (max-width: 1100px) {
-    :global(.universe__tile--tall) { min-height: 600px; }
     :global(.universe__tile--wide) { min-height: 360px; }
     :global(.universe__tile) { min-height: 240px; }
   }
@@ -231,7 +225,6 @@ const tiles = [
     }
     :global(.universe__tile),
     :global(.universe__tile--wide),
-    :global(.universe__tile--tall),
     :global(.universe__tile--normal) {
       grid-column: 1;
       grid-row: auto;
@@ -245,7 +238,6 @@ const tiles = [
   @media (max-width: 400px) {
     :global(.universe__tile),
     :global(.universe__tile--wide),
-    :global(.universe__tile--tall),
     :global(.universe__tile--normal) {
       aspect-ratio: 3 / 4;
     }
