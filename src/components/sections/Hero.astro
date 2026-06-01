@@ -371,6 +371,14 @@ const pairs = [
 <style>
   .hero {
     position: relative;
+    /* z-index/isolation defensivo · cuando ScrollTrigger pinneá el Hero
+     * con position:fixed, sin un stacking-context propio el Hero podía
+     * quedar floating sobre el Manifesto al volver desde abajo si los
+     * inline styles de GSAP no se limpiaban. Con isolation: isolate el
+     * Hero crea su propio contexto y nunca puede tapar contenido que
+     * venga después en el flow document. */
+    z-index: 0;
+    isolation: isolate;
     height: 100vh;
     height: 100dvh;
     min-height: 680px;

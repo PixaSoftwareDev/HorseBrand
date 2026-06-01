@@ -17,62 +17,6 @@ export function cldTransform(publicId: string, transforms: string): string {
   return `${BASE}/${transforms}/${publicId}`;
 }
 
-export interface ResponsiveSrc {
-  src: string;
-  srcSet: string;
-  sizes: string;
-}
-
-/**
- * Responsive crop for the zoom-parallax.
- *
- * Cap: w_3600 max. Going higher caused 400s on other machines because
- * Cloudinary refuses to upscale above the original (most uploaded sources
- * are ~4000px wide phone photos, so w_5400+ is never delivered cleanly,
- * and free plans return 400 for upscale attempts).
- *
- * The counter-scale architecture in ZoomParallax already renders the IMG
- * at peak layout size, so the GPU keeps a sharp texture from frame 0 —
- * we don't need a giant source on top of that. 3600w on retina at scale 6
- * gives enough resolution without any upscale risk.
- */
-export function cldZoomImage(publicId: string): ResponsiveSrc {
-  // `c_limit` en lugar de `c_fill,ar_16:9` · respeta el aspect natural
-  // de cada foto. Antes Cloudinary forzaba todo a 16:9 landscape, que
-  // cortaba portraits brutalmente. Con c_limit, la foto se entrega a
-  // su proporción original y el tile la muestra completa (vía object-fit
-  // contain inline en el render). */
-  const base = "f_auto,q_auto:good,c_limit";
-  const make = (w: number): string => cldTransform(publicId, `${base},w_${w}`);
-  return {
-    src: make(1600),
-    srcSet: [
-      `${make(640)} 640w`,
-      `${make(960)} 960w`,
-      `${make(1600)} 1600w`,
-      `${make(2400)} 2400w`,
-      `${make(3600)} 3600w`,
-    ].join(", "),
-    /*
-     * `sizes` must describe what the IMG is **rendered** at — not the
-     * source's max. The previous value (3600px) was the largest srcset
-     * entry, which made the browser always pick the 3600w source even
-     * on viewports where the tile actually paints ~1200-1700 px wide.
-     *
-     * In ZoomParallax the inner box is sized `w × max` vw at peak, and
-     * the largest tile peaks at ~90vw. The browser then chooses the
-     * right entry by multiplying `sizes` by DPR:
-     *   - 1440 vp · DPR 1 → 1296 px → picks 1600w
-     *   - 1440 vp · DPR 2 → 2592 px → picks 2400w (was 3600w before)
-     *   - 1920 vp · DPR 2 → 3456 px → still picks 3600w when needed
-     * Bandwidth savings: ~30-40% on typical DPR-2 desktops, no visible
-     * loss of sharpness because the counter-scale architecture already
-     * keeps the texture at peak resolution from frame 0.
-     */
-    sizes: "(max-width: 900px) 100vw, 90vw",
-  };
-}
-
 /** Standard editorial image (gallery thumbnail, hero slide, etc.). */
 export function cldImage(publicId: string, width = 1600): string {
   return cldTransform(publicId, `f_auto,q_auto:good,w_${width}`);

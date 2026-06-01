@@ -168,10 +168,17 @@ h2 {
   letter-spacing: 0;
   font-weight: 400;
 }
+/* Italic accent dentro de los h2 · cognac es la firma cromática de la
+ * marca. Definido acá una sola vez para que todas las secciones del
+ * home compartan el mismo gesto (Collection, Gallery, Universe,
+ * Manifesto, Sport, Heritage, Caballo, Contact) sin necesidad de
+ * override scoped en cada componente. Hero queda exento porque
+ * sobrescribe con gold (sobre fondo dark, cognac no contrasta). */
 h2 em {
   font-family: var(--font-italic);
   font-style: italic;
   font-weight: 300;
+  color: var(--color-cognac);
 }
 .section__head {
   max-width: 1500px;

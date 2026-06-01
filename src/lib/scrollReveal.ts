@@ -48,4 +48,16 @@ export function initScrollReveal(): void {
   window.addEventListener("scroll", kick, { passive: true });
   window.addEventListener("resize", kick);
   kick();
+
+  // initScrollReveal() runs again on every astro:page-load (SPA nav), so
+  // remove the scroll/resize listeners before the swap to avoid stacking
+  // duplicates that all fire on the same event.
+  document.addEventListener(
+    "astro:before-swap",
+    () => {
+      window.removeEventListener("scroll", kick);
+      window.removeEventListener("resize", kick);
+    },
+    { once: true }
+  );
 }

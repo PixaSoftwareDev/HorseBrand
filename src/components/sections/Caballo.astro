@@ -45,9 +45,6 @@ const horseVideoPoster = cldVideoPoster(CLD_IDS.VID_HORSE_GALOPE, 2400);
 const keywords = ["caballo.word_1", "caballo.word_2", "caballo.word_3", "caballo.word_4"] as const;
 const megaWord = lang === "es" ? "Caballo" : "Horse";
 const ariaTitle = `${t("caballo.eyebrow")} · ${t("caballo.title_1")} ${t("caballo.title_2")}`;
-const filmCaption = lang === "es"
-  ? "Galope libre · Pampa argentina"
-  : "Free gallop · Argentine pampa";
 ---
 
 <section
@@ -57,8 +54,6 @@ const filmCaption = lang === "es"
 >
   <div class="caballo__container">
     <div class="caballo__editorial">
-      <span class="caballo__eyebrow" data-cab-rev>{t("caballo.eyebrow")}</span>
-
       <!-- Video zone · UN solo video continuo que ocupa la franja
            superior (visible completa) + el área del CABALLO (visible
            solo por las letras). El paper del bottom zone se hace cargo
@@ -318,13 +313,13 @@ const filmCaption = lang === "es"
     font-weight: 400;
     letter-spacing: -8px;
   }
-  /* ---- Eyebrow · gold uppercase ---- */
+  /* ---- Eyebrow · stone (alineado con el sistema global) ---- */
   .caballo__eyebrow {
     font-family: var(--font-sans);
     font-size: 11px;
     letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: var(--color-cognac);
+    color: var(--color-stone);
     margin-bottom: 32px;
     opacity: 0;
     transform: translateY(8px);

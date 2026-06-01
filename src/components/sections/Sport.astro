@@ -19,13 +19,12 @@ const sportImg = cldImage(CLD_IDS.SPORT_HERO, 1400);
          editorial tipo flip-page. -->
     <Reveal class="sport__media">
       <div data-scroll-reveal>
-        <img src={sportImg} alt={t("sport.eyebrow")} loading="lazy" decoding="async" />
+        <img src={sportImg} alt={`${t("sport.title_1")} ${t("sport.title_2")}`} loading="lazy" decoding="async" />
       </div>
       <figcaption class="sport__caption">{t("sport.caption")}</figcaption>
     </Reveal>
 
     <div class="sport__text">
-      <Reveal class="eyebrow">{t("sport.eyebrow")}</Reveal>
       <Reveal as="h2">
         <span>{t("sport.title_1")}</span>
         <em>{t("sport.title_2")}</em>

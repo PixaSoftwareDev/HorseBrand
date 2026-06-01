@@ -89,9 +89,19 @@ const LOGO_DARK =
       });
       closeBtn?.addEventListener("click", close);
       menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", close));
-      document.addEventListener("keydown", (e) => {
+
+      // Named handler so it can be removed on SPA navigation — onPageReady
+      // re-runs wireToggle() on every astro:page-load, so an anonymous
+      // listener would accumulate one duplicate per navigation.
+      const onKeydown = (e: KeyboardEvent): void => {
         if (e.key === "Escape" && menu.classList.contains("open")) close();
-      });
+      };
+      document.addEventListener("keydown", onKeydown);
+      document.addEventListener(
+        "astro:before-swap",
+        () => document.removeEventListener("keydown", onKeydown),
+        { once: true }
+      );
     }
 
     const cart = document.getElementById("navCart");

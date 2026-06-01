@@ -75,9 +75,21 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3082, 1600);
      * entraba). 64 es lo más grande que garantiza "Una marca que
      * respira" en 1 línea sobre una column de 820px. */
     font-size: clamp(36px, 4.2vw, 64px);
-    line-height: 1.08;
-    letter-spacing: -0.005em;
-    padding-bottom: 0.18em;
+    /* Line-height 1.14 (era 1.08) · los italics de Fraunces tienen
+     * ascenders altos en "identidad ecuestre" + acentos en "carácter"
+     * que se cortaban con el line-height tight. 1.14 deja respirar
+     * sin abrir demasiado el bloque. */
+    /* Line-height 1.14 (era 1.08) · los italics de Fraunces tienen
+     * ascenders altos en "identidad ecuestre" y acentos en "carácter"
+     * que necesitan respiración vertical. 1.14 aire sin abrir
+     * demasiado el bloque. */
+    line-height: 1.14;
+    letter-spacing: 0;
+    /* Padding solo vertical · top para acentos altos, bottom para
+     * descenders y comas. El horizontal no hace falta porque el clip
+     * de la animación de palabras en heroExit.ts ya respira 0.15em
+     * a cada lado para alojar los overhangs del italic Fraunces. */
+    padding: 0.14em 0 0.22em;
     /* Sin color override · hereda el ink-78% del global h1-h4 (el
      * tono "lujo silencioso" suave). Ponerle var(--color-ink) directo
      * lo volvía negro duro, perdía la respiración editorial. */
@@ -136,7 +148,13 @@ const manifestoImg = cldImage(CLD_IDS.IMG_3082, 1600);
     font-size: clamp(28px, 3.2vw, 44px);
     line-height: 1.2;
     letter-spacing: 0.005em;
-    color: var(--color-cognac);
+    /* Ink-78% (era cognac) · el cognac competía con el em italic del
+     * título "identidad ecuestre, cuero, carácter." que ya es cognac.
+     * Dos italics marrones consecutivos sobrecargaban la sección.
+     * Ahora la pullquote es un susurro gris (coherente con su mensaje
+     * "lujo que no grita") y el cognac queda reservado al acento del
+     * título — un solo gesto cromático por bloque. */
+    color: rgba(21, 17, 13, 0.78);
     max-width: 440px;
   }
 

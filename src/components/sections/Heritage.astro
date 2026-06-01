@@ -17,7 +17,6 @@ const stats = [
 <section class="heritage" id="patrimonio" aria-label={t("heritage.eyebrow")}>
   <div class="heritage__inner">
     <div class="heritage__head">
-      <Reveal class="heritage__eyebrow">{t("heritage.eyebrow")}</Reveal>
       <Reveal as="h2">
         <span>{t("heritage.title_1")}</span>
         <em>{t("heritage.title_2")}</em>
@@ -36,11 +35,6 @@ const stats = [
           </li>
         ))}
       </ul>
-    </Reveal>
-
-    <Reveal as="div" class="heritage__tagline" delay={300}>
-      <p class="heritage__line-1">{t("heritage.tagline_1")}</p>
-      <p class="heritage__line-2">{t("heritage.tagline_2")}</p>
     </Reveal>
   </div>
 </section>
@@ -177,7 +171,7 @@ const stats = [
     font-family: var(--font-display);
     font-size: clamp(40px, 4.4vw, 64px);
     font-weight: 400;
-    color: var(--color-ink);
+    color: rgba(21, 17, 13, 0.78);
     line-height: 1;
     letter-spacing: -0.01em;
   }
@@ -190,30 +184,6 @@ const stats = [
     font-weight: 400;
     max-width: 180px;
     line-height: 1.4;
-  }
-
-  /* ---- Tagline · cierre ---- */
-  :global(.heritage__tagline) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    margin-top: 6px;
-  }
-  .heritage__line-1 {
-    font-family: var(--font-italic);
-    font-style: italic;
-    font-weight: 300;
-    font-size: clamp(18px, 1.6vw, 24px);
-    color: var(--color-cognac);
-    letter-spacing: 0.005em;
-  }
-  .heritage__line-2 {
-    font-family: var(--font-sans);
-    font-size: 11px;
-    letter-spacing: 0.34em;
-    text-transform: uppercase;
-    color: rgba(21, 17, 13, 0.55);
   }
 
   /* ---- Responsive ---- */

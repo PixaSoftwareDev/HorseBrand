@@ -1,16 +1,19 @@
 ---
 import { type Lang, useTranslations } from "@/i18n/ui";
 import Reveal from "@/components/shared/Reveal.astro";
-import ZoomParallax, { type ZoomImage } from "@/components/ui/ZoomParallax";
-import { cldZoomImage } from "@/lib/cloudinary";
+import { cldTransform } from "@/lib/cloudinary";
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Cloudinary public IDs — served via CDN with f_auto/q_auto:best/w_3000/16:9 crop.
-// Crisp at the parallax max zoom (9x) and much faster than processing locally.
-const ZOOM_PUBLIC_IDS = [
+// 15 imágenes total · 13 portrait + 2 landscape como break editorial.
+// Las landscapes (posiciones 4 y 11 del array) caen en col 2 y col 3
+// respectivamente — col 1 queda 100% portrait, las otras dos tienen
+// un break editorial cada una. El index.astro renderiza esta como la
+// única galería del home (las variantes "expand" y "zoom-parallax"
+// fueron descartadas tras la comparación visual).
+const IMAGE_IDS = [
   "v1778360938/IMG_3096_efos1q.jpg",
   "v1778360946/IMG_2976_eebayx.jpg",
   "v1778360899/IMG_3137_xr9jtc.jpg",
@@ -18,146 +21,186 @@ const ZOOM_PUBLIC_IDS = [
   "v1778360901/IMG_3140_td7uw8.jpg",
   "v1778360902/IMG_3119_cliy4v.jpg",
   "v1778360915/IMG_3115_qvcecp.jpg",
+  "v1778360932/IMG_3085_lebep3.jpg",
+  "v1778360936/IMG_3084_rtibam.jpg",
+  "v1778360923/IMG_3092_lzvmym.jpg",
+  "v1778360923/IMG_3104_t4ylou.jpg",
+  "v1778360933/IMG_3110_bryc5p.jpg",
+  "v1778360941/IMG_3081_qhisip.jpg",
+  "v1778360923/IMG_3105_p1bq2y.jpg",
+  "v1778360941/IMG_3113_jk1p36.jpg",
 ];
 
-const zoomImages: ZoomImage[] = ZOOM_PUBLIC_IDS.map((id) => {
-  const r = cldZoomImage(id);
-  return { src: r.src, srcSet: r.srcSet, sizes: r.sizes, alt: "" };
-});
+// Aspects · sincronizado 1:1 con IMAGE_IDS · si se suma/quita una foto
+// hay que agregar/quitar su entry acá también.
+const ASPECTS = [
+  "3:4", "3:4", "3:4", "3:4", "4:3", "3:4", "3:4",
+  "3:4", "3:4", "3:4", "3:4", "4:3", "3:4", "3:4", "3:4",
+];
+
+const items = IMAGE_IDS.map((id, i) => ({
+  src: cldTransform(id, `f_auto,q_auto:good,c_fill,g_auto,ar_${ASPECTS[i]},w_900`),
+  aspect: ASPECTS[i],
+}));
+
+// Distribución interleaved · index % 3 reparte las imágenes en 3
+// columnas alternadamente. Para 15 fotos: col 1 = [0,3,6,9,12],
+// col 2 = [1,4,7,10,13], col 3 = [2,5,8,11,14]. Cambiar la cantidad
+// de columnas requiere ajustar el `% 3` y el grid-template-columns.
+const columns: typeof items[] = [[], [], []];
+items.forEach((item, i) => columns[i % 3].push(item));
 ---
 
 <section class="gallery" id="galeria">
   <div class="section__head">
-    <Reveal class="eyebrow">{t("gallery.eyebrow")}</Reveal>
     <Reveal as="h2">
       <span>{t("gallery.title_1")}</span> <em>{t("gallery.title_2")}</em> <span>{t("gallery.title_3")}</span>
     </Reveal>
   </div>
 
-  <div class="zoom-wrap" aria-hidden="true">
-    <ZoomParallax client:visible images={zoomImages} />
+  <div class="gallery__grid">
+    {columns.map((col, colIdx) => (
+      <div class="gallery__col">
+        {col.map((item, itemIdx) => (
+          <figure
+            class="gallery__item"
+            data-gallery-reveal
+            style={`--gallery-aspect: ${item.aspect.replace(":", " / ")}; --gallery-delay: ${(colIdx * 0.08 + itemIdx * 0.14).toFixed(2)}s`}
+          >
+            <img src={item.src} alt="" loading="lazy" decoding="async" />
+          </figure>
+        ))}
+      </div>
+    ))}
   </div>
 </section>
 
+<script>
+  import { onPageReady } from "@/lib/onPageReady";
+
+  function wireGallery(): void {
+    const items = document.querySelectorAll<HTMLElement>("[data-gallery-reveal]");
+    if (items.length === 0) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    items.forEach((el) => io.observe(el));
+
+    document.addEventListener("astro:before-swap", () => io.disconnect(), {
+      once: true,
+    });
+  }
+
+  onPageReady(wireGallery);
+</script>
+
 <style>
-  .gallery { background: var(--color-ivory); padding-bottom: 140px; }
-
-  .zoom-wrap { margin: 30px 0 60px; }
-
-  :global(.zoom-parallax) {
-    position: relative;
-    height: 300vh;
+  .gallery {
+    background: var(--color-paper);
+    padding: 110px 0 130px;
   }
-  :global(.zp-sticky) {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-    background: var(--color-ivory);
+
+  .gallery__grid {
+    max-width: 1500px;
+    margin: 40px auto 0;
+    padding: 0 5vw;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
   }
-  :global(.zp-item) {
-    position: absolute;
-    inset: 0;
+
+  .gallery__col {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    will-change: transform;
+    flex-direction: column;
+    gap: 18px;
   }
-  :global(.zp-inner) {
+
+  /* Cada figura · misma técnica que Collection (cardImageRise):
+   *   - figure es transparente, sin overlay ni shadow
+   *   - la IMG arranca con clip-path inset(0 0 100% 0) — invisible
+   *   - cuando .is-visible se activa, CSS animation (no transition)
+   *     anima el clip de 100% bottom → 0, revelando la imagen top→down
+   *   - el unclipped fragment es solo la imagen recortada, no hay
+   *     overlay paper que pueda dejar strip visible al final
+   *   - animation-delay = --gallery-delay genera la cascada visible */
+  .gallery__item {
+    position: relative;
+    margin: 0;
+    width: 100%;
+    aspect-ratio: var(--gallery-aspect, 1 / 1);
     overflow: hidden;
-    border-radius: 3px;
-    box-shadow:
-      0 1px 2px rgba(15, 11, 8, 0.06),
-      0 22px 60px -12px rgba(15, 11, 8, 0.28);
+    border-radius: 4px;
+    background: transparent;
   }
-  :global(.zp-inner img) {
+  .gallery__item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    filter: saturate(0.96) contrast(1.02);
-    /* Hint browsers to keep texture at the highest available resolution
-     * when CSS-scaled by transform. Without this, some browsers downsample
-     * the GPU texture to layout-box × DPR and the high-res srcset is wasted. */
-    image-rendering: high-quality;
-    image-rendering: -webkit-optimize-contrast;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+    /* Estado inicial: 100% recortada desde el bottom → invisible.
+     * El animation la lleva a inset(0) cuando entra al viewport. */
+    clip-path: inset(0 0 100% 0);
+    -webkit-clip-path: inset(0 0 100% 0);
+    will-change: clip-path;
+  }
+  .gallery__item.is-visible img {
+    animation: galleryItemRise 1s var(--ease-editorial) forwards;
+    animation-delay: var(--gallery-delay, 0s);
+  }
+  @keyframes galleryItemRise {
+    0% {
+      clip-path: inset(0 0 100% 0);
+      -webkit-clip-path: inset(0 0 100% 0);
+    }
+    100% {
+      clip-path: inset(0 0 0 0);
+      -webkit-clip-path: inset(0 0 0 0);
+    }
+  }
+  /* Hover · scale 1.04 después del reveal · transición propia para no
+   * competir con el animation de entrada. */
+  .gallery__item.is-visible:hover img {
+    transform: scale(1.04);
+    transition: transform 1.2s var(--ease-soft);
   }
 
-  /* ---- Touch / mobile fallback + reduced-motion ----
-   * The 7-image absolute parallax layout + framer-motion's inline transforms
-   * collapse into a clean vertical grid on touch screens. Every override is
-   * !important because framer-motion writes inline style="transform: scale(...)"
-   * and the original component sets style="position: relative; top; left; ..."
-   * — both have higher specificity than scoped CSS without !important.
-   *
-   * `.zp-reduced` is added by ZoomParallax.tsx when the OS asks for
-   * reduced motion — it bypasses the motion.div / useSpring stack
-   * entirely and renders the same flat grid this CSS already produces
-   * for mobile/touch. Sharing the rules keeps both code paths consistent. */
-  @media (hover: none), (max-width: 900px) {
-    :global(.zoom-parallax) {
-      height: auto !important;
+  /* Tablet · 2 columnas. Redistribuye las 3 columnas en 2 manteniendo
+   * el orden de las imágenes. */
+  @media (max-width: 1100px) {
+    .gallery__grid {
+      grid-template-columns: repeat(2, 1fr);
     }
-    :global(.zp-sticky) {
-      position: static !important;
-      height: auto !important;
-      display: grid !important;
+  }
+
+  /* Mobile · 1 columna · gap más chico. */
+  @media (max-width: 700px) {
+    .gallery { padding: 80px 0 90px; }
+    .gallery__grid {
       grid-template-columns: 1fr;
       gap: 14px;
-      padding: 0 5vw;
     }
-    :global(.zp-item) {
-      position: static !important;
-      inset: auto !important;
-      display: block !important;
-      transform: none !important;
-    }
-    :global(.zp-inner) {
-      position: static !important;
-      top: auto !important;
-      left: auto !important;
-      width: 100% !important;
-      height: auto !important;
-      max-width: 100% !important;
-      aspect-ratio: 16 / 9 !important;
-      transform: none !important;
-    }
-    :global(.zp-inner img) {
-      filter: none;
-      image-rendering: auto;
+    .gallery__col {
+      gap: 14px;
     }
   }
 
-  /* Reduced-motion path (any viewport, any input). The component
-   * skips motion.divs and emits the same flat grid. The static
-   * branch doesn't have inline framer-motion styles to override,
-   * so we don't need !important here. */
-  :global(.zoom-parallax.zp-reduced) {
-    height: auto;
-  }
-  :global(.zp-reduced .zp-sticky) {
-    position: static;
-    height: auto;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-    padding: 0 5vw;
-  }
-  :global(.zp-reduced .zp-item) {
-    position: static;
-    inset: auto;
-    display: block;
-  }
-  :global(.zp-reduced .zp-inner) {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-  }
-  :global(.zp-reduced .zp-inner img) {
-    filter: none;
-    image-rendering: auto;
+  /* Reduced motion · aterrizan en estado final sin animar. */
+  @media (prefers-reduced-motion: reduce) {
+    .gallery__item img {
+      clip-path: none;
+      -webkit-clip-path: none;
+      animation: none;
+    }
+    .gallery__item.is-visible:hover img { transform: none; }
   }
 </style>

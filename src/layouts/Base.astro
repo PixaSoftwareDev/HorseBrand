@@ -5,7 +5,6 @@ import Nav from "@/components/nav/Nav.astro";
 import MobileMenu from "@/components/nav/MobileMenu.astro";
 import Cursor from "@/components/ui/Cursor.astro";
 import SectionMarker from "@/components/ui/SectionMarker.astro";
-import Lightbox from "@/components/ui/Lightbox.astro";
 import IntroSplash from "@/components/ui/IntroSplash.astro";
 import PageLoader from "@/components/ui/PageLoader.astro";
 import ShopHandle from "@/components/shop/ShopHandle.astro";
@@ -103,7 +102,6 @@ const ogLocale = lang === "en" ? "en_US" : "es_AR";
       <source src="/audio/ambient.mp3" type="audio/mpeg" />
     </audio>
 
-    <Lightbox />
     <ShopHandle lang={lang} />
     <ShopDrawer lang={lang} />
 

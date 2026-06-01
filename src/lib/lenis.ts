@@ -19,10 +19,9 @@
  *   so existing listeners keep working unchanged:
  *     · Nav.astro / initNavScrollState (toggles .scrolled class)
  *     · scrollReveal.ts (data-scroll-reveal clip-path driver)
- *     · ZoomParallax.tsx → framer-motion useScroll (reads window.scrollY)
  *     · Craft.astro sticky-pin RAF
- *   Gallery and Craft are benchmark-quality and untouchable; they should
- *   pick up the inertia transparently with no code changes.
+ *   Craft is benchmark-quality and untouchable; it should pick up the
+ *   inertia transparently with no code changes.
  * - Anchor links (`<a href="#section">`) previously used native
  *   `window.scrollTo({behavior:'smooth'})` which would fight Lenis's wheel
  *   interception. `initSmoothAnchors` in cursor.ts now routes through

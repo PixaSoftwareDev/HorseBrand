@@ -4,12 +4,15 @@ import { SHOP_BASE_URL, SHOP_CATEGORIES, type ShopCategoryKey } from "@/lib/shop
 import { cldImage } from "@/lib/cloudinary";
 import { CLD_IDS } from "@/lib/cloudinaryAssets";
 
+// Imágenes replicadas de la sección "Piezas que perduran" (Collection)
+// para mantener coherencia visual entre la colección y las categorías
+// del drawer de tienda. Mapeo por afinidad de rubro.
 const CAT_IMAGES: Record<ShopCategoryKey, string> = {
-  furniture: cldImage(CLD_IDS.IMG_3144, 480),
-  home: cldImage(CLD_IDS.LIFE_INE_91, 480),
-  mate: cldImage(CLD_IDS.IMG_3105, 480),
-  bags: cldImage(CLD_IDS.IMG_2977, 480),
-  rugs: cldImage(CLD_IDS.IMG_3081, 480),
+  furniture: cldImage(CLD_IDS.LIFE_INE_43, 480), // Tordillo Heritage
+  home: cldImage(CLD_IDS.LIFE_INE_91, 480),      // Home & Deco · lifestyle
+  mate: cldImage(CLD_IDS.IMG_2971, 480),         // Matera Criollo
+  bags: cldImage(CLD_IDS.LIFE_INE_39, 480),      // Palermo Travel Bag
+  rugs: cldImage(CLD_IDS.IMG_3098, 480),         // Cavaliere Bag
 };
 
 interface Props { lang: Lang }
@@ -306,9 +309,23 @@ const t = useTranslations(lang);
     window.addEventListener("shop:open", open);
     window.addEventListener("shop:close", close);
 
-    document.addEventListener("keydown", (e) => {
+    const onKeydown = (e: KeyboardEvent): void => {
       if (e.key === "Escape" && drawer.classList.contains("open")) close();
-    });
+    };
+    document.addEventListener("keydown", onKeydown);
+
+    // onPageReady re-runs wireDrawer() on every astro:page-load. Without
+    // this cleanup the window + document listeners would accumulate one
+    // duplicate set per SPA navigation, firing open/close multiple times.
+    document.addEventListener(
+      "astro:before-swap",
+      () => {
+        window.removeEventListener("shop:open", open);
+        window.removeEventListener("shop:close", close);
+        document.removeEventListener("keydown", onKeydown);
+      },
+      { once: true }
+    );
   }
   onPageReady(wireDrawer);
 </script>

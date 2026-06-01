@@ -1,7 +1,6 @@
 ---
 import { getCollection } from "astro:content";
 import { type Lang, useTranslations } from "@/i18n/ui";
-import Reveal from "@/components/shared/Reveal.astro";
 import { cldImage } from "@/lib/cloudinary";
 import { CLD_IDS, type CldKey } from "@/lib/cloudinaryAssets";
 
@@ -16,7 +15,6 @@ const products = (await getCollection("products")).sort(
 
 <section class="collection" id="coleccion">
   <div class="section__head">
-    <Reveal class="eyebrow">{t("collection.eyebrow")}</Reveal>
     <h2 class="collection__title" data-coll-title>
       <span class="line">{t("collection.title_1")} <em>{t("collection.title_2")}</em></span>
     </h2>
@@ -93,6 +91,11 @@ const products = (await getCollection("products")).sort(
     if (reduced || noHover) return;
 
     cards.forEach((card) => {
+      // Guard idempotente · wireCollection() corre de nuevo en cada
+      // astro:page-load (SPA nav). Sin esta marca, una card que sobrevive
+      // el swap acumularía un set extra de listeners pointer por navegación.
+      if (card.dataset.wired === "1") return;
+      card.dataset.wired = "1";
       const inner = card.querySelector<HTMLElement>(".card__media-inner");
       if (!inner) return;
       let raf: number | null = null;

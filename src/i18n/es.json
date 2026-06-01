@@ -34,14 +34,12 @@
   "caballo.word_4": "Silencio",
   "caballo.closer": "Todo se reúne alrededor de un ser inigualable.",
 
-  "sport.eyebrow": "El deporte",
   "sport.title_1": "Del deporte ecuestre",
   "sport.title_2": "al estilo de vida.",
   "sport.body_1": "Inspirados en la elegancia atemporal del mundo ecuestre, creamos piezas que reflejan sofisticación, carácter y exclusividad.",
   "sport.body_2": "El universo hípico inspira cada detalle: tradición, diseño y materiales nobles, concebidos para perdurar.",
   "sport.caption": "— En la cancha y en cada pieza",
 
-  "universe.eyebrow": "El universo",
   "universe.title_1": "Un mundo alrededor",
   "universe.title_2": "del caballo.",
   "universe.sub": "Nuestra identidad se respira en nuestros productos y en nuestros espacios.",
@@ -54,19 +52,16 @@
   "universe.equestrian_title": "Equestrian",
   "universe.equestrian_text": "Para el caballo y para quien lo monta. Indumentaria de competición.",
 
-  "collection.eyebrow": "La colección",
   "collection.title_1": "Piezas que",
   "collection.title_2": "perduran",
   "collection.sub": "Una selección curada de nuestras siluetas más emblemáticas.",
   "collection.see_piece": "Ver pieza",
   "collection.buy": "Comprar",
 
-  "gallery.eyebrow": "La galería",
   "gallery.title_1": "El",
   "gallery.title_2": "universo",
   "gallery.title_3": "Horse Brand.",
 
-  "craft.eyebrow": "Artesanía",
   "craft.title_1": "El gesto",
   "craft.title_2": "del oficio.",
   "craft.p": "Cada pieza es trabajada a mano: cortado, biselado, tinturado de cantos. El tiempo no es nuestro enemigo, es nuestro aliado.",
@@ -91,8 +86,6 @@
   "heritage.stat_2_label": "Continentes",
   "heritage.stat_3_value": "+15",
   "heritage.stat_3_label": "Años de oficio",
-  "heritage.tagline_1": "Nacida en el oficio del montura.",
-  "heritage.tagline_2": "Una historia que sigue galopando.",
 
   "contact.eyebrow": "Contacto",
   "contact.title_1": "Hablemos",

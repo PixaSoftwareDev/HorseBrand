@@ -78,7 +78,11 @@ export const CLD_IDS = {
 
   // Craft · primera foto del horizontal scroll (slide title)
   // "El gesto del oficio". Imagen real del cliente.
-  CRAFT_HERO: "v1779991225/DSC03702_tt99bi",
+  // Pre-crop chained · recorta ~15% del borde izquierdo (donde asoma
+  // una lata roja del taller que distraía). g_east ancla a la derecha,
+  // así la mano + cuero quedan centrados. El helper agrega f_auto/
+  // q_auto/w_NNNN después en cadena.
+  CRAFT_HERO: "c_crop,w_0.92,h_1.0,g_east/v1779991225/DSC03702_tt99bi",
 
   // Caballo · video del galope libre que se monta debajo del lockup
   // tipográfico. Generado en Flow, 16:9. Reproduce muteado/loop debajo

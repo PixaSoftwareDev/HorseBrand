@@ -84,6 +84,13 @@ export function initNavScrollState(): void {
   };
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
+  // Mirror the IntersectionObserver branch's cleanup so the fallback
+  // listener doesn't accumulate across SPA navigations.
+  document.addEventListener(
+    "astro:before-swap",
+    () => window.removeEventListener("scroll", onScroll),
+    { once: true }
+  );
 }
 
 export function initSmoothAnchors(): void {

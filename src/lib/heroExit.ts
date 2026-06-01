@@ -305,6 +305,26 @@ function buildTimeline(t: Targets): void {
         setLeaving(false);
         setQuiet(false);
         setNavBlurred(false);
+        // Clear all inline styles que GSAP escribió en onUpdate · sin esto
+        // los styles (scale 0.55, yPercent -10, opacity intermedia, bg paper)
+        // sobreviven al ciclo del pin y, cuando el usuario vuelve desde
+        // abajo, ScrollTrigger reactivá el pin con esos valores fantasma
+        // — el Hero queda re-pinneado con la coreografía a medio camino,
+        // tapando al Manifesto. clearProps restaura los valores CSS base.
+        const cleanup = [
+          t.heroSplit,
+          t.heroBrand,
+          t.heroContent,
+          t.heroOverlay,
+          t.heroProgress,
+          t.heroScroll,
+        ].filter((el): el is HTMLElement => el !== null);
+        if (cleanup.length > 0) gsap.set(cleanup, { clearProps: "all" });
+        gsap.set(t.hero, { clearProps: "backgroundColor" });
+        // Reset typewriter cue flag · permite re-disparar la línea opener
+        // si el usuario vuelve a bajar después de regresar al Hero.
+        storyCueFired = false;
+        wasNavBlurred = false;
       },
       onUpdate: (self) => {
         const p = self.progress;
@@ -475,10 +495,17 @@ function buildTimeline(t: Targets): void {
 
       const split = new SplitType(title, { types: "words", tagName: "span" });
       splits.push(split);
+      // Clip-path inset con -0.15em laterales · el rectángulo del clip
+      // se ensancha 0.15em a cada lado del advance-width de cada palabra
+      // para que los side-bearings y overhangs del italic Fraunces
+      // (la cola de la "d" terminal de "identidad", la "r" de "carácter",
+      // etc.) no queden recortados contra el borde del clip. La máscara
+      // vertical sigue siendo idéntica (revela de abajo hacia arriba),
+      // solo el horizontal respira.
       gsap.set(split.words, {
         y: "100%",
-        clipPath: "inset(0 0 100% 0)",
-        WebkitClipPath: "inset(0 0 100% 0)",
+        clipPath: "inset(0 -0.15em 100% -0.15em)",
+        WebkitClipPath: "inset(0 -0.15em 100% -0.15em)",
         display: "inline-block",
       });
       ScrollTrigger.create({
@@ -489,8 +516,8 @@ function buildTimeline(t: Targets): void {
         onEnter: () => {
           gsap.to(split.words, {
             y: 0,
-            clipPath: "inset(0 0 0 0)",
-            WebkitClipPath: "inset(0 0 0 0)",
+            clipPath: "inset(0 -0.15em 0 -0.15em)",
+            WebkitClipPath: "inset(0 -0.15em 0 -0.15em)",
             duration: 1.1,
             ease: "expo.out",
             stagger: 0.035,
