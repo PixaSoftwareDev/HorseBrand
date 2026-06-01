@@ -144,7 +144,6 @@ const closingTitleEnd = "character.";
     if (window.matchMedia("(max-width: 900px)").matches) return;
 
     const slides = Array.from(track.querySelectorAll<HTMLElement>(".slide"));
-    const photoSlides = slides.filter((s) => s.classList.contains("slide--photo"));
     const closingSlide = track.querySelector<HTMLElement>(".slide--closing");
 
     // STEP-BASED scroll: each "stop" centers a slide in the viewport.
