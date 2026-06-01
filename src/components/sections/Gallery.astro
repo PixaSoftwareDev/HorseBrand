@@ -25,7 +25,7 @@ const IMAGE_IDS = [
   "v1780310789/IMG_3098_qhmgaj.jpg",
   "v1778360899/IMG_3137_xr9jtc.jpg",
   "v1778360892/IMG_3141_kokhl6.jpg",
-  "v1780311066/IMG_3123_jgdnf9.jpg",
+  "v1780354426/IMG_3136_juwjzq.jpg",
   "v1778360918/IMG_2988_x6bexo.jpg",
   "v1778360915/IMG_3115_qvcecp.jpg",
   "v1778360932/IMG_3085_lebep3.jpg",
@@ -45,8 +45,15 @@ const ASPECTS = [
   "3:4", "3:4", "3:4", "3:4", "4:3", "3:4", "3:4", "3:4",
 ];
 
+// Override de gravity por id · por defecto el crop usa g_auto. Para esta
+// foto g_auto anclaba a las manos y cortaba el morral; g_south baja el
+// encuadre y muestra el cuerpo con el logo.
+const GRAVITY_OVERRIDE: Record<string, string> = {
+  "v1780354426/IMG_3136_juwjzq.jpg": "south",
+};
+
 const items = IMAGE_IDS.map((id, i) => ({
-  src: cldTransform(id, `f_auto,q_auto:good,c_fill,g_auto,ar_${ASPECTS[i]},w_900`),
+  src: cldTransform(id, `f_auto,q_auto:good,c_fill,g_${GRAVITY_OVERRIDE[id] ?? "auto"},ar_${ASPECTS[i]},w_900`),
   aspect: ASPECTS[i],
 }));
 
